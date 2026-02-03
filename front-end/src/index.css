@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+
+html{
+    background-color: #F7F7FF
+}
+
+.customScrollbar {
+  scrollbar-width: none;                    
+}
+
+.custom-toast {
+  border-radius: 12px;          
+  background: #333;              
+  color: #fff;                  
+  padding: 16px 24px;           
+  font-size: 16px;              
+  text-align: center;           
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+}
+
+.toast-island-container {
+  width: 100%;
+  pointer-events: none;
+  padding: 12px 0;
+}
+
+.toast-island {
+  width: 300px !important;
+  margin-bottom: 1rem;
+  max-width: min(92vw, 820px);
+  margin: 0 auto !important;
+  min-height: 42px;
+  padding: 8px 16px !important;
+  border-radius: 999px !important;
+  background: radial-gradient(120% 140% at 50% 0%, rgba(45, 45, 50, 0.98), rgba(15, 15, 18, 0.98)) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.35) !important;
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+
+.toast-island-body {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
