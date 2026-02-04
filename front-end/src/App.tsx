@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css"
 import { UserProvider } from "./context/UserProvider"
 import { SocketProvider } from "./context/SocketProvider"
 import { AuthProvider } from "./context/AuthProvider"
+import { MessageProvider } from "./context/MessageProvider"
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
 
       <UserProvider>
         <SocketProvider>
+          <MessageProvider>
           <AuthProvider>
             <ToastContainer
               position="top-center"
@@ -33,6 +35,7 @@ function App() {
             />
             <RouterProvider router={Router} />
           </AuthProvider>
+          </MessageProvider>
         </SocketProvider>
       </UserProvider>
     </>

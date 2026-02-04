@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { logger } from "../Logger/Logger.js";
+import { Message } from "../modals/Message.modal.js";
 
 
 const connectedUsers = {};
@@ -20,22 +21,38 @@ export const initializeSocket = (server) => {
 
         socket.on("register", (userId) => {
             socket.userId = userId;
-            socket.join(String(userId)); 
+            socket.join(String(userId));
             logger.info(`User ${userId} registered with socket ${socket.id}`);
         });
 
-        
-        socket.on("private_message", ({ toUserId, content }) => {
+
+        socket.on("private_message", async ({ toUserId, content }) => {
             if (!socket.userId) return;
             logger.info(`Private message from ${socket.userId} to ${toUserId}`);
-            console.log(`------------->Message content: ${content}`);
-        // Send the private_message event to the sockets that are in the room toUserId
-            io.to(toUserId).emit("private_message", {
-                fromUserId: socket.userId,
-                content,
-                toUserId,
-                timestamp: new Date(),
-            });
+
+
+
+            try {
+                //storing message to db
+               const message = await Message.create({
+                    senderId: socket.userId,
+                    receiverId: toUserId,
+                    content: content,
+                    isRead: false,
+                });
+                // Send the private_message event to the sockets that are in the room toUserId
+                io.to(toUserId).emit("private_message", {
+                    messageId: message.id,
+                    fromUserId: socket.userId,
+                    content,
+                    toUserId,
+                    timestamp: new Date(),
+                });
+
+            } catch (error) {
+                logger.error(`Error handling private message: ${error.message}`);
+            }
+
         });
 
         //here we are receving message the user is sending message threought this event 

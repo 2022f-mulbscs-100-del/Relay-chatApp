@@ -6,7 +6,6 @@ import { useAuthCall } from "./customHooks/useAuthCall";
 const ProtectedRoutes = ({children}: {children: React.ReactNode}) => {
    const {user} = useUser();
    const {loading } = useAuthCall();
-   console.log("ProtectedRoutes user:", user);
     return (
         <>
         {loading ? "Loading..." : user === null ?  <Navigate to="/login" />: children }

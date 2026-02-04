@@ -22,22 +22,22 @@ html{
 .toast-island-container {
   width: 100%;
   pointer-events: none;
-  padding: 12px 0;
+  padding: 8px 0;
 }
 
 .toast-island {
-  width: 300px !important;
-  margin-bottom: 1rem;
-  max-width: min(92vw, 820px);
+  width: fit-content !important;
+  max-width: min(92vw, 520px);
   margin: 0 auto !important;
-  min-height: 42px;
-  padding: 8px 16px !important;
+  min-height: 40px;
+  padding: 10px 18px !important;
   border-radius: 999px !important;
-  background: radial-gradient(120% 140% at 50% 0%, rgba(45, 45, 50, 0.98), rgba(15, 15, 18, 0.98)) !important;
-  color: #f8fafc !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.35) !important;
-  backdrop-filter: blur(12px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(226, 232, 240, 0.65)) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   pointer-events: auto;
 }
 
@@ -47,7 +47,16 @@ html{
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+}
+
+.toast-island-body::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.22);
 }

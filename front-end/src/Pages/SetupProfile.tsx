@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { FiCamera, FiPlus, FiX } from "react-icons/fi";
+import { useNavigate } from "react-router";
 
 const SetupProfile = () => {
   const [tags, setTags] = useState<string[]>(["Design", "UI/UX", "React"]);
   const [tagInput, setTagInput] = useState("");
+
+  const navigate = useNavigate();
 
   const addTag = () => {
     const value = tagInput.trim();
@@ -22,14 +25,14 @@ const SetupProfile = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="w-full px-2 md:px-3 py-6">
-        <div className="max-w-3xl mx-auto">
+      <div className="w-full px-0 py-6">
+        <div className="w-full px-20">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold">Set up your profile</h1>
               <p className="text-sm text-slate-500">Tell people who you are and what you do</p>
             </div>
-            <button className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition">
+            <button className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition cursor-pointer" onClick={() => { navigate("/") }}>
               Skip for now
             </button>
           </div>
@@ -132,7 +135,9 @@ const SetupProfile = () => {
           </div>
 
           <div className="mt-6 flex items-center justify-between">
-            <button className="text-sm text-slate-500 hover:text-slate-700">
+            <button className="text-sm text-slate-500 hover:text-slate-700 cursor-pointer"
+            onClick={()=>{navigate("/")}}
+            >
               Skip setup
             </button>
             <button className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition">

@@ -10,6 +10,7 @@ import http from 'http';
 import { initializeSocket } from './socketio/socket.js';
 import UserRoutes from './routes/UserRoutes.js';
 import { logger } from './Logger/Logger.js';
+import MessageRoutes from './routes/MessageRoutes.js';
 dotenv.config();
 const app = express();
 const PORT = 2404;
@@ -33,6 +34,7 @@ app.use(express.json());
 app.use("/api",RefreshRoutes);
 app.use("/api/auth",AuthRoutes);
 app.use("/api/users",UserRoutes);
+app.use('/api/messages', MessageRoutes);
 app.use((err, req, res, next) => {
     logger.error(`Error: ${err.message}`, { stack: err.stack, status: err.status });
     return res.status(500).json({

@@ -18,9 +18,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }).then((response) => {
             setUser(response.data.user);
             sessionStorage.setItem("accessToken", response.data.accessToken);
-        }).catch((error) => {
+        }).catch(() => {
             setUser(null);
-            console.log("Not authenticated", error);
         });
     }, [setUser]);
     return (
