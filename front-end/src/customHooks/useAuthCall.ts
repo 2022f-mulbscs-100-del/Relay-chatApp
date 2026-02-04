@@ -37,10 +37,19 @@ export const useAuthCall = () => {
         }
     }
 
-    const logout = () => {
-        setUser(null);
-        sessionStorage.removeItem("accessToken");
+    const logout = async () => {
+        try {
+             await AxiosClient.post("/auth/logout").catch(err => {
+                console.error("Error during logout:", err);
+            });
+            sessionStorage.removeItem("accessToken");
+            setUser(null);
+            
+        } catch  {
+            throw new Error("Logout failed");
+        }
     }
+
 
     return { login, signUp, logout, loading, error };
 

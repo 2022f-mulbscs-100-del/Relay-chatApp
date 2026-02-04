@@ -1,21 +1,16 @@
-import  { useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { FiCamera, FiMessageCircle, FiPhone, FiMail, FiMapPin, FiCalendar, FiUsers, FiAward, FiSettings, FiBell, FiShield, FiLogOut, FiMoreVertical } from 'react-icons/fi';
+import { useUserApis } from '../customHooks/useUserApis';
+import { useUser } from '../context/UserProvider';
+import { useAuthCall } from '../customHooks/useAuthCall';
+import { toast } from 'react-toastify';
+import { normalizeDate } from '../utlis/NormalizeDate';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
 
-  const profile = {
-    name: 'Alex Morgan',
-    username: '@alexmorgan',
-    bio: 'Product designer & coffee enthusiast. Building beautiful experiences one pixel at a time ✨',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&h=400&fit=crop',
-    location: 'San Francisco, CA',
-    email: 'alex.morgan@email.com',
-    phone: '+1 (555) 123-4567',
-    joinDate: 'January 2023'
-  };
+
 
   const stats = [
     { icon: FiMessageCircle, label: 'Messages', value: '2,847', color: 'from-purple-500 to-pink-500' },
@@ -40,32 +35,41 @@ const ProfilePage = () => {
   ];
 
   const settings = [
-    { icon: FiBell, label: 'Notifications', description: 'Manage notification preferences' },
-    { icon: FiShield, label: 'Privacy & Security', description: 'Control your privacy settings' },
-    { icon: FiSettings, label: 'Account Settings', description: 'Update your account details' },
-    { icon: FiLogOut, label: 'Log Out', description: 'Sign out of your account', danger: true }
+    { id: 1, icon: FiBell, label: 'Notifications', description: 'Manage notification preferences' },
+    { id: 2, icon: FiShield, label: 'Privacy & Security', description: 'Control your privacy settings' },
+    { id: 3, icon: FiSettings, label: 'Account Settings', description: 'Update your account details' },
+    { id: 4, icon: FiLogOut, label: 'Log Out', description: 'Sign out of your account', danger: true }
   ];
 
+
+  const {getProfile} = useUserApis();
+  const {logout,loading} = useAuthCall();
+  const {user} = useUser();
+  useEffect(() => {
+    getProfile();
+  }, [])
+
+  const Logout = async () => {
+    try {
+       await logout();
+      
+    } catch (error) {
+      toast.error(String(error));
+    }
+  }
+
+
   return (
-    <div className=" bg-slate-50 text-slate-900">
+    <div className=" bg-slate-50 text-slate-900 px-10">
     
 
-      <div className="w-full px-2 md:px-3 py-6">
-        <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
-          <div className="relative h-56 bg-slate-100">
-            <img src={profile.coverImage} alt="Cover" className="w-full h-full object-cover" />
-            {isEditing && (
-              <button className="absolute top-4 right-4 p-2.5 rounded-lg bg-white/90 border border-slate-200 shadow-sm hover:bg-white transition">
-                <FiCamera className="w-4 h-4 text-slate-700" />
-              </button>
-            )}
-          </div>
-          <div className="px-4 pb-5">
-            <div className="-mt-14 flex flex-col md:flex-row md:items-end gap-5">
+      <div className="w-full   md:px-3 py-6">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-4 pb-5">
+          <div className="flex flex-col md:flex-row md:items-end gap-5 pt-5">
               <div className="relative">
                 <img
-                  src={profile.avatar}
-                  alt={profile.name}
+                  src={user?.avatar}
+                  alt={user?.name}
                   className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-sm"
                 />
                 <div className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
@@ -78,19 +82,11 @@ const ProfilePage = () => {
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
-                    <h1 className="text-2xl font-semibold">{profile.name}</h1>
-                    <p className="text-sm text-slate-500">{profile.username}</p>
+                    <h1 className="text-2xl font-semibold">@{user?.username}</h1>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
-                      Message
-                    </button>
-                    <button className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
-                      Call
-                    </button>
-                  </div>
+            
                 </div>
-                <p className="mt-3 text-slate-600">{profile.bio}</p>
+                <p className="mt-3 text-slate-600">{user?.bio}</p>
               </div>
             </div>
           </div>
@@ -127,28 +123,28 @@ const ProfilePage = () => {
                   <FiMail className="w-4 h-4 text-slate-500" />
                   <div>
                     <div className="text-slate-500">Email</div>
-                    <div className="font-medium text-slate-800">{profile.email}</div>
+                    <div className="font-medium text-slate-800">{user?.email}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FiPhone className="w-4 h-4 text-slate-500" />
                   <div>
                     <div className="text-slate-500">Phone</div>
-                    <div className="font-medium text-slate-800">{profile.phone}</div>
+                    <div className="font-medium text-slate-800">{user?.phone}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FiMapPin className="w-4 h-4 text-slate-500" />
                   <div>
                     <div className="text-slate-500">Location</div>
-                    <div className="font-medium text-slate-800">{profile.location}</div>
+                    <div className="font-medium text-slate-800">{user?.location}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FiCalendar className="w-4 h-4 text-slate-500" />
                   <div>
                     <div className="text-slate-500">Joined</div>
-                    <div className="font-medium text-slate-800">{profile.joinDate}</div>
+                    <div className="font-medium text-slate-800">{normalizeDate(user?.createdAt || '').toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric'})}</div>
                   </div>
                 </div>
               </div>
@@ -162,11 +158,12 @@ const ProfilePage = () => {
                   return (
                     <button
                       key={index}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition ${
+                      className={` cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition ${
                         setting.danger
                           ? 'text-rose-600 hover:bg-rose-50'
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
+                    onClick={Logout}
                     >
                       <Icon className="w-4 h-4" />
                       <div className="flex-1">
@@ -252,7 +249,6 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

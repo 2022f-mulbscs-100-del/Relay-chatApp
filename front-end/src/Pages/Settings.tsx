@@ -1,6 +1,8 @@
 import { FiBell, FiCreditCard, FiKey, FiLock, FiLogOut, FiMail, FiShield, FiSmartphone, FiUser } from "react-icons/fi";
+import { useAuthCall } from "../customHooks/useAuthCall";
 
 const Settings = () => {
+  const {logout} = useAuthCall();
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="w-full px-2 md:px-3 py-6">
@@ -184,12 +186,16 @@ const Settings = () => {
             </section>
 
             <section className="rounded-xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-3 "
+              >
                 <FiLogOut className="w-4 h-4 text-rose-600" />
-                <h2 className="text-sm font-semibold text-rose-700">Log out</h2>
+                <h2 className="text-sm font-semibold text-rose-700 "
+                >Log out</h2>
               </div>
               <p className="text-xs text-rose-600 mb-4">Sign out of your account on this device.</p>
-              <button className="w-full px-3 py-2 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition">
+              <button 
+              onClick={logout}
+              className="w-full cursor-pointer px-3 py-2 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition">
                 Log out
               </button>
             </section>

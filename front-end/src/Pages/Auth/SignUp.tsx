@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaApple, FaGithub, FaGoogle } from "react-icons/fa6";
 import { useAuthCall } from "../../customHooks/useAuthCall";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
     const [signUpData, setSignUpData] = useState({
@@ -14,12 +15,17 @@ const SignUp = () => {
     const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (signUpData.username === "" || signUpData.email === "" || signUpData.password === "") {
-            console.log("Please fill all the fields");
+            toast.error("Please fill all the fields");
             return;
         }
+        try {
 
-        await signUp(signUpData);
-        navigate("/");
+            await signUp(signUpData);
+            navigate("/setup-profile");
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            toast.error((error?.response?.data?.message) || "Signup failed");
+        }
 
     }
 
@@ -74,7 +80,7 @@ const SignUp = () => {
                                 placeholder="Create a password"
                             />
                         </label>
-                        <button type="submit" className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition">
+                        <button type="submit" className="w-ful cursor-pointer bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition">
                             {loading ? "..." : "Create account"}
                         </button>
                     </form>
@@ -86,13 +92,13 @@ const SignUp = () => {
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
-                        <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
+                        <button className="flex items-center cursor-pointer justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
                             <FaGoogle className="text-[16px]" />
                         </button>
-                        <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
+                        <button className="flex items-center cursor-pointer justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
                             <FaApple className="text-[16px]" />
                         </button>
-                        <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
+                        <button className="flex items-center cursor-pointer justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
                             <FaGithub className="text-[16px]" />
                         </button>
                     </div>
@@ -100,7 +106,7 @@ const SignUp = () => {
 
                 <div className="text-center text-sm text-slate-600 mt-4">
                     Already have an account?{" "}
-                    <button className="text-slate-900 font-medium" onClick={() => { navigate("/login") }}>
+                    <button className="text-slate-900 font-medium cursor-pointer" onClick={() => { navigate("/login") }}>
                         Log in
                     </button>
                 </div>

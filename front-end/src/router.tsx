@@ -12,6 +12,7 @@ import Settings from "./Pages/Settings";
 import SetupProfile from "./Pages/SetupProfile";
 import ProfilePage from "./Pages/profile";
 import ProtectedRoutes from "./ProtectedRoutes";
+import NotFound from "./Pages/NotFound";
 interface ProviderWrapperProps {
     children?: React.ReactNode;
 }
@@ -50,7 +51,7 @@ const Router = createBrowserRouter([
                 element: <MfaCode />
             },
             {
-                path: "/Contacts",
+                path: "/contacts",
                 element: (
                     <ProtectedRoutes>
                         <LayoutWrapper>
@@ -76,7 +77,7 @@ const Router = createBrowserRouter([
                     </ProtectedRoutes>
             },
             {
-                path: "/Groups",
+                path: "/groups",
                 element:
                     <ProtectedRoutes>
                         <LayoutWrapper>
@@ -85,7 +86,7 @@ const Router = createBrowserRouter([
                     </ProtectedRoutes>
             },
             {
-                path: "/Settings",
+                path: "/settings",
                 element:
                     <ProtectedRoutes>
                         <LayoutWrapper>
@@ -101,6 +102,10 @@ const Router = createBrowserRouter([
                             <ProfilePage />
                         </LayoutWrapper>
                     </ProtectedRoutes>
+            },
+            {
+                path: "*",
+                element: <NotFound />
             }
 
 

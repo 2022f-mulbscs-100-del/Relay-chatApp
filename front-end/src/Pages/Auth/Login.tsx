@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaApple, FaGithub, FaGoogle } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { useAuthCall } from "../../customHooks/useAuthCall";
+import LoadingSpinner from "../../Component/LoadingSpinner";
 
 const Login = () => {
 
@@ -15,7 +16,6 @@ const Login = () => {
 
     const HandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value, name } = e.target;
-        console.log(value, name);
         setLoginData({
             ...loginData,
             [name]: value
@@ -25,14 +25,13 @@ const Login = () => {
         e.preventDefault();
         if (loginData.email === "" || loginData.password === "") {
             toast.error("Please fill all the fields");
-            console.log("Please fill all the fields");
             return;
         }
         try {
             await login(loginData);
             navigate("/");
         } catch (error) {
-            console.log(error);
+            toast.error(String(error));
         }
     }
 
@@ -84,8 +83,8 @@ const Login = () => {
                             </button>
                         </div>
 
-                        <button type="submit" className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition">
-                            {loading ? "..." : "Login"}
+                        <button type="submit" className="w-full cursor-pointer bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition">
+                            {loading ? <LoadingSpinner size={16} thickness={2} color="#fff" /> : "Login"}
                         </button>
                     </form>
 
@@ -110,7 +109,7 @@ const Login = () => {
 
                 <div className="text-center text-sm text-slate-600 mt-4">
                     Don&apos;t have an account?{" "}
-                    <button className="text-slate-900 font-medium" onClick={() => navigate("/signup")}>
+                    <button className="text-slate-900 font-medium cursor-pointer" onClick={() => navigate("/signup")}>
                         Sign up
                     </button>
                 </div>

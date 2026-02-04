@@ -1,11 +1,8 @@
 import { createContext, useContext, useState } from "react";
+import type { User } from "../types/user.type";
 
 
-type User = {
-    id: string;
-    name: string;
-    email: string;
-};
+
 
 type UserContextProps = {
     user: User | null;
@@ -17,8 +14,10 @@ const UserContext = createContext<UserContextProps | null>(null);
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>({
         id: "",
-        name: "",
+        username: "",
         email: "",
+        createdAt: "",
+        hasMessaged: false
     });
 
     return (
