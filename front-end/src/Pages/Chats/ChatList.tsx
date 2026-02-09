@@ -4,6 +4,7 @@ type ChatListProps = {
     id: number;
     username: string;
     setActiveUserId: (id: number) => void;
+    activeUserId?: number | null;
     receivedMessages?: {
         id: number;
         senderId: number;
@@ -18,7 +19,8 @@ const ChatList = ({
     id,
     username,
     setActiveUserId,
-    receivedMessages
+    receivedMessages,
+    activeUserId
 }: ChatListProps) => {
 
     //eslint-disable-next-line 
@@ -38,9 +40,11 @@ const lastMessage = SortingMessage(receivedMessages || [])[SortingMessage(receiv
                 && msg.isRead === false;
         }).length;
     };
+
+    const activeChat = activeUserId === id;
     return (
         <div
-            className="group w-full flex items-center gap-3 px-3 py-3 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition"
+            className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${activeChat ? "border-slate-300 shadow-sm" : "border-slate-200"} bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition`}
             onClick={() => {
                 setActiveUserId(id);
             }}

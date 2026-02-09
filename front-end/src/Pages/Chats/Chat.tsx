@@ -6,8 +6,9 @@ import { useSocket } from "../../context/SocketProvider";
 import { useUser } from "../../context/UserProvider";
 import { useMessage } from "../../context/MessageProvider";
 import { toast } from "react-toastify";
-import type { chatUser } from "../../types/message.types";
+import type { chatUser, MessageProps } from "../../types/message.types";
 import { useMessageApis } from "../../customHooks/useMessageApis";
+import { AxiosClient } from "../../api/AxiosClient";
 
 
 const Chats = () => {
@@ -17,10 +18,11 @@ const Chats = () => {
    const [activeUserId, setActiveUserId] = useState<number | null>(null);
    const socket = useSocket();
    const { user } = useUser();
-   const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage } = useMessage();
+   const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message } = useMessage();
    const [userList, setUserList] = useState<string>("");
    const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
 
+   // const connectedUsers: { [key: string]: boolean } = {};
 
    useEffect(() => {
       if (!socket || !user?.id) return;
@@ -29,16 +31,90 @@ const Chats = () => {
          socket.emit("register", user.id);
       };
 
+
       if (socket.connected) {
          handleConnect();
       }
 
       socket.on("connect", handleConnect);
 
+      socket.on("user_online", (userId) => {
+         // connectedUsers[userId] = true;
+         // connectedUsers.set(userId, true);
+         console.log(`User ${userId} is online`);
+      });
+
       return () => {
          socket.off("connect", handleConnect);
       };
    }, [socket, user?.id]);
+
+
+
+
+   useEffect(() => {
+      if (!socket) return;
+
+      const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number }) => {
+         setMessage((prev: MessageProps[] | null) => [...(prev || []), {
+            senderId: msg.fromUserId,
+            receiverId: Number(msg.toUserId),
+            content: msg.content,
+            createdAt: msg.timestamp
+         }]);
+
+         if(activeUserId !== msg.fromUserId){
+            toast.info(`New message from @${listOfChatUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
+         }
+         await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
+      };
+
+      socket.on("private_message", handleMessageReceived);
+
+      return () => {
+         socket.off("private_message", handleMessageReceived);
+      };
+   }, [socket, activeUserId, setMessage]);
+
+   const [inputMessage, setInputMessage] = useState("");
+
+
+   const SendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!socket || activeUserId === null) return;
+      if (inputMessage.trim() === "") return;
+      socket.emit("private_message", {
+         content: inputMessage,
+         toUserId: String(activeUserId)
+      });
+
+      const isSaved = async () => {
+         if (message?.length === 0) {
+            await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
+         }
+         const FilterMessage = message?.some((msg) => {
+            return (msg.senderId === Number(user?.id) && msg.senderId === activeUserId && msg.isRead === false);
+
+         })
+         if (!FilterMessage) return false;
+         await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
+         return FilterMessage;
+      }
+
+
+      setMessage((prev: MessageProps[] | null) => [...(prev || []), {
+         senderId: Number(user?.id),
+         receiverId: Number(activeUserId),
+         content: inputMessage,
+         createdAt: new Date()
+      }]);
+
+      setInputMessage("");
+      await isSaved();
+
+   }
+
+
 
    useEffect(() => {
       if (!user?.id) return;
@@ -187,12 +263,13 @@ const Chats = () => {
                         ...(user.sentMessages || []),
                         ...(user.receivedMessages || [])
                      ];
-                  return (
+                     return (
                         <ChatList
                            key={user.id}
                            id={user.id}
                            username={user.username}
                            setActiveUserId={setActiveUserId}
+                           activeUserId={activeUserId}
                            receivedMessages={allMessages}
                         />
                      );
@@ -204,6 +281,9 @@ const Chats = () => {
             <main className="flex-1 bg-white">
                {activeUserId ?
                   <ChatPage
+                     inputMessage={inputMessage}
+                     setInputMessage={setInputMessage}
+                     SendMessage={SendMessage}
                      key={activeUserId}
                      listOfChatUsers={listOfChatUsers}
                      activeUserId={activeUserId} />

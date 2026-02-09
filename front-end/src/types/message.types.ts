@@ -12,6 +12,11 @@ export interface chatUser {
    id: number;
    username: string;
    email?: string;
+   profilePic?: string;
+   title?: string;
+   about?: string;
+   location?: string;
+   tags?: string[];
    sentMessages?: {
       id: number;
       senderId: number;

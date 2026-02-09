@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { FiCamera, FiPlus, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+import { useUserApis } from "../customHooks/useUserApis";
 
 const SetupProfile = () => {
-  const [tags, setTags] = useState<string[]>(["Design", "UI/UX", "React"]);
+  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
   const navigate = useNavigate();
@@ -19,9 +21,47 @@ const SetupProfile = () => {
     setTagInput("");
   };
 
+
+
   const removeTag = (value: string) => {
     setTags((prev) => prev.filter((tag) => tag !== value));
   };
+
+
+const { setupProfile } = useUserApis();
+  const [phone, setPhone] = useState("");
+  const [title, setTitle] = useState("");
+  const [about, setAbout] = useState("");
+  const HandleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case "phone":
+        if (phone.length >= 15) return;
+        setPhone(value);
+        break;
+      case "title":
+        setTitle(value);
+        break;
+      case "about":
+        setAbout(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+const handleContinue = async () => {
+if(!phone || !title || !about){
+  toast.error("Please fill in all required fields");
+  return;
+}
+  try {
+   await setupProfile(phone, title, about, tags);
+    navigate("/");
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : "An error occurred while setting up profile");
+  }
+}
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -69,13 +109,19 @@ const SetupProfile = () => {
                 <input
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
                   placeholder="+1 (555) 000-0000"
+                  name="phone"
+                  value={phone}
+                  onChange={HandleChange}
                 />
               </label>
               <label className="text-sm">
                 <span className="text-slate-500">Role / Title</span>
                 <input
+                  name="title"
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
                   placeholder="Product Designer"
+                  value={title}
+                  onChange={HandleChange}
                 />
               </label>
             </div>
@@ -83,8 +129,11 @@ const SetupProfile = () => {
             <label className="text-sm mt-4 block">
               <span className="text-slate-500">Bio</span>
               <textarea
+                name="about"
                 className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 min-h-[120px]"
                 placeholder="Share a short bio that helps others get to know you."
+                value={about}
+                onChange={HandleChange}
               />
             </label>
 
@@ -136,11 +185,13 @@ const SetupProfile = () => {
 
           <div className="mt-6 flex items-center justify-between">
             <button className="text-sm text-slate-500 hover:text-slate-700 cursor-pointer"
-            onClick={()=>{navigate("/")}}
+              onClick={() => { navigate("/") }}
             >
               Skip setup
             </button>
-            <button className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition">
+            <button className="cursor-pointer px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition"
+            onClick={handleContinue}
+            >
               Continue
             </button>
           </div>

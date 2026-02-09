@@ -1,4 +1,5 @@
 import { FiDownload, FiFilter, FiMessageCircle, FiMoreVertical, FiPhone, FiPlus, FiSearch, FiStar, FiUsers, FiVideo } from "react-icons/fi";
+import { useMessage } from "../context/MessageProvider";
 
 const Contacts = () => {
   const groups = [
@@ -25,6 +26,8 @@ const Contacts = () => {
     if (status === "Away") return "bg-amber-500";
     return "bg-slate-300";
   };
+
+  const {listOfChatUsers} = useMessage();
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -109,16 +112,16 @@ const Contacts = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {contacts.map((contact) => (
+              {listOfChatUsers.map((contact) => (
                 <div
-                  key={contact.name}
+                  key={contact.username}
                   className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-300 transition"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-sm font-semibold text-slate-700">
-                          {contact.name
+                          {contact.username
                             .split(" ")
                             .map((part) => part[0])
                             .join("")}
@@ -127,7 +130,7 @@ const Contacts = () => {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                          {contact.name}
+                          {contact.username}
                           {contact.favorite && <FiStar className="w-3.5 h-3.5 text-amber-500" />}
                         </div>
                         <div className="text-xs text-slate-500">{contact.title}</div>
@@ -141,7 +144,7 @@ const Contacts = () => {
 
                   <div className="mt-4 flex items-center justify-between">
                     <span className="px-2 py-1 rounded-md bg-slate-100 text-xs font-medium text-slate-600">
-                      {contact.tag}
+                      {contact.tags?.map((tag) => tag).join(", ")}
                     </span>
                     <div className="flex items-center gap-2">
                       <button className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">

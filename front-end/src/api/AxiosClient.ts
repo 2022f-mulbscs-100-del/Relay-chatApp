@@ -28,7 +28,7 @@ AxiosClient.interceptors.response.use(
 
     // If access token expired
     if (
-      error.response?.status === 401 &&
+      error.response?.status === 403 &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;

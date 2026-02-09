@@ -17,7 +17,13 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
         username: "",
         email: "",
         createdAt: "",
-        hasMessaged: false
+        hasMessaged: false,
+        phone: "",
+        title: "",
+        about: "",
+        location: "",
+        tags: [],
+        profilePic: ""
     });
 
     return (

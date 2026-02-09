@@ -43,7 +43,7 @@ const ProfilePage = () => {
 
 
   const {getProfile} = useUserApis();
-  const {logout,loading} = useAuthCall();
+  const {logout} = useAuthCall();
   const {user} = useUser();
   useEffect(() => {
     getProfile();
@@ -68,8 +68,8 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row md:items-end gap-5 pt-5">
               <div className="relative">
                 <img
-                  src={user?.avatar}
-                  alt={user?.name}
+                  src={user?.profilePic || "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=300&h=300&fit=crop"}
+                  alt={user?.username}
                   className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-sm"
                 />
                 <div className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
@@ -86,7 +86,7 @@ const ProfilePage = () => {
                   </div>
             
                 </div>
-                <p className="mt-3 text-slate-600">{user?.bio}</p>
+                <p className="mt-3 text-slate-600">{user?.title}</p>
               </div>
             </div>
           </div>
@@ -163,7 +163,12 @@ const ProfilePage = () => {
                           ? 'text-rose-600 hover:bg-rose-50'
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
-                    onClick={Logout}
+                    onClick={() => {
+                      if(setting.label === 'Log Out'){
+                        Logout();
+                      }
+                        
+                      }}
                     >
                       <Icon className="w-4 h-4" />
                       <div className="flex-1">
@@ -200,11 +205,10 @@ const ProfilePage = () => {
               <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="text-lg font-semibold mb-3">About</h3>
                 <p className="text-slate-600 leading-relaxed">
-                  Passionate about creating beautiful and functional user experiences. I love working with modern technologies
-                  and collaborating with talented teams to build products that make a difference.
+                  {user?.about || "This user hasn't added any information about themselves yet."}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {['Design', 'UI/UX', 'React', 'Figma', 'Coffee Lover'].map((tag, i) => (
+                  {(user?.tags ?? []).map((tag, i) => (
                     <span
                       key={i}
                       className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium"

@@ -46,16 +46,16 @@ const ChatMessage = ({
                 return (
                     <div key={index} className="flex my-2">
                         <div
-                            className={`max-w-[70%] px-3 py-2 rounded-2xl text-sm leading-relaxed shadow-sm ${isMyMessage
+                            className={`max-w-[70%] h-full px-3 py-2 rounded-2xl text-sm leading-relaxed shadow-sm ${isMyMessage
                                 ? 'bg-slate-900 text-white ml-auto rounded-br-md'
                                 : 'bg-white text-slate-900 border border-slate-200 rounded-bl-md'
                                 }`}
                         >
-                            <p ref={index === messageList.length - 1 ? lastMessageRef : null}>
+                            <p className=" max-w-[500px] h-full   wrap-break-word" ref={index === messageList.length - 1 ? lastMessageRef : null}>
                                 {message.content}
                             </p>
                             {message.createdAt && (
-                                <p className="text-xs text-slate-400">
+                                <p className="text-xs text-slate-400 ">
                                     {normalizeDate(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                             )}

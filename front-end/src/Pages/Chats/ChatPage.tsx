@@ -1,12 +1,10 @@
 import { FaPaperPlane } from "react-icons/fa";
 import ChatMessage from "./ChatMessage";
-import { useEffect, useRef, useState } from "react";
-import { useSocket } from "../../context/SocketProvider";
-import { useUser } from "../../context/UserProvider";
+import { useEffect, useMemo, useRef } from "react";
 import { useMessage } from "../../context/MessageProvider";
-import type { MessageProps } from "../../types/message.types";
-import { AxiosClient } from "../../api/AxiosClient";
+
 import { useMessageApis } from "../../customHooks/useMessageApis";
+import { useUser } from "../../context/UserProvider";
 type ChatPageProps = {
     listOfChatUsers: {
         id: number;
@@ -21,74 +19,30 @@ type ChatPageProps = {
         }[]
     }[];
     activeUserId: number | null;
+    SendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
+    inputMessage: string;
+    setInputMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 const ChatPage = ({
     listOfChatUsers,
-    activeUserId
+    activeUserId,
+    SendMessage,
+    inputMessage,
+    setInputMessage
 }: ChatPageProps) => {
 
     const InputRef = useRef<HTMLInputElement | null>(null);
-    const socket = useSocket();
-    const [inputMessage, setInputMessage] = useState("");
-    const { message, setMessage } = useMessage();
-    const { user } = useUser();
+
+
+    const { message, } = useMessage();
     const { MarkMessageAsRead } = useMessageApis();
- 
+    const { user } = useUser();
 
-    useEffect(() => {
-        if (!socket) return;
-
-        const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number }) => {
-            setMessage((prev: MessageProps[] | null) => [...(prev || []), {
-                senderId: msg.fromUserId,
-                receiverId: msg.toUserId,
-                content: msg.content,
-                createdAt: msg.timestamp
-            }]);
-
-            await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
-
-        };
-
-        socket.on("private_message", handleMessageReceived);
-
-        return () => {
-            socket.off("private_message", handleMessageReceived);
-        };
-    }, [socket, activeUserId, setMessage]);
-
-    const isSaved = async () => {
-        if (message?.length === 0) {
-            await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
-        }
-        const FilterMessage = message?.some((msg) => {
-            return (msg.senderId === Number(user?.id) && msg.senderId === activeUserId && msg.isRead === false);
-
-        })
-        if (!FilterMessage) return false;
-        await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
-        return FilterMessage;
-    }
-    const SendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!socket || activeUserId === null) return;
-        if (inputMessage.trim() === "") return;
-        socket.emit("private_message", {
-            content: inputMessage,
-            toUserId: String(activeUserId)
-        });
-
-
-        setMessage((prev: MessageProps[] | null) => [...(prev || []), {
-            senderId: Number(user?.id),
-            receiverId: activeUserId,
-            content: inputMessage,
-            createdAt: new Date()
-        }]);
-        setInputMessage("");
-        await isSaved();
-
-    }
+    const FilterMessage = useMemo(() => {
+        return (message?.filter(msg => (msg.senderId === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && msg.receiverId === activeUserId)) || []
+        );
+    }, [message, activeUserId, user?.id]);
+    
     const filterUser = listOfChatUsers.find(user => user.id === activeUserId);
 
     useEffect(() => {
@@ -129,25 +83,25 @@ const ChatPage = ({
             </div>
 
             <div className="flex-1  overflow-auto customScrollbar bg-slate-50 px-4 py-4">
-                
+
                 <div className="">
-                        
-                <ChatMessage
-                    messageList={(message || []).map(msg => ({
-                        key: msg.id,
-                        fromUserId: msg.senderId || 0,
-                        content: msg.content || '',
-                        createdAt: msg.createdAt
-                    }))}
-                />
+
+                    <ChatMessage
+                        messageList={(FilterMessage || []).map(msg => ({
+                            key: msg.id,
+                            fromUserId: msg.senderId || 0,
+                            content: msg.content || '',
+                            createdAt: msg.createdAt
+                        }))}
+                    />
                 </div>
-            
+
             </div>
 
             <form onSubmit={SendMessage} className="border-t border-slate-200 bg-white px-4 py-3">
                 <div className="flex items-center gap-2">
                     <input
-                    ref={InputRef}
+                        ref={InputRef}
                         className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
                         type="text"
                         placeholder="Type a message…"

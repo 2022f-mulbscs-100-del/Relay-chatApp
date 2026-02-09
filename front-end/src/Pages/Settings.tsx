@@ -1,8 +1,47 @@
 import { FiBell, FiCreditCard, FiKey, FiLock, FiLogOut, FiMail, FiShield, FiSmartphone, FiUser } from "react-icons/fi";
 import { useAuthCall } from "../customHooks/useAuthCall";
+import { useUser } from "../context/UserProvider";
+import { toast } from "react-toastify";
+import { useUserApis } from "../customHooks/useUserApis";
+import { useState } from "react";
+import ChangePasswordModal from "../Component/ChangePasswordModal";
 
 const Settings = () => {
   const {logout} = useAuthCall();
+  const {user,setUser} = useUser();
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
+const HandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  switch (name) {
+    case "username":
+      setUser((prev) => prev ? {...prev, username: value} : prev);
+      break;
+    case "email":
+      setUser((prev) => prev ? {...prev, email: value} : prev);
+      break;
+    case "phone":
+      setUser((prev) => prev ? {...prev, phone: value} : prev);
+      break;
+    case "location":
+      setUser((prev) => prev ? {...prev, location: value} : prev);
+      break;
+    default:
+      break;
+  }
+};
+
+const {UpdateProfile} = useUserApis();
+const SaveChange = async () => {
+  if(user){
+    try {
+      await UpdateProfile(user.username, user.phone, user.location);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      toast.error(error as string);
+    }
+  }
+};
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="w-full px-2 md:px-3 py-6">
@@ -11,7 +50,7 @@ const Settings = () => {
             <h1 className="text-2xl font-semibold">Settings</h1>
             <p className="text-sm text-slate-500">Manage your account and preferences</p>
           </div>
-          <button className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition">
+          <button onClick={SaveChange} className="cursor-pointer px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition">
             Save changes
           </button>
         </div>
@@ -29,6 +68,10 @@ const Settings = () => {
                   <input
                     className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
                     defaultValue="Alex Morgan"
+                    type="text"
+                    value={user?.username}
+                    name="username"
+                    onChange={HandleChange}
                   />
                 </label>
                 <label className="text-sm">
@@ -36,6 +79,9 @@ const Settings = () => {
                   <input
                     className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
                     defaultValue="@alexmorgan"
+                    value={`@${user?.username}`}
+                    name="username"
+                    onChange={HandleChange}
                   />
                 </label>
                 <label className="text-sm">
@@ -43,6 +89,9 @@ const Settings = () => {
                   <input
                     className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
                     defaultValue="alex.morgan@email.com"
+                    value={user?.email}
+                    name="email"
+                    onChange={HandleChange}
                   />
                 </label>
                 <label className="text-sm">
@@ -50,6 +99,19 @@ const Settings = () => {
                   <input
                     className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
                     defaultValue="+1 (555) 123-4567"
+                    value={user?.phone}
+                    name="phone"
+                    onChange={HandleChange}
+                  />
+                </label>
+                <label className="text-sm">
+                  <span className="text-slate-500">Location</span>
+                  <input
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+                    defaultValue="San Francisco, CA"
+                    value={user?.location}
+                    name="location"
+                    onChange={HandleChange}
                   />
                 </label>
               </div>
@@ -75,13 +137,40 @@ const Settings = () => {
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
                   <div className="flex items-center gap-3">
+                    <FiSmartphone className="w-4 h-4 text-slate-500" />
+                    <div>
+                      <div className="text-sm font-medium">Passkey</div>
+                      <div className="text-xs text-slate-500">Use a device passkey for passwordless sign-in</div>
+                    </div>
+                  </div>
+                  <button className="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                    Set up
+                  </button>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                  <div className="flex items-center gap-3">
+                    <FiSmartphone className="w-4 h-4 text-slate-500" />
+                    <div>
+                      <div className="text-sm font-medium">Authenticator app</div>
+                      <div className="text-xs text-slate-500">Generate one-time codes with an authenticator</div>
+                    </div>
+                  </div>
+                  <button className="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                    Set up
+                  </button>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                  <div className="flex items-center gap-3">
                     <FiLock className="w-4 h-4 text-slate-500" />
                     <div>
                       <div className="text-sm font-medium">Change password</div>
                       <div className="text-xs text-slate-500">Update your password regularly</div>
                     </div>
                   </div>
-                  <button className="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                  <button
+                    onClick={() => setIsChangePasswordOpen(true)}
+                    className="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+                  >
                     Update
                   </button>
                 </div>
@@ -202,6 +291,10 @@ const Settings = () => {
           </div>
         </div>
       </div>
+      <ChangePasswordModal
+        open={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
     </div>
   );
 };

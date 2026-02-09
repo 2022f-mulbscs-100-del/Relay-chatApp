@@ -56,7 +56,9 @@ const SideBar = () => {
     return (
         <div className="bg-white/90 backdrop-blur border-r border-slate-200 fixed h-screen w-[72px] px-3 py-4 flex flex-col items-center justify-between">
             <div className="flex justify-center">
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm font-semibold shadow-sm">
+                <div
+                onClick={()=>{navigate("/profile")}}
+                className="w-10 h-10 rounded-xl cursor-pointer bg-slate-900 text-white flex items-center justify-center text-sm font-semibold shadow-sm">
                     R
                 </div>
             </div>
