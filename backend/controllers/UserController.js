@@ -116,7 +116,7 @@ export const getAllUsersController = async (req, res, next) => {
 }
 
 
-export const updateUserController = async (req, res, next) => {
+export const addAssociatedUserController = async (req, res, next) => {
     const { id } = req.user;
     const { userId } = req.body;
 

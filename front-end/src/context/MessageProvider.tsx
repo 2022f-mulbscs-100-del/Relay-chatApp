@@ -19,10 +19,12 @@ const MessageContext = createContext<MessageContextType | null>(null);
 
 
 export const MessageProvider = ({ children }: { children: React.ReactNode }) => {
+    
     const [message, setMessage] = useState<MessageProps[] | null>([]);
     const [listOfAllUsers, setListOfAllUsers] = useState<chatUser[]>([]);
     const [listOfChatUsers, setListOfChatUsers] = useState<chatUser[]>([]);
     const [ShowToastOfUnreadMessage, setShowToastOfUnreadMessage] = useState<chatUser[]>([]);
+
     return (
         <MessageContext.Provider value={{ message, setMessage, listOfAllUsers, setListOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, setShowToastOfUnreadMessage }}>
             {children}

@@ -9,7 +9,8 @@ export const useAuthCall = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const login = async (loginData:UserDataType) => {
+    // LOGIN API CALL
+    const login = async (loginData: UserDataType) => {
         setLoading(true);
         try {
             const res = await AxiosClient.post("/auth/login", loginData);
@@ -23,7 +24,10 @@ export const useAuthCall = () => {
         }
     }
 
-    const signUp = async (signUpData:SignUpDataType) => {
+
+
+    // SIGNUP API CALL
+    const signUp = async (signUpData: SignUpDataType) => {
         setLoading(true);
         try {
             const res = await AxiosClient.post("/auth/signup", signUpData);
@@ -37,15 +41,17 @@ export const useAuthCall = () => {
         }
     }
 
+
+    // LOGOUT API CALL
     const logout = async () => {
         try {
-             await AxiosClient.post("/auth/logout").catch(err => {
+            await AxiosClient.post("/auth/logout").catch(err => {
                 console.error("Error during logout:", err);
             });
             sessionStorage.removeItem("accessToken");
             setUser(null);
-            
-        } catch  {
+
+        } catch {
             throw new Error("Logout failed");
         }
     }

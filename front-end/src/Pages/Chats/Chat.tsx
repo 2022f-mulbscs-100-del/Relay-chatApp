@@ -1,4 +1,3 @@
-import { IoSearchOutline } from "react-icons/io5";
 import ChatList from "./ChatList"
 import ChatPage from "./ChatPage";
 import { useEffect, useRef, useState } from "react";
@@ -9,21 +8,30 @@ import { toast } from "react-toastify";
 import type { chatUser, MessageProps } from "../../types/message.types";
 import { useMessageApis } from "../../customHooks/useMessageApis";
 import { AxiosClient } from "../../api/AxiosClient";
+import LiveSearch from "./LiveSearch";
 
 
 const Chats = () => {
 
 
-
+   //STATES
    const [activeUserId, setActiveUserId] = useState<number | null>(null);
+   const [inputMessage, setInputMessage] = useState("");
+   const toastRef = useRef(false);
+
+   //HOOKS
    const socket = useSocket();
    const { user } = useUser();
+
+   //CONTEXT
    const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message } = useMessage();
-   const [userList, setUserList] = useState<string>("");
    const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
 
-   // const connectedUsers: { [key: string]: boolean } = {};
 
+   //EFFECTS
+
+
+   // REGISTER USER TO SOCKET.IO SERVER AND LISTEN FOR ONLINE USERS
    useEffect(() => {
       if (!socket || !user?.id) return;
 
@@ -31,27 +39,39 @@ const Chats = () => {
          socket.emit("register", user.id);
       };
 
+      const handleUserOnline = (userId: { users: number[] }) => {
+         const { users } = userId;
+         users?.map((id: number) => {
+            setListOfChatUsers((prev) => {
+               return prev.map((user: chatUser) => {
+                  if (user.id === id) {
+                     return {
+                        ...user,
+                        isOnline: true
+                     }
+                  }
+                  return user;
+               })
+            })
+
+         });
+      };
 
       if (socket.connected) {
          handleConnect();
       }
 
       socket.on("connect", handleConnect);
-
-      socket.on("user_online", (userId) => {
-         // connectedUsers[userId] = true;
-         // connectedUsers.set(userId, true);
-         console.log(`User ${userId} is online`);
-      });
+      socket.on("online_users", handleUserOnline);
 
       return () => {
          socket.off("connect", handleConnect);
+         socket.off("user_online", handleUserOnline);
       };
    }, [socket, user?.id]);
 
 
-
-
+   //to listen for incoming messages
    useEffect(() => {
       if (!socket) return;
 
@@ -63,8 +83,49 @@ const Chats = () => {
             createdAt: msg.timestamp
          }]);
 
-         if(activeUserId !== msg.fromUserId){
-            toast.info(`New message from @${listOfChatUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
+         if (activeUserId !== msg.fromUserId) {
+            toast.info(`New message from @${listOfAllUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
+
+            const newUser = listOfChatUsers.find((user: chatUser) => user.id === msg.fromUserId);
+            if (newUser) {
+               setListOfChatUsers((prev) => {
+                  return prev.map((user: chatUser) => {
+                     if (user.id === msg.fromUserId) {
+                        return {
+                           ...user,
+                           receivedMessages: [...(user.receivedMessages || []), {
+                              id: msg.messageId,
+                              senderId: msg.fromUserId,
+                              receiverId: Number(msg.toUserId),
+                              content: msg.content,
+                              createdAt: msg.timestamp,
+                              isRead: false
+                           }]
+                        }
+                     }
+                     return user;
+                  })
+
+
+               })
+            }
+            if (!newUser) {
+               const userToAdd = listOfAllUsers.find((user: chatUser) => user.id === Number(msg.fromUserId));
+               if (userToAdd) {
+                  const userWithMessage: chatUser = {
+                     ...userToAdd,
+                     receivedMessages: [...(userToAdd?.receivedMessages || []), {
+                        id: msg.messageId,
+                        senderId: msg.fromUserId,
+                        receiverId: Number(msg.toUserId),
+                        content: msg.content,
+                        createdAt: msg.timestamp,
+                        isRead: false
+                     }]
+                  };
+                  setListOfChatUsers((prev) => [...prev, userWithMessage]);
+               }
+            }
          }
          await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
       };
@@ -74,11 +135,67 @@ const Chats = () => {
       return () => {
          socket.off("private_message", handleMessageReceived);
       };
-   }, [socket, activeUserId, setMessage]);
+   }, [socket, activeUserId, setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers]);
 
-   const [inputMessage, setInputMessage] = useState("");
+   useEffect(() => {
+      if (!user?.id) return;
+      const fetcheLiveSearchData = async () => {
+         try {
+            await fetchAllUsersForLiveSearch();
 
+         } catch (error) {
+            toast.error(String(error));
+         }
+      }
+      fetcheLiveSearchData();
+   }, [user?.id]);
 
+   useEffect(() => {
+      if (!user?.id) return;
+      const getUsers = async () => {
+         try {
+            await getAsscociatedUsers();
+         } catch (error) {
+            toast.error(String(error));
+         }
+
+      }
+      const fetchUnreadChats = async () => {
+         try {
+            await getUnreadMessageChats();
+         } catch (error) {
+            toast.error(String(error));
+         }
+      }
+      fetchUnreadChats();
+      getUsers();
+   }, [user?.id]);
+
+   useEffect(() => {
+      setTimeout(() => {
+         getMessagesForActiveUser();
+      }, 100);
+      const getMessagesForActiveUser = async () => {
+         if (activeUserId === null) return;
+         try {
+            await getMessages(activeUserId);
+
+         } catch (error) {
+            toast.error(String(error));
+         }
+      }
+   }, [activeUserId]);
+
+   useEffect(() => {
+      if (ShowToastOfUnreadMessage && ShowToastOfUnreadMessage.length > 0 && !toastRef.current) {
+         ShowToastOfUnreadMessage.forEach((user: chatUser) => {
+            toast.info(`New message from @${user.username}`)
+         })
+         toastRef.current = true;
+      }
+   }, [ShowToastOfUnreadMessage]);
+
+   //Functions
    const SendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!socket || activeUserId === null) return;
@@ -115,80 +232,13 @@ const Chats = () => {
    }
 
 
-
-   useEffect(() => {
-      if (!user?.id) return;
-      const fetcheLiveSearchData = async () => {
-
-         try {
-            await fetchAllUsersForLiveSearch();
-
-         } catch (error) {
-            toast.error(String(error));
-         }
-      }
-      fetcheLiveSearchData();
-   }, [user?.id]);
-
-   useEffect(() => {
-      const getUsers = async () => {
-         try {
-            await getAsscociatedUsers();
-         } catch (error) {
-            toast.error(String(error));
-         }
-
-      }
-      getUsers();
-   }, []);
-
-   useEffect(() => {
-      const getMessagesForActiveUser = async () => {
-         if (activeUserId === null) return;
-         try {
-            await getMessages(activeUserId);
-         } catch (error) {
-            toast.error(String(error));
-         }
-      }
-      getMessagesForActiveUser();
-   }, [activeUserId, setMessage]);
-
-
-
-   useEffect(() => {
-      const fetchUnreadChats = async () => {
-         try {
-            await getUnreadMessageChats();
-         } catch (error) {
-            toast.error(String(error));
-         }
-      }
-      fetchUnreadChats();
-   }, []);
-
-   const toastRef = useRef(false);
-
-   useEffect(() => {
-      if (ShowToastOfUnreadMessage && ShowToastOfUnreadMessage.length > 0 && !toastRef.current) {
-         ShowToastOfUnreadMessage.forEach((user: chatUser) => {
-            toast.info(`New message from @${user.username}`)
-         })
-         toastRef.current = true;
-      }
-   }, [ShowToastOfUnreadMessage]);
-
-   const filterUser = listOfAllUsers.filter((user) => {
-      return user.username.toLowerCase().includes(userList.toLowerCase());
-   })
-
-
+   console.log("list Of User", listOfChatUsers);
 
    return (
 
       <div className="min-h-screen bg-slate-50">
          <div className="flex h-screen">
-            <aside className="w-[340px] shrink-0 border-r border-slate-200 bg-white">
+            <div className="w-[340px] shrink-0 border-r border-slate-200 bg-white">
                <div className="px-3 py-4 border-b border-slate-200">
                   <div className="flex items-center justify-between">
                      <div>
@@ -197,59 +247,14 @@ const Chats = () => {
                      </div>
                      <span className="text-xs text-slate-400">{listOfChatUsers.length} total</span>
                   </div>
-                  <div className="mt-3 relative">
-                     <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 flex items-center gap-2 text-slate-500">
-                        <IoSearchOutline className="text-slate-400" />
-                        <input
-                           className="outline-none bg-transparent w-full text-sm"
-                           type="text"
-                           placeholder="Search users"
-                           value={userList}
-                           onChange={(e) => setUserList(e.target.value)}
-                        />
-                        {filterUser.length !== 0 && userList.length > 1 &&
-                           <div>
-                              <div className="absolute left-0 top-10 bg-white/95 border border-slate-200 rounded-xl mt-2 w-[315px] shadow-lg z-10 overflow-hidden">
-                                 {filterUser.map((user: chatUser) => (
-                                    <div
-                                       key={user.id}
-                                       className="px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition"
-                                       onClick={() => {
-                                          if (listOfChatUsers.find((chatUser) => chatUser.id === user.id)) {
-                                             setActiveUserId(user.id);
-                                             setUserList("");
-                                             return;
-                                          }
-                                          setListOfChatUsers((prev) => [...prev, user]);
-                                          setActiveUserId(user.id);
-                                          setUserList("");
-                                       }}
-                                    >
-                                       <div className="flex items-center gap-3">
-                                          <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700">
-                                             {user.username.slice(0, 2).toUpperCase()}
-                                          </div>
-                                          <div className="min-w-0">
-                                             <h1 className="text-slate-900 font-semibold truncate">@{user.username}</h1>
-                                             <p className="text-slate-500 text-xs truncate">{user?.email}</p>
-                                          </div>
-                                       </div>
-                                    </div>
-                                 ))}
-                              </div>
-                           </div>
-                        }
-                        {filterUser.length === 0 && userList.length > 1 &&
-                           <div>
-                              <div className="absolute bg-white border border-slate-200 rounded-md mt-1 w-[calc(340px-24px)] shadow-sm z-10">
-                                 <div className="px-3 py-2 text-slate-500">
-                                    No users found
-                                 </div>
-                              </div>
-                           </div>
-                        }
-                     </div>
-                  </div>
+
+                  <LiveSearch
+                     listOfAllUsers={listOfAllUsers}
+                     setActiveUserId={setActiveUserId}
+                     setListOfChatUsers={setListOfChatUsers}
+                     listOfChatUsers={listOfChatUsers}
+                  />
+
                   <div className="mt-3 flex items-center gap-2 text-xs">
                      <button className="px-2.5 py-1 rounded-md bg-slate-900 text-white">All</button>
                      <button className="px-2.5 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 transition">Unread</button>
@@ -263,6 +268,7 @@ const Chats = () => {
                         ...(user.sentMessages || []),
                         ...(user.receivedMessages || [])
                      ];
+
                      return (
                         <ChatList
                            key={user.id}
@@ -271,11 +277,12 @@ const Chats = () => {
                            setActiveUserId={setActiveUserId}
                            activeUserId={activeUserId}
                            receivedMessages={allMessages}
+                           isOnline={user.isOnline}
                         />
                      );
                   })}
                </div>
-            </aside>
+            </div>
 
 
             <main className="flex-1 bg-white">

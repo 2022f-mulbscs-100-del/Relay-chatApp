@@ -31,9 +31,8 @@ const ChatPage = ({
     setInputMessage
 }: ChatPageProps) => {
 
+    
     const InputRef = useRef<HTMLInputElement | null>(null);
-
-
     const { message, } = useMessage();
     const { MarkMessageAsRead } = useMessageApis();
     const { user } = useUser();
@@ -48,7 +47,7 @@ const ChatPage = ({
     useEffect(() => {
         if (!activeUserId) return;
         MarkMessageAsRead(activeUserId);
-    }, [activeUserId]);
+    }, [activeUserId,setInputMessage]);
 
 
     useEffect(() => {
@@ -63,7 +62,7 @@ const ChatPage = ({
                 <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10">
                         <img className="w-full h-full rounded-full object-cover" src="/153608270.jpeg" alt="" />
-                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+                        {/* <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" /> */}
                     </div>
                     <div>
                         <p className="text-sm font-semibold text-slate-900">

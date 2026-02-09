@@ -10,10 +10,13 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const { setUser } = useUser();
+
+
     useEffect(() => {
-        axios.get("http://localhost:2404/api/refresh",{
+        axios.get("http://localhost:2404/api/refresh", {
             withCredentials: true,
         }).then((response) => {
             setUser(response.data.user);
@@ -22,6 +25,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(null);
         });
     }, [setUser]);
+
+
     return (
         <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
             {children}

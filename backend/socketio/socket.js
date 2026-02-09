@@ -3,7 +3,7 @@ import { logger } from "../Logger/Logger.js";
 import { Message } from "../modals/Message.modal.js";
 
 
-const connectedUsers = {};
+const connectedUsers = new Map(); // Map to store userId and their corresponding socketId(s)
 
 export const initializeSocket = (server) => {
 
@@ -23,8 +23,18 @@ export const initializeSocket = (server) => {
             socket.userId = userId;
             socket.join(String(userId));
             logger.info(`User ${userId} registered with socket ${socket.id}`);
+
+            if (!connectedUsers.has(userId)) {
+                connectedUsers.set(userId, new Set());
+                socket.broadcast.emit("user_online", userId); // Notify others that this user is online
+            }
+            connectedUsers.get(userId).add(socket.id);
+            socket.emit("online_users", { // Send the list of currently online users to the newly connected user mean the current user
+                users: Array.from(connectedUsers.keys()),
+            });
         });
 
+        // socket.to(socket.userId).emit("online_user", 10);
 
         socket.on("private_message", async ({ toUserId, content }) => {
             if (!socket.userId) return;
@@ -67,13 +77,13 @@ export const initializeSocket = (server) => {
 
         socket.on("disconnect", () => {
             logger.info(`Socket disconnected: ${socket.id}`);
-            for (const [userId, socketId] of Object.entries(connectedUsers)) {
-                if (socketId === socket.id) {
-                    delete connectedUsers[userId];
-                    logger.info(`User disconnected: ${userId}`);
-                    break;
-                }
-            }
+            // for (const [userId, socketId] of Object.entries(connectedUsers)) {
+            //     if (socketId === socket.id) {
+            //         delete connectedUsers[userId];
+            //         logger.info(`User disconnected: ${userId}`);
+            //         break;
+            //     }
+            // }
         });
     });
 

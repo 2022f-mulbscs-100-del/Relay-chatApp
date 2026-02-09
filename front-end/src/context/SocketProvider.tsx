@@ -6,7 +6,9 @@ import { useUser } from "./UserProvider";
 const SocketContext = createContext<Socket | null>(null);
 
 const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-    const {user } = useUser();
+    
+    const {user} = useUser();
+
     const socket = useMemo(() => {
           if (!user?.id) return null;
         return io("http://localhost:2404", {

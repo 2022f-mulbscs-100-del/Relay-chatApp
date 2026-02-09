@@ -8,6 +8,7 @@ export const useUserApis = () => {
     const [loading, setLoading] = useState(false);
 
 
+    // GET USER PROFILE API CALL
     const getProfile = async () => {
         setLoading(true);
         AxiosClient.get("/users/getUserProfile").then(res => {
@@ -20,7 +21,7 @@ export const useUserApis = () => {
 
     }
 
-
+    // UPDATE USER PROFILE API CALL
     const UpdateProfile = async (username: string, phone: string, location?: string) => {
         setLoading(true);
         try {
@@ -38,7 +39,7 @@ export const useUserApis = () => {
 
 
 
-
+    // SETUP USER PROFILE API CALL
     const setupProfile = async (phone: string, title: string, about: string, tags: string[]) => {
         setLoading(true);
         try {
@@ -55,6 +56,8 @@ export const useUserApis = () => {
         }
     }
 
+
+    // CHANGE PASSWORD API CALL
     const ChangePassword = async (currentPassword: string, newPassword: string) => {
         setLoading(true);
         try {
