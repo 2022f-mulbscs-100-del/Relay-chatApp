@@ -17,6 +17,7 @@ export interface chatUser {
    about?: string;
    location?: string;
    tags?: string[];
+   isOnline?: boolean;
    sentMessages?: {
       id: number;
       senderId: number;

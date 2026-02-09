@@ -12,6 +12,7 @@ const UserContext = createContext<UserContextProps | null>(null);
 
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
+
     const [user, setUser] = useState<User | null>({
         id: "",
         username: "",

@@ -13,6 +13,7 @@ type ChatListProps = {
         createdAt: Date;
         isRead: boolean;
     }[];
+    isOnline?: boolean;
 };
 
 const ChatList = ({
@@ -20,18 +21,22 @@ const ChatList = ({
     username,
     setActiveUserId,
     receivedMessages,
-    activeUserId
+    activeUserId,
+    isOnline = false,
 }: ChatListProps) => {
 
+    const { user } = useUser();
+
+
     //eslint-disable-next-line 
-    const SortingMessage = (receivedMessages:any[]) => {
-      return   receivedMessages?.sort((a, b) => {
+    const SortingMessage = (receivedMessages: any[]) => {
+        return receivedMessages?.sort((a, b) => {
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         })
     }
 
-const lastMessage = SortingMessage(receivedMessages || [])[SortingMessage(receivedMessages || []).length-1];
-    const { user } = useUser();
+   
+
     const getUnreadCount = () => {
         if (!receivedMessages) return 0;
         return receivedMessages.filter((msg) => {
@@ -41,6 +46,7 @@ const lastMessage = SortingMessage(receivedMessages || [])[SortingMessage(receiv
         }).length;
     };
 
+    const lastMessage = SortingMessage(receivedMessages || [])[SortingMessage(receivedMessages || []).length - 1];
     const activeChat = activeUserId === id;
     return (
         <div
@@ -50,8 +56,10 @@ const lastMessage = SortingMessage(receivedMessages || [])[SortingMessage(receiv
             }}
         >
             <div className="relative w-11 h-11 shrink-0">
-                <img className="w-full h-full rounded-full object-cover" src="/153608270.jpeg" alt="" />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+                <img className="w-full h-full rounded-full object-cover" src="/360_F_133149161_cZzY9SYCE9FjMOwMGRJ26W8OqMZx1opU.jpg" alt="" />
+                {isOnline === true &&
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+                }
             </div>
             <div className="flex flex-col w-full min-w-0">
                 <div className="flex items-center justify-between gap-2">
