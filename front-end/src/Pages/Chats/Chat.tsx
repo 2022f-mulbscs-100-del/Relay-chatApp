@@ -9,23 +9,25 @@ import type { chatUser, MessageProps } from "../../types/message.types";
 import { useMessageApis } from "../../customHooks/useMessageApis";
 import { AxiosClient } from "../../api/AxiosClient";
 import LiveSearch from "./LiveSearch";
+import { useGroup } from "../../context/GroupProvider";
+import type { Group } from "../../types/group.type";
 
 
 const Chats = () => {
 
 
    //STATES
-   const [activeUserId, setActiveUserId] = useState<number | null>(null);
+   const [activeUserId, setActiveUserId] = useState<string | null>(null);
    const [inputMessage, setInputMessage] = useState("");
    const toastRef = useRef(false);
 
-   //HOOKS
+   //HOOKSf
    const socket = useSocket();
-   const { user } = useUser();
+   const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
 
    //CONTEXT
+   const { user } = useUser();
    const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message } = useMessage();
-   const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
 
 
    //EFFECTS
@@ -83,14 +85,14 @@ const Chats = () => {
             createdAt: msg.timestamp
          }]);
 
-         if (activeUserId !== msg.fromUserId) {
+         if (activeUserId !== String(msg.fromUserId)) {
             toast.info(`New message from @${listOfAllUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
 
-            const newUser = listOfChatUsers.find((user: chatUser) => user.id === msg.fromUserId);
+            const newUser = listOfChatUsers.find((user: chatUser) => String(user.id) === String(msg.fromUserId));
             if (newUser) {
                setListOfChatUsers((prev) => {
                   return prev.map((user: chatUser) => {
-                     if (user.id === msg.fromUserId) {
+                     if (String(user.id) === String(msg.fromUserId)) {
                         return {
                            ...user,
                            receivedMessages: [...(user.receivedMessages || []), {
@@ -210,7 +212,7 @@ const Chats = () => {
             await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
          }
          const FilterMessage = message?.some((msg) => {
-            return (msg.senderId === Number(user?.id) && msg.senderId === activeUserId && msg.isRead === false);
+            return (msg.senderId === Number(user?.id) && String(msg.senderId) === activeUserId && msg.isRead === false);
 
          })
          if (!FilterMessage) return false;
@@ -231,9 +233,8 @@ const Chats = () => {
 
    }
 
-
-   console.log("list Of User", listOfChatUsers);
-
+   const [tab, setTab] = useState<"all" | "unread" | "groups">("all");
+   const { groups } = useGroup();
    return (
 
       <div className="min-h-screen bg-slate-50">
@@ -256,55 +257,102 @@ const Chats = () => {
                   />
 
                   <div className="mt-3 flex items-center gap-2 text-xs">
-                     <button className="px-2.5 py-1 rounded-md bg-slate-900 text-white">All</button>
-                     <button className="px-2.5 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 transition">Unread</button>
-                     <button className="px-2.5 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 transition">Groups</button>
+                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "all" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("all")}>All</button>
+                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "unread" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("unread")}>Unread</button>
+                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "groups" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("groups")}>Groups</button>
                   </div>
                </div>
 
-               <div className="px-3 py-4 h-[calc(100vh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
-                  {listOfChatUsers.map((user: chatUser) => {
-                     const allMessages = [
-                        ...(user.sentMessages || []),
-                        ...(user.receivedMessages || [])
-                     ];
+               {tab === "all" &&
+                  <div className="px-3 py-4 h-[calc(100vh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
+                     {listOfChatUsers.map((user: chatUser) => {
+                        const allMessages = [
+                           ...(user.sentMessages || []),
+                           ...(user.receivedMessages || [])
+                        ];
 
-                     return (
-                        <ChatList
-                           key={user.id}
-                           id={user.id}
-                           username={user.username}
-                           setActiveUserId={setActiveUserId}
-                           activeUserId={activeUserId}
-                           receivedMessages={allMessages}
-                           isOnline={user.isOnline}
-                        />
-                     );
-                  })}
-               </div>
+                        return (
+
+                           <ChatList
+                              key={user.id}
+                              id={user.id}
+                              username={user.username}
+                              setActiveUserId={setActiveUserId}
+                              activeUserId={activeUserId}
+                              receivedMessages={allMessages}
+                              isOnline={user.isOnline}
+                           />
+                        );
+                     })}
+                  </div>}
+               {tab === "groups" &&
+                  <div className="px-3 py-4 h-[calc(100vh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
+                     {groups?.map((group: Group) => {
+                        return (
+
+                           <ChatList
+                              key={group.id}
+                              id={group.id}
+                              username={group.groupName}
+                              setActiveUserId={setActiveUserId}
+                              activeUserId={activeUserId}
+                           />
+                        );
+                     })}
+                  </div>}
+
             </div>
-
-
-            <main className="flex-1 bg-white">
-               {activeUserId ?
-                  <ChatPage
-                     inputMessage={inputMessage}
-                     setInputMessage={setInputMessage}
-                     SendMessage={SendMessage}
-                     key={activeUserId}
-                     listOfChatUsers={listOfChatUsers}
-                     activeUserId={activeUserId} />
-                  : (
-                     <div className="flex items-center justify-center h-full bg-slate-50">
-                        <div className="text-center rounded-xl border border-slate-200 bg-white px-8 py-6 shadow-sm">
-                           <div className="text-sm font-semibold text-slate-900">No chat selected</div>
-                           <div className="text-xs text-slate-500 mt-1">Choose a conversation to start messaging</div>
+            {tab === "all" &&
+               <main className="flex-1 bg-white">
+                  {activeUserId ?
+                     <ChatPage
+                        inputMessage={inputMessage}
+                        setInputMessage={setInputMessage}
+                        SendMessage={SendMessage}
+                        key={activeUserId}
+                        listOfChatUsers={listOfChatUsers}
+                        activeUserId={activeUserId} />
+                     : (
+                        <div className="flex items-center justify-center h-full bg-slate-50">
+                           <div className="text-center rounded-xl border border-slate-200 bg-white px-8 py-6 shadow-sm">
+                              <div className="text-sm font-semibold text-slate-900">No chat selected</div>
+                              <div className="text-xs text-slate-500 mt-1">Choose a conversation to start messaging</div>
+                           </div>
                         </div>
-                     </div>
-                  )}
-            </main>
+                     )}
+               </main>
+            }
+
+
+            {tab === "groups" &&
+               <main className="flex-1 bg-white">
+                  {activeUserId ?
+                     <ChatPage
+                        inputMessage={inputMessage}
+                        setInputMessage={setInputMessage}
+                        SendMessage={SendMessage}
+                        key={groups?.length}
+                        listOfChatUsers={listOfChatUsers}
+                        activeUserId={activeUserId}
+                        mode="group"
+                     />
+                     : (
+                        <div className="flex items-center justify-center h-full bg-slate-50">
+                           <div className="text-center rounded-xl border border-slate-200 bg-white px-8 py-6 shadow-sm">
+                              <div className="text-sm font-semibold text-slate-900">No chat selected</div>
+                              <div className="text-xs text-slate-500 mt-1">Choose a conversation to start messaging</div>
+                           </div>
+                        </div>
+                     )}
+               </main>
+            }
+
+
          </div>
       </div>
+
+
+
    )
 };
 

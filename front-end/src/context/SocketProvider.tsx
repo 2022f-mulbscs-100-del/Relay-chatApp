@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import { io, Socket } from "socket.io-client";
 import { useUser } from "./UserProvider";
 
@@ -10,11 +10,37 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const {user} = useUser();
 
     const socket = useMemo(() => {
-          if (!user?.id) return null;
+        if (!user?.id) {
+            return null;
+        }
         return io("http://localhost:2404", {
             withCredentials: true,
         });
-    }, [user]);
+    }, [user?.id]);
+
+    useEffect(() => {
+        if (!socket || !user?.id) {
+            return;
+        }
+
+      
+        const handleConnect = () => {
+            socket.emit("register", user.id);
+        };
+
+        if (socket.connected) {
+           
+            handleConnect();
+        } else {
+            
+            socket.on("connect", handleConnect);
+        }
+
+        return () => {
+            socket.off("connect", handleConnect);
+            if (socket) socket.disconnect();
+        };
+    }, [socket, user?.id]);
 
     return (
         <SocketContext.Provider value={socket}>

@@ -12,4 +12,6 @@ routes.post("/UserProfileSetup", VerifyToken, UserProfileSetupController);
 routes.get("/getUserProfile", VerifyToken, getUserProfileController);
 routes.post("/UpdateUserProfileSetup", VerifyToken, UpdateUserProfileSetupController);
 routes.post("/updateUserPassword", VerifyToken, UpdateUserPasswordController);
+
+
 export default routes;

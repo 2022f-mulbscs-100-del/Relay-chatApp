@@ -17,7 +17,6 @@ export const useMessageApis = () => {
             .then((response) => {
                 setLoading(false);
                 setListOfAllUsers(response.data.users);
-                console.log("All users fetched for live search:", response.data.users);
             })
             .catch(() => {
                 setLoading(false);
@@ -30,7 +29,7 @@ export const useMessageApis = () => {
     const getAsscociatedUsers = async () => {
         setLoading(true);
         AxiosClient.get("/users/getAssociatedUsers").then((response) => {
-            setListOfChatUsers(response.data.AcssociatedUsers);
+            setListOfChatUsers(response.data.AcssociatedUsers.hasMessaged);
         }).catch(() => {
             throw new Error("Failed to fetch users");
         });
@@ -38,7 +37,7 @@ export const useMessageApis = () => {
 
 
     // GET MESSAGES WITH A USER API CALL
-    const getMessages = async (userId: number) => {
+    const getMessages = async (userId: string) => {
         setLoading(true);
         AxiosClient.get(`/messages/getMessages/${userId}`)
             .then((response) => {
@@ -51,13 +50,13 @@ export const useMessageApis = () => {
 
 
     // MARK MESSAGES AS READ API CALL
-    const MarkMessageAsRead = async (activeUserId: number | null) => {
+    const MarkMessageAsRead = async (activeUserId: string | null) => {
         if (!activeUserId) return;
         
         try {
             setListOfChatUsers((prev) => {
                 return prev.map((user: chatUser) => {
-                    if (user.id === activeUserId) {
+                    if (String(user.id) === activeUserId) {
 
                         const updatedSentMessages = user.receivedMessages?.map((msg) => ({
                             ...msg,

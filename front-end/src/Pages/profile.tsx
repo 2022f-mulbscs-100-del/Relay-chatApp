@@ -1,5 +1,5 @@
 import  { useEffect, useState } from 'react';
-import { FiCamera, FiMessageCircle, FiPhone, FiMail, FiMapPin, FiCalendar, FiUsers, FiAward, FiSettings, FiBell, FiShield, FiLogOut, FiMoreVertical } from 'react-icons/fi';
+import { FiCamera, FiMessageCircle, FiPhone, FiMail, FiMapPin, FiCalendar, FiUsers, FiAward, FiSettings, FiBell, FiShield, FiLogOut } from 'react-icons/fi';
 import { useUserApis } from '../customHooks/useUserApis';
 import { useUser } from '../context/UserProvider';
 import { useAuthCall } from '../customHooks/useAuthCall';
@@ -10,7 +10,7 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
 
-
+console.log(setIsEditing)
 
   const stats = [
     { icon: FiMessageCircle, label: 'Messages', value: '2,847', color: 'from-purple-500 to-pink-500' },

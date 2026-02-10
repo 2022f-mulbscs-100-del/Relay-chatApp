@@ -4,7 +4,7 @@ import type { chatUser } from "../../types/message.types";
 
 interface LiveSearchProps {
     listOfAllUsers: chatUser[];
-    setActiveUserId: React.Dispatch<React.SetStateAction<number | null>>;
+    setActiveUserId: React.Dispatch<React.SetStateAction<string | null>>;
     setListOfChatUsers: React.Dispatch<React.SetStateAction<chatUser[]>>;
     listOfChatUsers: chatUser[];
 }
@@ -35,12 +35,12 @@ const LiveSearch = ({ listOfAllUsers, setActiveUserId, setListOfChatUsers, listO
                                     className="px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition"
                                     onClick={() => {
                                         if (listOfChatUsers.find((chatUser) => chatUser.id === user.id)) {
-                                            setActiveUserId(user.id);
+                                            setActiveUserId(String(user.id));
                                             setUserList("");
                                             return;
                                         }
                                         setListOfChatUsers((prev) => [...prev, user]);
-                                        setActiveUserId(user.id);
+                                        setActiveUserId(String(user.id));
                                         setUserList("");
                                     }}
                                 >

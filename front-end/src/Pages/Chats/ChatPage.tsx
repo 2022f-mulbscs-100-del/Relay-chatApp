@@ -5,6 +5,8 @@ import { useMessage } from "../../context/MessageProvider";
 
 import { useMessageApis } from "../../customHooks/useMessageApis";
 import { useUser } from "../../context/UserProvider";
+import type { Group } from "../../types/group.type";
+import { useGroup } from "../../context/GroupProvider";
 type ChatPageProps = {
     listOfChatUsers: {
         id: number;
@@ -18,17 +20,19 @@ type ChatPageProps = {
             isRead: boolean;
         }[]
     }[];
-    activeUserId: number | null;
+    activeUserId: string | null;
     SendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
     inputMessage: string;
     setInputMessage: React.Dispatch<React.SetStateAction<string>>;
+    mode?: "private" | "group";
 }
 const ChatPage = ({
     listOfChatUsers,
     activeUserId,
     SendMessage,
     inputMessage,
-    setInputMessage
+    setInputMessage,
+    mode = "private"
 }: ChatPageProps) => {
 
     
@@ -36,14 +40,15 @@ const ChatPage = ({
     const { message, } = useMessage();
     const { MarkMessageAsRead } = useMessageApis();
     const { user } = useUser();
+    const {groups} = useGroup();
 
     const FilterMessage = useMemo(() => {
-        return (message?.filter(msg => (msg.senderId === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && msg.receiverId === activeUserId)) || []
+        return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []
         );
     }, [message, activeUserId, user?.id]);
-    
-    const filterUser = listOfChatUsers.find(user => user.id === activeUserId);
-
+    const filterUser = listOfChatUsers.find(user => String(user.id) === activeUserId);
+    const filterGroup = groups?.find((group: Group) => (String(group.id)) === activeUserId); 
+ 
     useEffect(() => {
         if (!activeUserId) return;
         MarkMessageAsRead(activeUserId);
@@ -66,7 +71,7 @@ const ChatPage = ({
                     </div>
                     <div>
                         <p className="text-sm font-semibold text-slate-900">
-                            {filterUser ? filterUser.username : "Unknown User"}
+                            {mode === "private" ? (filterUser ? filterUser.username : "Unknown User") : (filterGroup ? filterGroup?.groupName : "Unknown Group")}
                         </p>
                         <p className="text-xs text-slate-500">Active now</p>
                     </div>
