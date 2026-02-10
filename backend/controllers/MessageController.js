@@ -1,20 +1,13 @@
 import { Op } from "sequelize";
 import { Message } from "../modals/Message.modal.js";
 import User from "../modals/User.modal.js";
+import { MessageService } from "../services/Message/index.js";
 
 export const getMessagesController = async (req, res) => {
     const { id: senderId } = req.user;
     const { chatId: receiverId } = req.params;
     try {
-        const messages = await Message.findAll({
-            where: {
-                [Op.or]: [
-                    { senderId, receiverId },
-                    { senderId: receiverId, receiverId: senderId }
-                ]
-            },
-            order: [['createdAt', 'ASC']]
-        });
+        const { messages } = await MessageService.getAllMessages(senderId, receiverId);
         return res.status(200).json({ success: true, messages });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -74,8 +67,6 @@ export const updateMessageController = async (req, res, next) => {
 
 export const unReadChatListController = async (req, res, next) => {
     const { id: userId } = req.user;
-
-
     try {
         const message = await Message.findAll(
             {
@@ -93,7 +84,7 @@ export const unReadChatListController = async (req, res, next) => {
             })
             ListOfUser.push(user)
         }
-        res.status(200).json({success: true, message: "Unread chats fetched successfully.", unreadChats: ListOfUser })
+        res.status(200).json({ success: true, message: "Unread chats fetched successfully.", unreadChats: ListOfUser })
     } catch (error) {
         next(error)
     }

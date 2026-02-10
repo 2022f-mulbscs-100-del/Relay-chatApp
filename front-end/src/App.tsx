@@ -6,6 +6,7 @@ import { UserProvider } from "./context/UserProvider"
 import { SocketProvider } from "./context/SocketProvider"
 import { AuthProvider } from "./context/AuthProvider"
 import { MessageProvider } from "./context/MessageProvider"
+import { GroupProvider } from "./context/GroupProvider"
 
 
 function App() {
@@ -16,28 +17,30 @@ function App() {
     <>
 
       <UserProvider>
-        <SocketProvider>
-          <MessageProvider>
-          <AuthProvider>
-            <ToastContainer
-              position="top-center"
-              autoClose={3000}
-              hideProgressBar={true}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              icon={false}
-              closeButton={false}
-              className="toast-island-container"
-              toastClassName="toast-island"
-            />
-            <RouterProvider router={Router} />
-          </AuthProvider>
-          </MessageProvider>
-        </SocketProvider>
+        <GroupProvider>
+          <SocketProvider>
+            <MessageProvider>
+              <AuthProvider>
+                <ToastContainer
+                  position="top-center"
+                  autoClose={3000}
+                  hideProgressBar={true}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  icon={false}
+                  closeButton={false}
+                  className="toast-island-container"
+                  toastClassName="toast-island"
+                />
+                <RouterProvider router={Router} />
+              </AuthProvider>
+            </MessageProvider>
+          </SocketProvider>
+        </GroupProvider>
       </UserProvider>
     </>
   )

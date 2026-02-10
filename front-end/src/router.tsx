@@ -7,7 +7,7 @@ import MfaCode from "./Pages/Auth/MfaCode";
 import LayoutWrapper from "./LayoutWrapper";
 import Contacts from "./Pages/Contacts";
 import Chats from "./Pages/Chats/Chat";
-import Groups from "./Pages/Groups";
+import Groups from "./Pages/Groups/Groups";
 import Settings from "./Pages/Settings";
 import SetupProfile from "./Pages/SetupProfile";
 import ProfilePage from "./Pages/profile";

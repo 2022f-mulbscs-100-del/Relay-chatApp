@@ -1,10 +1,10 @@
 import { useUser } from "../../context/UserProvider";
 
 type ChatListProps = {
-    id: number;
+    id: number | string;
     username: string;
-    setActiveUserId: (id: number) => void;
-    activeUserId?: number | null;
+    setActiveUserId: (id: string) => void;
+    activeUserId?:   string | null;
     receivedMessages?: {
         id: number;
         senderId: number;
@@ -35,7 +35,7 @@ const ChatList = ({
         })
     }
 
-   
+
 
     const getUnreadCount = () => {
         if (!receivedMessages) return 0;
@@ -52,7 +52,8 @@ const ChatList = ({
         <div
             className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${activeChat ? "border-slate-300 shadow-sm" : "border-slate-200"} bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition`}
             onClick={() => {
-                setActiveUserId(id);
+                setActiveUserId(String(id));
+                
             }}
         >
             <div className="relative w-11 h-11 shrink-0">

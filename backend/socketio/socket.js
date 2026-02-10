@@ -1,7 +1,11 @@
 import { Server } from "socket.io";
 import { logger } from "../Logger/Logger.js";
 import { Message } from "../modals/Message.modal.js";
-
+import Group from "../modals/Group.modal.js";
+import AuthService from "../services/Auth/AuthService.js";
+import GroupMessage from "../modals/GroupMessage.modal.js";
+import { Op, Sequelize } from "sequelize";
+import { sequelize } from "../config/dbConfig.js";
 
 const connectedUsers = new Map(); // Map to store userId and their corresponding socketId(s)
 
@@ -19,10 +23,25 @@ export const initializeSocket = (server) => {
     io.on("connection", (socket) => {
         logger.info(`New socket connection: ${socket.id}`);
 
-        socket.on("register", (userId) => {
+        socket.on("register", async (userId) => {
             socket.userId = userId;
             socket.join(String(userId));
             logger.info(`User ${userId} registered with socket ${socket.id}`);
+
+            const groups = await Group.findAll({
+                where: Sequelize.where(
+                    Sequelize.fn(
+                        'JSON_CONTAINS',
+                        Sequelize.col('memberIds'),
+                        JSON.stringify(userId)
+                    ),
+                    1
+                )
+            });
+
+            for (const group of groups) {
+                socket.join(String(group.id));
+            }
 
             if (!connectedUsers.has(userId)) {
                 connectedUsers.set(userId, new Set());
@@ -34,7 +53,7 @@ export const initializeSocket = (server) => {
             });
         });
 
-        // socket.to(socket.userId).emit("online_user", 10);
+
 
         socket.on("private_message", async ({ toUserId, content }) => {
             if (!socket.userId) return;
@@ -44,7 +63,7 @@ export const initializeSocket = (server) => {
 
             try {
                 //storing message to db
-               const message = await Message.create({
+                const message = await Message.create({
                     senderId: socket.userId,
                     receiverId: toUserId,
                     content: content,
@@ -65,14 +84,52 @@ export const initializeSocket = (server) => {
 
         });
 
+
+
         //here we are receving message the user is sending message threought this event 
         //privatemessage and we sending that message or forwarding that message to 
         //the specific user using toUserId(room)
         //on front end the user is receving that message by listening to the same event name private message
         //and then updating the chat window
+        //Group creation and notifying other
 
 
+        socket.on("create_group", async ({ groupName, memberIds, userId }) => {
+            console.log("create_group event received with data: ---------->", { groupName, memberIds, userId });
+            const { user } = await AuthService.FindById(userId)
 
+           
+            const allMembers = [...new Set([...memberIds, userId])];
+
+            const group = await Group.create({
+                groupName,
+                createdBy: user.username,
+                memberIds: allMembers
+            })
+
+           
+            for (const memberId of allMembers) {
+                io.to(String(memberId)).emit("group_created", group);
+                console.log(`Emitted group_created event to user ${memberId} for group ${group.id}`);
+            }
+
+        })
+
+        socket.on("group_message", async ({ groupId, content, userId }) => {
+
+            io.to(String(groupId)).emit("group_message", {
+                groupId,
+                content,
+                fromUserId: userId,
+                timestamp: new Date(),
+            })
+
+            await GroupMessage.create({
+                groupId,
+                senderId: userId,
+                content
+            })
+        })
 
 
         socket.on("disconnect", () => {
