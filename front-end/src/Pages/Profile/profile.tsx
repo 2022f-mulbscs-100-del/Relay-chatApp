@@ -1,10 +1,10 @@
 import  { useEffect, useState } from 'react';
 import { FiCamera, FiMessageCircle, FiPhone, FiMail, FiMapPin, FiCalendar, FiUsers, FiAward, FiSettings, FiBell, FiShield, FiLogOut } from 'react-icons/fi';
-import { useUserApis } from '../customHooks/useUserApis';
-import { useUser } from '../context/UserProvider';
-import { useAuthCall } from '../customHooks/useAuthCall';
+import { useUserApis } from '../../customHooks/useUserApis';
+import { useUser } from '../../context/UserProvider';
+import { useAuthCall } from '../../customHooks/useAuthCall';
 import { toast } from 'react-toastify';
-import { normalizeDate } from '../utlis/NormalizeDate';
+import { normalizeDate } from '../../utlis/NormalizeDate';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);

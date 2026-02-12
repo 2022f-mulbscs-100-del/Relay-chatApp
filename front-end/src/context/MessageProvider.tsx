@@ -24,7 +24,7 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
     const [listOfAllUsers, setListOfAllUsers] = useState<chatUser[]>([]);
     const [listOfChatUsers, setListOfChatUsers] = useState<chatUser[]>([]);
     const [ShowToastOfUnreadMessage, setShowToastOfUnreadMessage] = useState<chatUser[]>([]);
-
+  
     return (
         <MessageContext.Provider value={{ message, setMessage, listOfAllUsers, setListOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, setShowToastOfUnreadMessage }}>
             {children}

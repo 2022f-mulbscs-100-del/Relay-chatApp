@@ -11,27 +11,32 @@ import { AxiosClient } from "../../api/AxiosClient";
 import LiveSearch from "./LiveSearch";
 import { useGroup } from "../../context/GroupProvider";
 import type { Group } from "../../types/group.type";
+import useGroupApis from "../../customHooks/useGroupApis";
+
 
 
 const Chats = () => {
+
+   const url = new URL(window.location.href);
 
 
    //STATES
    const [activeUserId, setActiveUserId] = useState<string | null>(null);
    const [inputMessage, setInputMessage] = useState("");
+   const [tab, setTab] = useState<"all" | "unread" | "groups">(url.searchParams.get("tab") as "all" | "unread" | "groups" || "all");
    const toastRef = useRef(false);
 
    //HOOKSf
    const socket = useSocket();
    const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
-
+   const { getGroupMessages } = useGroupApis();
    //CONTEXT
    const { user } = useUser();
+   const { listOfgroups, setListOfgroups } = useGroup();
    const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message } = useMessage();
 
 
    //EFFECTS
-
 
    // REGISTER USER TO SOCKET.IO SERVER AND LISTEN FOR ONLINE USERS
    useEffect(() => {
@@ -72,8 +77,83 @@ const Chats = () => {
       };
    }, [socket, user?.id]);
 
+   //listen for incoming group messages
+   useEffect(() => {
+      if (!socket) return;
 
-   //to listen for incoming messages
+      const handleGroupMessage = (msg: { groupId: number; fromUserId: number; content: string; timestamp: Date }) => {
+         console.log(msg, "incoming group message"); // Log the incoming message
+         if (String(msg.fromUserId) === String(user?.id)) return;
+         setMessage((prev: MessageProps[] | null) =>
+            [...(prev || []), {
+               senderId: msg.fromUserId,
+               groupId: String(msg.groupId),
+               content: msg.content,
+               createdAt: msg.timestamp
+            }])
+
+         if (activeUserId !== String(msg.groupId)) {
+            const group = listOfgroups?.find(group => String(group.id) === String(msg.groupId));
+            if (group) {
+               toast.info(`New message in group @${group.groupName}`);
+            }
+         }
+
+         // setListOfgroups((prev: Group[]) => {
+         //    return prev.map((group: Group) => {
+         //       if (String(group.id) === String(msg.groupId)) {
+         //          const updatedGroupMessages = [...(group.groupMessages || []), {
+         //             senderId: msg.fromUserId,
+         //             groupId: String(msg.groupId),
+         //             content: msg.content,
+         //             createdAt: msg.timestamp,
+         //             isReadBy: []
+         //          }];
+
+         //          return {
+         //             ...group,
+         //             groupMessages: updatedGroupMessages
+         //          }
+         //       }
+         //       return group;
+         //    })
+         // })
+         if (activeUserId !== String(msg.groupId)) {
+
+            setListOfgroups((prev: Group[]) => {
+               return prev.map((group) => {
+                  if (String(group.id) === String(msg.groupId)) {
+                     const updateGroupMessages = [
+                        ...(group.groupMessages || []), {
+                           senderId: msg.fromUserId,
+                           groupId: String(msg.groupId),
+                           content: msg.content,
+                           createdAt: new Date().toISOString(),
+                           isReadBy: []
+                        }
+                     ]
+                     return {
+                        ...group,
+                        groupMessages: updateGroupMessages
+                     }
+                  }
+                  return group;
+               })
+            })
+         }
+
+      };
+
+      socket.on("group_message", handleGroupMessage);
+
+      return () => {
+         socket.off("group_message", handleGroupMessage);
+      };
+   }, [socket, activeUserId, setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, listOfgroups, user?.id]);
+
+
+   console.log(listOfgroups)
+   //to listen for incoming private messages
    useEffect(() => {
       if (!socket) return;
 
@@ -139,6 +219,7 @@ const Chats = () => {
       };
    }, [socket, activeUserId, setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers]);
 
+   //to fetch all users for live search in chat list
    useEffect(() => {
       if (!user?.id) return;
       const fetcheLiveSearchData = async () => {
@@ -152,6 +233,7 @@ const Chats = () => {
       fetcheLiveSearchData();
    }, [user?.id]);
 
+   //to fetch associated users for chat list and to fetch unread message chats when user logs in
    useEffect(() => {
       if (!user?.id) return;
       const getUsers = async () => {
@@ -173,21 +255,28 @@ const Chats = () => {
       getUsers();
    }, [user?.id]);
 
+   //to fetch messages for active user or group when active user or group changes
    useEffect(() => {
-      setTimeout(() => {
-         getMessagesForActiveUser();
-      }, 100);
       const getMessagesForActiveUser = async () => {
          if (activeUserId === null) return;
          try {
-            await getMessages(activeUserId);
-
+            if (tab === "groups") {
+               await getGroupMessages(activeUserId);
+            } else {
+               await getMessages(activeUserId);
+            }
          } catch (error) {
             toast.error(String(error));
          }
       }
+      setTimeout(() => {
+         getMessagesForActiveUser();
+      }, 100);
    }, [activeUserId]);
 
+
+
+   //Toast for unread messages
    useEffect(() => {
       if (ShowToastOfUnreadMessage && ShowToastOfUnreadMessage.length > 0 && !toastRef.current) {
          ShowToastOfUnreadMessage.forEach((user: chatUser) => {
@@ -197,7 +286,7 @@ const Chats = () => {
       }
    }, [ShowToastOfUnreadMessage]);
 
-   //Functions
+   //Send Private Message
    const SendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!socket || activeUserId === null) return;
@@ -233,8 +322,39 @@ const Chats = () => {
 
    }
 
-   const [tab, setTab] = useState<"all" | "unread" | "groups">("all");
-   const { groups } = useGroup();
+   //Send Group Message
+   const SendGroupMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!socket || activeUserId === null) return;
+      if (inputMessage.trim() === "") return;
+
+      socket.emit("group_message", {
+         content: inputMessage,
+         userId: String(user?.id),
+         groupId: String(activeUserId),
+         timestamp: new Date()
+      });
+      setMessage((prev: MessageProps[] | null) => [...(prev || []), {
+         groupId: String(activeUserId),
+         senderId: Number(user?.id),
+         content: inputMessage,
+         createdAt: new Date().toISOString(),
+      }]);
+
+      setInputMessage("");
+
+   }
+
+
+   useEffect(() => {
+      url.searchParams.get("tab")
+      url.searchParams.set("tab", tab);
+      window.history.replaceState(null, "", url);
+   }, [tab])
+
+
+
+
    return (
 
       <div className="min-h-screen bg-slate-50">
@@ -275,27 +395,30 @@ const Chats = () => {
 
                            <ChatList
                               key={user.id}
-                              id={user.id}
+                              id={String(user.id)}
                               username={user.username}
                               setActiveUserId={setActiveUserId}
                               activeUserId={activeUserId}
                               receivedMessages={allMessages}
                               isOnline={user.isOnline}
+                              mode="private"
                            />
                         );
                      })}
-                  </div>}
+                  </div>
+               }
                {tab === "groups" &&
                   <div className="px-3 py-4 h-[calc(100vh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
-                     {groups?.map((group: Group) => {
+                     {listOfgroups?.map((group: Group) => {
                         return (
-
                            <ChatList
                               key={group.id}
-                              id={group.id}
+                              id={String(group.id)}
                               username={group.groupName}
+                              receivedMessages={group.groupMessages}
                               setActiveUserId={setActiveUserId}
                               activeUserId={activeUserId}
+                              mode="group"
                            />
                         );
                      })}
@@ -322,17 +445,15 @@ const Chats = () => {
                      )}
                </main>
             }
-
-
             {tab === "groups" &&
                <main className="flex-1 bg-white">
                   {activeUserId ?
                      <ChatPage
                         inputMessage={inputMessage}
                         setInputMessage={setInputMessage}
-                        SendMessage={SendMessage}
-                        key={groups?.length}
-                        listOfChatUsers={listOfChatUsers}
+                        SendGroupMessage={SendGroupMessage}
+                        key={listOfgroups?.length}
+                        listOfgroups={listOfgroups}
                         activeUserId={activeUserId}
                         mode="group"
                      />

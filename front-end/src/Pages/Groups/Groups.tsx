@@ -1,25 +1,11 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { FiBell, FiBookmark, FiCalendar, FiChevronDown, FiClock, FiFilter, FiMessageCircle, FiMoreVertical, FiPlus, FiSearch, FiUsers } from "react-icons/fi";
 import CreateGroupModal from "./CreateGroupModal";
-import { useSocket } from "../../context/SocketProvider";
 import { useGroup } from "../../context/GroupProvider";
 
 const Groups = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const socket = useSocket();
-  const {groups} = useGroup();
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("group_created", (data) => {
-      console.log("Group created:", data);
-    });
-
-    return () => {
-      socket.off("group_created");
-    };
-  }, [socket]);
+  const { listOfgroups } = useGroup();
 
 
 
@@ -124,7 +110,7 @@ const Groups = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {groups.map((group) => (
+              {listOfgroups.map((group) => (
                 <div
                   key={group.groupName}
                   className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-300 transition"
@@ -152,9 +138,9 @@ const Groups = () => {
                       <FiClock className="w-3.5 h-3.5" />
                       {/* <span>{group.activity}</span> */}
                     </div>
-                    {group.groupMessages.length > 0 ? (
+                    {group.groupMessages.length <= 0 ? (
                       <span className="px-2 py-0.5 rounded-full bg-slate-900 text-white text-xs font-medium">
-                        {group.groupMessages} new
+                       new
                       </span>
                     ) : (
                       <span className="text-xs text-slate-400">No unread</span>

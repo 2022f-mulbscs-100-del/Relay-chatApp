@@ -53,6 +53,10 @@ export const initializeSocket = (server) => {
             });
         });
 
+        socket.on("join_group", async ({ groupId, userId }) => {
+            socket.join(String(groupId));
+            logger.info(`User ${userId} joined group ${groupId}`);
+        });
 
 
         socket.on("private_message", async ({ toUserId, content }) => {
@@ -95,7 +99,7 @@ export const initializeSocket = (server) => {
 
 
         socket.on("create_group", async ({ groupName, memberIds, userId }) => {
-            console.log("create_group event received with data: ---------->", { groupName, memberIds, userId });
+        
             const { user } = await AuthService.FindById(userId)
 
            
@@ -110,24 +114,22 @@ export const initializeSocket = (server) => {
            
             for (const memberId of allMembers) {
                 io.to(String(memberId)).emit("group_created", group);
-                console.log(`Emitted group_created event to user ${memberId} for group ${group.id}`);
             }
 
         })
 
-        socket.on("group_message", async ({ groupId, content, userId }) => {
-
+        socket.on("group_message", async ({ groupId, content, userId, timestamp }) => {
+            if (!socket.userId) return;
             io.to(String(groupId)).emit("group_message", {
                 groupId,
                 content,
                 fromUserId: userId,
-                timestamp: new Date(),
             })
 
             await GroupMessage.create({
                 groupId,
-                senderId: userId,
-                content
+                senderId: socket.userId,
+                content,
             })
         })
 

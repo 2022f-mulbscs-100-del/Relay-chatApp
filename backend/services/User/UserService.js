@@ -116,7 +116,7 @@ class UserService {
                 hasMessaged = user.hasMessaged;
                 if (hasMessaged.includes(toSaveUser.email)) {
                     logger.info(`User with ID ${id} already has ${toSaveUser.email} in hasMessaged list.`);
-                    throw ErrorHandler(400, "User already associated");
+                    throw ErrorHandler(200, "User already associated");
                 }
                 hasMessaged.push(toSaveUser.email);
                 user.hasMessaged = JSON.stringify(hasMessaged);
