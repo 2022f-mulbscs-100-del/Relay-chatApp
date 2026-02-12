@@ -1,5 +1,5 @@
 import { FiDownload, FiFilter, FiMessageCircle, FiMoreVertical, FiPhone, FiPlus, FiSearch, FiStar, FiUsers, FiVideo } from "react-icons/fi";
-import { useMessage } from "../context/MessageProvider";
+import { useMessage } from "../../context/MessageProvider";
 
 const Contacts = () => {
   const groups = [

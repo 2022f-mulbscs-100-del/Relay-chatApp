@@ -2,8 +2,9 @@ export interface MessageProps {
     id?: number;
     senderId?: number;
     receiverId?: number;
+    groupId?:  string;
     content?: string;
-    createdAt?: Date;
+    createdAt?: string | Date;
     isRead?: boolean;
 }
 

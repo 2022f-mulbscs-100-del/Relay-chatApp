@@ -2,13 +2,14 @@ import { FaPaperPlane } from "react-icons/fa";
 import ChatMessage from "./ChatMessage";
 import { useEffect, useMemo, useRef } from "react";
 import { useMessage } from "../../context/MessageProvider";
-
 import { useMessageApis } from "../../customHooks/useMessageApis";
 import { useUser } from "../../context/UserProvider";
 import type { Group } from "../../types/group.type";
-import { useGroup } from "../../context/GroupProvider";
+import useGroupApis from "../../customHooks/useGroupApis";
+
+
 type ChatPageProps = {
-    listOfChatUsers: {
+    listOfChatUsers?: {
         id: number;
         username: string;
         receivedMessages?: {
@@ -20,39 +21,69 @@ type ChatPageProps = {
             isRead: boolean;
         }[]
     }[];
+
     activeUserId: string | null;
-    SendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
+    SendMessage?: (e: React.FormEvent<HTMLFormElement>) => void;
+    SendGroupMessage?: (e: React.FormEvent<HTMLFormElement>) => void;
     inputMessage: string;
     setInputMessage: React.Dispatch<React.SetStateAction<string>>;
     mode?: "private" | "group";
+    listOfgroups?: Group[];
 }
 const ChatPage = ({
     listOfChatUsers,
     activeUserId,
     SendMessage,
+    SendGroupMessage,
     inputMessage,
     setInputMessage,
+    listOfgroups,
     mode = "private"
 }: ChatPageProps) => {
 
-    
-    const InputRef = useRef<HTMLInputElement | null>(null);
-    const { message, } = useMessage();
-    const { MarkMessageAsRead } = useMessageApis();
-    const { user } = useUser();
-    const {groups} = useGroup();
 
+
+    //states
+    const InputRef = useRef<HTMLInputElement | null>(null);
+    
+    //context
+    const { message } = useMessage();
+    const { user } = useUser();
+
+    //hooks
+    const { MarkMessageAsRead } = useMessageApis();
+    const { MarkGroupMessageAsRead } = useGroupApis();
+
+   
+
+    //filter user from list of chat users to show the name of the user
+    const filterUser = listOfChatUsers?.find(user => String(user.id) === activeUserId);
+
+    //filter message for specific user 
     const FilterMessage = useMemo(() => {
-        return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []
-        );
+        return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []);
     }, [message, activeUserId, user?.id]);
-    const filterUser = listOfChatUsers.find(user => String(user.id) === activeUserId);
-    const filterGroup = groups?.find((group: Group) => (String(group.id)) === activeUserId); 
- 
+
+    
+    //filter group from list of groups to show the name of the group
+    const filterGroup = listOfgroups?.find((group: Group) => (String(group.id)) === activeUserId);
+
+    //filter group messages for specific group
+    const filteredGroupMessages = useMemo(() => {
+        return message?.filter(msg => msg.groupId === activeUserId) || [];
+    }, [message, activeUserId]);
+
+    
+    //effect to mark messages as read
     useEffect(() => {
         if (!activeUserId) return;
-        MarkMessageAsRead(activeUserId);
-    }, [activeUserId,setInputMessage]);
+        if (mode === "private") {
+            MarkMessageAsRead(activeUserId);
+        }
+        if(mode === "group") {
+            MarkGroupMessageAsRead(activeUserId,user?.id);
+        }
+    }, [activeUserId, setInputMessage]);
 
 
     useEffect(() => {
@@ -90,19 +121,32 @@ const ChatPage = ({
 
                 <div className="">
 
-                    <ChatMessage
-                        messageList={(FilterMessage || []).map(msg => ({
-                            key: msg.id,
-                            fromUserId: msg.senderId || 0,
-                            content: msg.content || '',
-                            createdAt: msg.createdAt
-                        }))}
-                    />
+                    {mode === "private" ?
+                        <ChatMessage
+                            messageList={(FilterMessage || []).map(msg => ({
+                                key: msg.id,
+                                fromUserId: msg.senderId || 0,
+                                content: msg.content || '',
+                                createdAt: msg.createdAt
+                            }))}
+                        />
+
+                        :
+                        <ChatMessage
+                            messageList={((filteredGroupMessages || []) || []).map(msg => ({
+                                key: msg.id,
+                                fromUserId: Number(msg.senderId) || 0,
+                                content: msg.content || '',
+                                createdAt: msg.createdAt || ""
+                            }))}
+                        />
+                    }
+
                 </div>
 
             </div>
 
-            <form onSubmit={SendMessage} className="border-t border-slate-200 bg-white px-4 py-3">
+            <form onSubmit={mode === "private" ? SendMessage : SendGroupMessage} className="border-t border-slate-200 bg-white px-4 py-3">
                 <div className="flex items-center gap-2">
                     <input
                         ref={InputRef}

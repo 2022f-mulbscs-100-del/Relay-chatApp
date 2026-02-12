@@ -1,19 +1,22 @@
 import { useUser } from "../../context/UserProvider";
 
 type ChatListProps = {
-    id: number | string;
+    id: string;
     username: string;
     setActiveUserId: (id: string) => void;
-    activeUserId?:   string | null;
+    activeUserId?: string | null;
     receivedMessages?: {
-        id: number;
-        senderId: number;
-        receiverId: number;
+        id?: number | string;
+        senderId: string | number;
+        receiverId?: number;
+        groupId?: string;
         content: string;
-        createdAt: Date;
-        isRead: boolean;
+        createdAt: Date | string;
+        isRead?: boolean;
+        isReadBy?: (string | number)[];
     }[];
     isOnline?: boolean;
+    mode:"group" | "private" 
 };
 
 const ChatList = ({
@@ -23,18 +26,25 @@ const ChatList = ({
     receivedMessages,
     activeUserId,
     isOnline = false,
+    mode
 }: ChatListProps) => {
 
+
+   
+
+    //context
     const { user } = useUser();
 
-
-    //eslint-disable-next-line 
-    const SortingMessage = (receivedMessages: any[]) => {
+    const SortingMessage = (receivedMessages: ChatListProps["receivedMessages"]) => {
         return receivedMessages?.sort((a, b) => {
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         })
     }
 
+    const getUnreadCountForGroup = ()=>{
+        if (!receivedMessages || !user?.id) return 0;
+        return receivedMessages.filter((msg)=> !msg.isReadBy?.includes(user.id)).length;
+    }
 
 
     const getUnreadCount = () => {
@@ -46,14 +56,16 @@ const ChatList = ({
         }).length;
     };
 
-    const lastMessage = SortingMessage(receivedMessages || [])[SortingMessage(receivedMessages || []).length - 1];
+    const sortedMessages = SortingMessage(receivedMessages || []);
+    const lastMessage = sortedMessages && sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1] : undefined;
     const activeChat = activeUserId === id;
+   
     return (
         <div
             className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${activeChat ? "border-slate-300 shadow-sm" : "border-slate-200"} bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition`}
             onClick={() => {
                 setActiveUserId(String(id));
-                
+
             }}
         >
             <div className="relative w-11 h-11 shrink-0">
@@ -69,9 +81,14 @@ const ChatList = ({
                 </div>
                 <div className="flex items-center justify-between gap-2">
                     <p className="text-xs text-slate-500 truncate">{lastMessage ? lastMessage.content : "No messages yet"}</p>
-                    {getUnreadCount() > 0 &&
+                    {mode === "private" && getUnreadCount() > 0 &&
                         <span className="min-w-[18px] h-[18px] rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center">
                             {getUnreadCount()}
+                        </span>
+                    }
+                   {mode === "group" && getUnreadCountForGroup() > 0 &&
+                        <span className="min-w-[18px] h-[18px] rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center">
+                            {getUnreadCountForGroup()}
                         </span>
                     }
                 </div>

@@ -126,8 +126,10 @@ class AuthService {
 
     static async login(email, password) {
         try {
-            const { user } = await this.constructor.VerifyCredentials(email, password);
-            const tokens = await this.constructor.generateTokens(user.id);
+            await AuthService.VerifyCredentials(email, password);
+            const { user } = await AuthService.FindUserByEmail(email);
+           
+            const tokens = await AuthService.generateTokens(user.id);
             return {
                 user,
                 ...tokens
@@ -141,15 +143,15 @@ class AuthService {
 
     static async signUp(username, email, password) {
         try {
-            const userExists = await this.userExists(email);
+            const userExists = await AuthService.userExists(email);
             if (userExists) {
                 logger.warn(`User already exists with email: ${email}`);
                 throw ErrorHandler(400, "User already exists");
             }
-            const newUser = await this.constructor.createUser(username, email);
-            const hashedPassword = await this.constructor.HashingPassword(password);
-            await this.constructor.createAuthRecord(newUser.id, hashedPassword);
-            const tokens = await this.constructor.generateTokens(newUser.id);
+            const newUser = await AuthService.createUser(username, email);
+            const hashedPassword = await AuthService.HashingPassword(password);
+            await AuthService.createAuthRecord(newUser.id, hashedPassword);
+            const tokens = await AuthService.generateTokens(newUser.id);
 
 
             return {
@@ -165,8 +167,8 @@ class AuthService {
     static async updatePassword(id, newPassword) {
         try {
             const { user } = await UserService.getUserById(id);
-            await this.constructor.VerifyCredentials(user.email, newPassword);
-            const HashedPassword = await this.constructor.HashingPassword(newPassword);
+            await AuthService.VerifyCredentials(user.email, newPassword);
+            const HashedPassword = await AuthService.HashingPassword(newPassword);
             user.auth.password = HashedPassword;
             await user.save();
 

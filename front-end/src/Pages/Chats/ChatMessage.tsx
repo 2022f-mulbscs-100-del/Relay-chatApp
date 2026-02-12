@@ -3,9 +3,9 @@ import { useUser } from "../../context/UserProvider";
 import { normalizeDate } from "../../utlis/NormalizeDate";
 type ChatMessageProps = {
     messageList: {
-        fromUserId: number;
+        fromUserId: number ;
         content: string;
-        createdAt?: Date;
+        createdAt?: Date | string;
     }[];
 }
 
@@ -21,7 +21,7 @@ const ChatMessage = ({
         if (!lastMessageRef.current) return;
 
 
-        
+
         if (!hasMountedRef.current) {
             lastMessageRef.current.scrollIntoView({ behavior: "auto", block: "end" });
             hasMountedRef.current = true;

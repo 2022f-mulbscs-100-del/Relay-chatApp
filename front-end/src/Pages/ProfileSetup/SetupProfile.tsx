@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FiCamera, FiPlus, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { useUserApis } from "../customHooks/useUserApis";
+import { useUserApis } from "../../customHooks/useUserApis";
 
 const SetupProfile = () => {
   const [tags, setTags] = useState<string[]>([]);

@@ -1,10 +1,10 @@
 import { FiBell, FiCreditCard, FiKey, FiLock, FiLogOut, FiMail, FiShield, FiSmartphone, FiUser } from "react-icons/fi";
-import { useAuthCall } from "../customHooks/useAuthCall";
-import { useUser } from "../context/UserProvider";
+import { useAuthCall } from "../../customHooks/useAuthCall";
+import { useUser } from "../../context/UserProvider";
 import { toast } from "react-toastify";
-import { useUserApis } from "../customHooks/useUserApis";
+import { useUserApis } from "../../customHooks/useUserApis";
 import { useState } from "react";
-import ChangePasswordModal from "../Component/ChangePasswordModal";
+import ChangePasswordModal from "../../Component/ChangePasswordModal";
 
 const Settings = () => {
   const {logout} = useAuthCall();

@@ -5,14 +5,14 @@ import Signup from "./Pages/Auth/SignUp";
 import ForgotPassword from "./Pages/Auth/ForgotPassword";
 import MfaCode from "./Pages/Auth/MfaCode";
 import LayoutWrapper from "./LayoutWrapper";
-import Contacts from "./Pages/Contacts";
+import Contacts from "./Pages/Contacts/Contacts";
 import Chats from "./Pages/Chats/Chat";
 import Groups from "./Pages/Groups/Groups";
-import Settings from "./Pages/Settings";
-import SetupProfile from "./Pages/SetupProfile";
-import ProfilePage from "./Pages/profile";
+import Settings from "./Pages/Settings/Settings";
+import SetupProfile from "./Pages/ProfileSetup/SetupProfile";
+import ProfilePage from "./Pages/Profile/profile";
 import ProtectedRoutes from "./ProtectedRoutes";
-import NotFound from "./Pages/NotFound";
+import NotFound from "./Pages/NotFound/NotFound";
 interface ProviderWrapperProps {
     children?: React.ReactNode;
 }
