@@ -4,8 +4,8 @@ import { Message } from "../modals/Message.modal.js";
 import Group from "../modals/Group.modal.js";
 import AuthService from "../services/Auth/AuthService.js";
 import GroupMessage from "../modals/GroupMessage.modal.js";
-import { Op, Sequelize } from "sequelize";
-import { sequelize } from "../config/dbConfig.js";
+import {  Sequelize } from "sequelize";
+import User from "../modals/User.modal.js";
 
 const connectedUsers = new Map(); // Map to store userId and their corresponding socketId(s)
 
@@ -134,17 +134,24 @@ export const initializeSocket = (server) => {
         })
 
 
-        socket.on("disconnect", () => {
+          socket.on("disconnect", async () => {
             logger.info(`Socket disconnected: ${socket.id}`);
-            // for (const [userId, socketId] of Object.entries(connectedUsers)) {
-            //     if (socketId === socket.id) {
-            //         delete connectedUsers[userId];
-            //         logger.info(`User disconnected: ${userId}`);
-            //         break;
-            //     }
-            // }
+            const userId = socket.userId;
+            if (!userId || !connectedUsers.has(userId)) return;
+
+            const userSockets = connectedUsers.get(userId);
+            userSockets.delete(socket.id);
+
+            if (userSockets.size === 0) {
+                connectedUsers.delete(userId);
+                await User.update({ lastSeen: new Date().toISOString() }, { where: { id: userId } });
+                socket.broadcast.emit("user_offline", userId);
+                socket.broadcast.emit("user_last_seen", { userId, lastSeen: new Date().toISOString() });
+            }
         });
     });
+
+   
 
     return io;
 };

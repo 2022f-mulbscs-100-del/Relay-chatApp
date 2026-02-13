@@ -19,6 +19,7 @@ export interface chatUser {
    location?: string;
    tags?: string[];
    isOnline?: boolean;
+   lastSeen?: string | Date;
    sentMessages?: {
       id: number;
       senderId: number;

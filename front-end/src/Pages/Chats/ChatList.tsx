@@ -59,13 +59,14 @@ const ChatList = ({
     const sortedMessages = SortingMessage(receivedMessages || []);
     const lastMessage = sortedMessages && sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1] : undefined;
     const activeChat = activeUserId === id;
+
+    
    
     return (
         <div
             className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${activeChat ? "border-slate-300 shadow-sm" : "border-slate-200"} bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition`}
             onClick={() => {
                 setActiveUserId(String(id));
-
             }}
         >
             <div className="relative w-11 h-11 shrink-0">

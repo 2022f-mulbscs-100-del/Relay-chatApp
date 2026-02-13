@@ -38,8 +38,7 @@ class GroupService {
 
     static async MarkGroupMessageAsRead(groupId, userId) {
         try {
-            console.log("Marking group messages as read for user:", userId, "in group:", groupId);
-            // Ensure userId is a string for consistent comparison
+          
             const userIdStr = String(userId);
             
             const groupMessages = await GroupMessage.findAll({
@@ -48,24 +47,20 @@ class GroupService {
                 }
             });
             
-            console.log("Total group messages found:", groupMessages.length);
             let markedCount = 0;
             
             for (const message of groupMessages) {
-              console.log("Processing message:", message.id, "Current isReadBy:", message.isReadBy);
                 const isReadBy = Array.isArray(message.isReadBy) ? message.isReadBy : JSON.parse(message.isReadBy || "[]");
                 
                 
                 if (!isReadBy.includes(userIdStr)) {
                     isReadBy.push(userIdStr);
                     message.isReadBy = JSON.stringify(isReadBy);
-                    console.log("Marking as read - Message:", message.id, "New isReadBy:", message.isReadBy);
                     await message.save();
                     markedCount++;
                 }
             }
             
-            console.log(`Marked ${markedCount} messages as read for user ${userIdStr}`);
             return { message: `${markedCount} group messages marked as read` };
         }
         catch (error) {

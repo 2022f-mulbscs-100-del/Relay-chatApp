@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { chatUser, MessageProps } from "../types/message.types";
 
 
@@ -11,6 +11,10 @@ interface MessageContextType {
     setListOfChatUsers: React.Dispatch<React.SetStateAction<chatUser[]>>;
     ShowToastOfUnreadMessage: chatUser[];
     setShowToastOfUnreadMessage: React.Dispatch<React.SetStateAction<chatUser[]>>;
+    activeUserId: string | null;
+    setActiveUserId: React.Dispatch<React.SetStateAction<string | null>>;
+    onlineUserIds: number[];
+    setOnlineUserIds: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 
@@ -19,18 +23,27 @@ const MessageContext = createContext<MessageContextType | null>(null);
 
 
 export const MessageProvider = ({ children }: { children: React.ReactNode }) => {
-    
+
     const [message, setMessage] = useState<MessageProps[] | null>([]);
     const [listOfAllUsers, setListOfAllUsers] = useState<chatUser[]>([]);
     const [listOfChatUsers, setListOfChatUsers] = useState<chatUser[]>([]);
     const [ShowToastOfUnreadMessage, setShowToastOfUnreadMessage] = useState<chatUser[]>([]);
-  
+    const [activeUserId, setActiveUserId] = useState<string | null>(null);
+    const [onlineUserIds, setOnlineUserIds] = useState<number[]>([]);
+
+useEffect(() => {
+
+
+    
+}, [setListOfAllUsers]);
+
     return (
-        <MessageContext.Provider value={{ message, setMessage, listOfAllUsers, setListOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, setShowToastOfUnreadMessage }}>
+        <MessageContext.Provider value={{ message, setMessage, listOfAllUsers, setListOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, setShowToastOfUnreadMessage, activeUserId, setActiveUserId, onlineUserIds, setOnlineUserIds }}>
             {children}
         </MessageContext.Provider>
     );
 };
+
 
 
 //eslint-disable-next-line 

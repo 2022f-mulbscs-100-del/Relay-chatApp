@@ -1,26 +1,20 @@
 import { FaPaperPlane } from "react-icons/fa";
 import ChatMessage from "./ChatMessage";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMessage } from "../../context/MessageProvider";
 import { useMessageApis } from "../../customHooks/useMessageApis";
 import { useUser } from "../../context/UserProvider";
 import type { Group } from "../../types/group.type";
 import useGroupApis from "../../customHooks/useGroupApis";
+import ChatProfileModal from "./ChatProfileModal";
+import type { chatUser } from "../../types/message.types";
+import { FiChevronLeft, FiInfo } from "react-icons/fi";
+import { normalizeDate } from "../../utlis/NormalizeDate";
+import { useSocket } from "../../context/SocketProvider";
 
 
 type ChatPageProps = {
-    listOfChatUsers?: {
-        id: number;
-        username: string;
-        receivedMessages?: {
-            id: number;
-            senderId: number;
-            receiverId: number;
-            content: string;
-            createdAt: Date;
-            isRead: boolean;
-        }[]
-    }[];
+    listOfChatUsers?: chatUser[];
 
     activeUserId: string | null;
     SendMessage?: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -29,6 +23,7 @@ type ChatPageProps = {
     setInputMessage: React.Dispatch<React.SetStateAction<string>>;
     mode?: "private" | "group";
     listOfgroups?: Group[];
+    onBack?: () => void;
 }
 const ChatPage = ({
     listOfChatUsers,
@@ -38,33 +33,58 @@ const ChatPage = ({
     inputMessage,
     setInputMessage,
     listOfgroups,
-    mode = "private"
+    mode = "private",
+    onBack
 }: ChatPageProps) => {
+
 
 
 
     //states
     const InputRef = useRef<HTMLInputElement | null>(null);
-    
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
     //context
-    const { message } = useMessage();
+    const { message, onlineUserIds, setListOfChatUsers } = useMessage();
     const { user } = useUser();
+    const socket = useSocket();
 
     //hooks
     const { MarkMessageAsRead } = useMessageApis();
     const { MarkGroupMessageAsRead } = useGroupApis();
 
-   
 
     //filter user from list of chat users to show the name of the user
-    const filterUser = listOfChatUsers?.find(user => String(user.id) === activeUserId);
+    const foundUser = listOfChatUsers?.find(user => String(user.id) === activeUserId);
+    const filterUser = foundUser ? {
+        ...foundUser,
+        isOnline: onlineUserIds.includes(Number(foundUser.id))
+    } : undefined;
+
+
+
+    useEffect(() => {
+        if (!socket || !user?.id) return;
+        socket.on("user_last_seen", ({ userId, lastSeen }) => {
+            setListOfChatUsers((prev) => 
+                prev.map((user) => 
+                    String(user.id) === String(userId) 
+                        ? { ...user, lastSeen }
+                        : user
+                )
+            );
+        });
+        return () => {
+            socket.off("user_last_seen");
+        };
+    }, [socket, user?.id, setListOfChatUsers]);
 
     //filter message for specific user 
     const FilterMessage = useMemo(() => {
         return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []);
     }, [message, activeUserId, user?.id]);
 
-    
+
     //filter group from list of groups to show the name of the group
     const filterGroup = listOfgroups?.find((group: Group) => (String(group.id)) === activeUserId);
 
@@ -73,15 +93,15 @@ const ChatPage = ({
         return message?.filter(msg => msg.groupId === activeUserId) || [];
     }, [message, activeUserId]);
 
-    
+
     //effect to mark messages as read
     useEffect(() => {
         if (!activeUserId) return;
         if (mode === "private") {
             MarkMessageAsRead(activeUserId);
         }
-        if(mode === "group") {
-            MarkGroupMessageAsRead(activeUserId,user?.id);
+        if (mode === "group") {
+            MarkGroupMessageAsRead(activeUserId, user?.id);
         }
     }, [activeUserId, setInputMessage]);
 
@@ -94,30 +114,62 @@ const ChatPage = ({
 
     return (
         <div className="flex flex-col w-full h-full">
-            <div className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-3">
-                <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10">
-                        <img className="w-full h-full rounded-full object-cover" src="/153608270.jpeg" alt="" />
-                        {/* <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" /> */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-3 sm:px-4">
+                <div className="flex min-w-0 items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 md:hidden"
+                        aria-label="Back to chats"
+                    >
+                        <FiChevronLeft className="h-4 w-4" />
+                    </button>
+                    <div className="relative h-11 w-11 shrink-0 rounded-full ring-2 ring-slate-200">
+                        <img className="h-full w-full rounded-full object-cover" src={filterUser?.profilePic || "/153608270.jpeg"} alt={filterUser?.username || "chat user"} />
+                        {mode === "private" && (
+                            <span
+                                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${filterUser?.isOnline === true ? "bg-emerald-500" : "bg-slate-400"}`}
+                            />
+                        )}
                     </div>
-                    <div>
-                        <p className="text-sm font-semibold text-slate-900">
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">
                             {mode === "private" ? (filterUser ? filterUser.username : "Unknown User") : (filterGroup ? filterGroup?.groupName : "Unknown Group")}
                         </p>
-                        <p className="text-xs text-slate-500">Active now</p>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5">
+                                {mode === "private" ? (filterUser?.isOnline === true ? "Online" :
+                                    filterUser?.lastSeen ? normalizeDate((filterUser?.lastSeen || "")).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : "Offline"
+                                ) : "Group chat"}
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button className="px-3 py-1.5 rounded-md border border-slate-200 text-xs text-slate-600 hover:bg-slate-50 transition">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                    <button
+                        type="button"
+                        className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
+                        onClick={() => setIsProfileModalOpen(true)}
+                        disabled={mode !== "private" || !filterUser}
+                        aria-label="View profile details"
+                    >
+                        <FiInfo className="h-4 w-4" />
+                    </button>
+                    <button
+                        type="button"
+                        className="hidden rounded-md bg-slate-900 px-3 py-1.5 text-xs text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex"
+                        onClick={() => setIsProfileModalOpen(true)}
+                        disabled={mode !== "private" || !filterUser}
+                    >
                         View profile
                     </button>
-                    <button className="px-3 py-1.5 rounded-md bg-slate-900 text-white text-xs hover:bg-slate-800 transition">
+                    <button className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 md:inline-flex">
                         Mute
                     </button>
                 </div>
             </div>
 
-            <div className="flex-1  overflow-auto customScrollbar bg-slate-50 px-4 py-4">
+            <div className="flex-1 overflow-auto customScrollbar bg-slate-50 px-3 py-4 sm:px-4">
 
                 <div className="">
 
@@ -146,7 +198,7 @@ const ChatPage = ({
 
             </div>
 
-            <form onSubmit={mode === "private" ? SendMessage : SendGroupMessage} className="border-t border-slate-200 bg-white px-4 py-3">
+            <form onSubmit={mode === "private" ? SendMessage : SendGroupMessage} className="border-t border-slate-200 bg-white px-3 py-3 sm:px-4">
                 <div className="flex items-center gap-2">
                     <input
                         ref={InputRef}
@@ -163,6 +215,13 @@ const ChatPage = ({
                     </button>
                 </div>
             </form>
+
+            <ChatProfileModal
+                open={isProfileModalOpen}
+                onClose={() => setIsProfileModalOpen(false)}
+                user={filterUser}
+                totalMessages={FilterMessage.length}
+            />
         </div>
     )
 }
@@ -180,4 +239,3 @@ export default ChatPage;
 //we just using the privatemessage as an route to send message to the specific 
 //user the private message event is an route in which all the users/rooms
 //exist and we send message to specific user by specifying their id using the private room event (the route)
-

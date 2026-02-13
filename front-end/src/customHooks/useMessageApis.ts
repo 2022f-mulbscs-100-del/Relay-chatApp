@@ -8,7 +8,23 @@ export const useMessageApis = () => {
     const { setListOfAllUsers, setMessage, setShowToastOfUnreadMessage, setListOfChatUsers } = useMessage();
     const [loading, setLoading] = useState(false);
     const { user } = useUser();
+  
 
+    const normalizeUserId = (id: unknown) => {
+        const numericId = Number(id);
+        return Number.isNaN(numericId) ? 0 : numericId;
+    };
+
+    const dedupeUsersById = (users: chatUser[]) => {
+        const map = new Map<number, chatUser>();
+        users.forEach((user) => {
+            const normalizedId = normalizeUserId(user.id);
+            if (normalizedId !== null) {
+                map.set(normalizedId, { ...user, id: normalizedId });
+            }
+        });
+        return Array.from(map.values());
+    };
 
     // FETCH ALL USERS FOR LIVE SEARCH API CALL
     const fetchAllUsersForLiveSearch = async () => {
@@ -29,8 +45,18 @@ export const useMessageApis = () => {
     const getAsscociatedUsers = async () => {
         setLoading(true);
         AxiosClient.get("/users/getAssociatedUsers").then((response) => {
-            setListOfChatUsers(response.data.AcssociatedUsers.hasMessaged);
+            setLoading(false);
+            const updatedListOfChatUsers = response.data.AcssociatedUsers.hasMessaged.map((user: chatUser) => {
+                const normalizedId = normalizeUserId(user.id);
+                return {
+                    ...user,
+                    id: normalizedId,
+                };
+            });
+            setListOfChatUsers(dedupeUsersById(updatedListOfChatUsers));
+
         }).catch(() => {
+            setLoading(false);
             throw new Error("Failed to fetch users");
         });
     }
@@ -89,14 +115,16 @@ export const useMessageApis = () => {
             setListOfChatUsers((prev) => {
                 const unreadChats = response.data.unreadChats || [];
                 //eslint-disable-next-line
-                const normalizedUsers = unreadChats.map((user: any) => ({
-                    ...user,
-                    receivedMessages: user.sentMessages || user.receivedMessages || []
-                }));
-                const newUsers = normalizedUsers.filter(
-                    (unreadUser: chatUser) => !prev.some((existingUser) => existingUser.id === unreadUser.id)
-                );
-                return [...prev, ...newUsers];
+                const normalizedUsers = unreadChats.map((user: any) => {
+                    const normalizedId = normalizeUserId(user.id);
+                    return {
+                        ...user,
+                        id: normalizedId,
+                        receivedMessages: user.sentMessages || user.receivedMessages || []
+                    } as chatUser;
+                });
+                const merged = [...prev, ...normalizedUsers];
+                return dedupeUsersById(merged);
             });
 
         } catch {
