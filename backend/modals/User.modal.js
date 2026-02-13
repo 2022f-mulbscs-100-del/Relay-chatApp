@@ -44,6 +44,10 @@ const User  = sequelize.define("users", {
         type: DataTypes.JSON,
         defaultValue: false,
     },
+    lastSeen: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 }, {
     timestamps: true,
 });
