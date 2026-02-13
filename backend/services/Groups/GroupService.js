@@ -5,13 +5,13 @@ import GroupMessage from "../../modals/GroupMessage.modal.js";
 class GroupService {
 
     static async FindGroupByUser(id) {
-
+        const numericId = Number(id);
         const groups = await Group.findAll({
             where: Sequelize.where(
                 Sequelize.fn(
                     'JSON_CONTAINS',
                     Sequelize.col('memberIds'),
-                    JSON.stringify(id)
+                    JSON.stringify(numericId)
                 ),
                 1
             ),
@@ -22,6 +22,8 @@ class GroupService {
             order: [[{ model: GroupMessage, as: 'groupMessages' }, 'createdAt', 'ASC']]
         }
         );
+        console.log(`FindGroupByUser - found ${groups.length} groups`);
+        groups.forEach(g => console.log(`Group ${g.id} memberIds:`, g.memberIds));
         return { groups };
     }
 
@@ -36,11 +38,21 @@ class GroupService {
         return { groupMessage };
     }
 
+    static async GetGroupByGroupId(groupId) {
+        try {
+            const group = await Group.findOne({ where: { id: groupId } })
+            return { group }
+            
+        } catch (error) {
+            throw error
+        }
+    }
+
     static async MarkGroupMessageAsRead(groupId, userId) {
         try {
           
             const userIdStr = String(userId);
-            
+
             const groupMessages = await GroupMessage.findAll({
                 where: {
                     groupId,
@@ -48,11 +60,11 @@ class GroupService {
             });
             
             let markedCount = 0;
-            
+
             for (const message of groupMessages) {
                 const isReadBy = Array.isArray(message.isReadBy) ? message.isReadBy : JSON.parse(message.isReadBy || "[]");
-                
-                
+
+
                 if (!isReadBy.includes(userIdStr)) {
                     isReadBy.push(userIdStr);
                     message.isReadBy = JSON.stringify(isReadBy);

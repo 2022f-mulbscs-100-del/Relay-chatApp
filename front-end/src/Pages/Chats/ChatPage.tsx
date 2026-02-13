@@ -8,14 +8,16 @@ import type { Group } from "../../types/group.type";
 import useGroupApis from "../../customHooks/useGroupApis";
 import ChatProfileModal from "./ChatProfileModal";
 import type { chatUser } from "../../types/message.types";
-import { FiChevronLeft, FiInfo } from "react-icons/fi";
+import { FiChevronLeft, FiInfo} from "react-icons/fi";
 import { normalizeDate } from "../../utlis/NormalizeDate";
 import { useSocket } from "../../context/SocketProvider";
+import AddMemberModal from "./AddMemberModal";
+import GroupMemberModal from "./GroupMemberModal";
+import LeaveGroupModal from "./LeaveGroupModal";
 
 
 type ChatPageProps = {
     listOfChatUsers?: chatUser[];
-
     activeUserId: string | null;
     SendMessage?: (e: React.FormEvent<HTMLFormElement>) => void;
     SendGroupMessage?: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -43,9 +45,11 @@ const ChatPage = ({
     //states
     const InputRef = useRef<HTMLInputElement | null>(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
+    const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+    const [isGroupMemberModalOpen, setIsGroupMemberModalOpen] = useState(false);
+    const [isLeaveGroupModalOpen, setIsLeaveGroupModalOpen] = useState(false);
     //context
-    const { message, onlineUserIds, setListOfChatUsers } = useMessage();
+    const { message, onlineUserIds, setListOfChatUsers,  } = useMessage();
     const { user } = useUser();
     const socket = useSocket();
 
@@ -92,6 +96,8 @@ const ChatPage = ({
     const filteredGroupMessages = useMemo(() => {
         return message?.filter(msg => msg.groupId === activeUserId) || [];
     }, [message, activeUserId]);
+
+
 
 
     //effect to mark messages as read
@@ -146,26 +152,62 @@ const ChatPage = ({
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                    <button
-                        type="button"
-                        className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
-                        onClick={() => setIsProfileModalOpen(true)}
-                        disabled={mode !== "private" || !filterUser}
-                        aria-label="View profile details"
-                    >
-                        <FiInfo className="h-4 w-4" />
-                    </button>
-                    <button
-                        type="button"
-                        className="hidden rounded-md bg-slate-900 px-3 py-1.5 text-xs text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex"
-                        onClick={() => setIsProfileModalOpen(true)}
-                        disabled={mode !== "private" || !filterUser}
-                    >
-                        View profile
-                    </button>
-                    <button className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 md:inline-flex">
-                        Mute
-                    </button>
+                    {mode === "private" ? (
+                        <>
+                            <button
+                                type="button"
+                                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
+                                onClick={() => setIsProfileModalOpen(true)}
+                                disabled={!filterUser}
+                                aria-label="View profile details"
+                            >
+                                <FiInfo className="h-4 w-4" />
+                            </button>
+                            <button
+                                type="button"
+                                className="hidden rounded-md bg-slate-900 px-3 py-1.5 text-xs text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex"
+                                onClick={() => setIsProfileModalOpen(true)}
+                                disabled={!filterUser}
+                            >
+                                View profile
+                            </button>
+                            <button className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 md:inline-flex">
+                                Mute
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                type="button"
+                                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsAddMemberModalOpen(true)}}
+                            >
+                                Add member
+                            </button>
+                            <button
+                                type="button"
+                                className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
+                            onClick={(e)=>{
+                                e.stopPropagation();
+                                setIsGroupMemberModalOpen(true)
+                            }}
+                            >
+                                Members ({filterGroup?.memberIds?.length || 0})
+                            </button>
+                            <button
+                                type="button"
+                                className="rounded-md bg-rose-600 px-3 py-1.5 text-xs text-white transition hover:bg-rose-700"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsLeaveGroupModalOpen(true);
+                                }}
+                            >
+                                Leave group
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -222,6 +264,27 @@ const ChatPage = ({
                 user={filterUser}
                 totalMessages={FilterMessage.length}
             />
+
+            {mode === "group" && isAddMemberModalOpen && (
+              <AddMemberModal
+                setIsAddMemberModalOpen={setIsAddMemberModalOpen}
+                filterGroup={filterGroup}
+              />
+            )}
+
+              {mode === "group" && isGroupMemberModalOpen && (
+              <GroupMemberModal
+                setIsGroupMemberModalOpen={setIsGroupMemberModalOpen}
+                filterGroup={filterGroup}
+              />
+            )}
+
+            {mode === "group" && isLeaveGroupModalOpen && (
+                <LeaveGroupModal
+                    setIsLeaveGroupModalOpen={setIsLeaveGroupModalOpen}
+                    filterGroup={filterGroup}
+                />
+            )}
         </div>
     )
 }
