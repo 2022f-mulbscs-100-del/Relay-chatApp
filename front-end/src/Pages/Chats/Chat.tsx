@@ -98,7 +98,7 @@ const Chats = () => {
       return () => {
          setActiveUserId(null);
       }
-   }, [])
+   }, [tab])
 
    //Toast for unread messages
    useEffect(() => {

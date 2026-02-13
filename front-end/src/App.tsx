@@ -12,12 +12,13 @@ import { useGroup } from "./context/GroupProvider"
 import type { Group } from "./types/group.type"
 
 
+
 function App() {
   const socket = useSocket();
   const { getGroupByUser } = useGroupApis();
 
   //context
-  const { setListOfChatUsers, listOfAllUsers, activeUserId, setMessage, listOfChatUsers, onlineUserIds, setOnlineUserIds } = useMessage();
+  const { setListOfChatUsers, listOfAllUsers, activeUserId, setMessage, listOfChatUsers, setOnlineUserIds } = useMessage();
   const { user } = useUser();
   const { listOfgroups, setListOfgroups } = useGroup();
 
@@ -48,6 +49,7 @@ function App() {
       });
     }
 
+
     if (socket.connected) {
       handleConnect();
     }
@@ -66,17 +68,6 @@ function App() {
   }, [socket, user?.id, setOnlineUserIds]);
 
 
-  // useEffect(() => {
-  //   setListOfChatUsers((prev) => {
-  //     return prev.map((user: chatUser) => {
-  //       if (onlineUserIds.includes(user.id)) {
-  //         return { ...user, isOnline: true };
-  //       } else {
-  //         return { ...user, isOnline: false };
-  //       }
-  //     });
-  //   });
-  // }, [onlineUserIds]);
 
 
   useEffect(() => {
@@ -86,8 +77,19 @@ function App() {
       getGroupByUser();
     });
 
+    socket.on("group_updated", ({ groupId, newMemberIds }) => {
+      if (newMemberIds.includes(Number(user?.id))) {
+        console.log("Received group_updated event for group:", newMemberIds, user?.id, groupId);
+        socket.emit("join_group", { groupId, userId: user?.id });
+        setTimeout(() => {
+          getGroupByUser();
+        }, 1000);
+      }
+    });
+
     return () => {
       socket.off("group_created");
+      socket.off("group_updated");
     };
   }, [socket]);
 
