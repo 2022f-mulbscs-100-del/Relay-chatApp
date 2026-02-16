@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { FiUsers, FiX } from "react-icons/fi";
 import type { Group } from "../../types/group.type";
 import { useMessage } from "../../context/MessageProvider";
+import { useUser } from "../../context/UserProvider";
 
 interface GroupMemberModalProps {
     setIsGroupMemberModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -36,6 +37,13 @@ const GroupMemberModal = ({ setIsGroupMemberModalOpen, filterGroup }: GroupMembe
 
     const memberIds = filterGroup?.memberIds || [];
     const filteredMembers = listOfAllUsers?.filter((user) => memberIds.includes((user.id))) || [];
+
+    const {user} = useUser();
+    filteredMembers.unshift({
+        id: 0,
+        username: user?.username || "Unknown User",
+        email: user?.email || "",
+    });
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-3">
@@ -82,7 +90,7 @@ const GroupMemberModal = ({ setIsGroupMemberModalOpen, filterGroup }: GroupMembe
                                             {member.email && <p className="truncate text-xs text-slate-500">{member.email}</p>}
                                         </div>
                                     </div>
-                                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">Member</span>
+                                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">{member.email === user?.email ? "You" : "Member"}</span>
                                 </div>
                             ))
                         )}

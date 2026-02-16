@@ -19,7 +19,6 @@ const LeaveGroupModal = ({ setIsLeaveGroupModalOpen, filterGroup }: LeaveGroupMo
     const { setActiveUserId } = useMessage();
 
 
-console.log("filterGroup in LeaveGroupModal", filterGroup);
     const handleLeaveGroup = () => {
         if (!socket || !user) return;
         socket.emit("leave_group", { groupId: filterGroup?.id, userId: user?.id });
