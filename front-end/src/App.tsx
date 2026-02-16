@@ -79,7 +79,6 @@ function App() {
 
     socket.on("group_updated", ({ groupId, newMemberIds }) => {
       if (newMemberIds.includes(Number(user?.id))) {
-        console.log("Received group_updated event for group:", newMemberIds, user?.id, groupId);
         socket.emit("join_group", { groupId, userId: user?.id });
         setTimeout(() => {
           getGroupByUser();

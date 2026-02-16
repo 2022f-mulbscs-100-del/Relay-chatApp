@@ -8,7 +8,7 @@ import type { Group } from "../../types/group.type";
 import useGroupApis from "../../customHooks/useGroupApis";
 import ChatProfileModal from "./ChatProfileModal";
 import type { chatUser } from "../../types/message.types";
-import { FiChevronLeft, FiInfo} from "react-icons/fi";
+import { FiChevronLeft, FiInfo } from "react-icons/fi";
 import { normalizeDate } from "../../utlis/NormalizeDate";
 import { useSocket } from "../../context/SocketProvider";
 import AddMemberModal from "./AddMemberModal";
@@ -49,7 +49,7 @@ const ChatPage = ({
     const [isGroupMemberModalOpen, setIsGroupMemberModalOpen] = useState(false);
     const [isLeaveGroupModalOpen, setIsLeaveGroupModalOpen] = useState(false);
     //context
-    const { message, onlineUserIds, setListOfChatUsers,  } = useMessage();
+    const { message, onlineUserIds, setListOfChatUsers, } = useMessage();
     const { user } = useUser();
     const socket = useSocket();
 
@@ -70,9 +70,9 @@ const ChatPage = ({
     useEffect(() => {
         if (!socket || !user?.id) return;
         socket.on("user_last_seen", ({ userId, lastSeen }) => {
-            setListOfChatUsers((prev) => 
-                prev.map((user) => 
-                    String(user.id) === String(userId) 
+            setListOfChatUsers((prev) =>
+                prev.map((user) =>
+                    String(user.id) === String(userId)
                         ? { ...user, lastSeen }
                         : user
                 )
@@ -83,6 +83,7 @@ const ChatPage = ({
         };
     }, [socket, user?.id, setListOfChatUsers]);
 
+    
     //filter message for specific user 
     const FilterMessage = useMemo(() => {
         return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []);
@@ -182,17 +183,18 @@ const ChatPage = ({
                                 className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setIsAddMemberModalOpen(true)}}
+                                    setIsAddMemberModalOpen(true)
+                                }}
                             >
                                 Add member
                             </button>
                             <button
                                 type="button"
                                 className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
-                            onClick={(e)=>{
-                                e.stopPropagation();
-                                setIsGroupMemberModalOpen(true)
-                            }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsGroupMemberModalOpen(true)
+                                }}
                             >
                                 Members ({filterGroup?.memberIds?.length || 0})
                             </button>
@@ -266,17 +268,17 @@ const ChatPage = ({
             />
 
             {mode === "group" && isAddMemberModalOpen && (
-              <AddMemberModal
-                setIsAddMemberModalOpen={setIsAddMemberModalOpen}
-                filterGroup={filterGroup}
-              />
+                <AddMemberModal
+                    setIsAddMemberModalOpen={setIsAddMemberModalOpen}
+                    filterGroup={filterGroup}
+                />
             )}
 
-              {mode === "group" && isGroupMemberModalOpen && (
-              <GroupMemberModal
-                setIsGroupMemberModalOpen={setIsGroupMemberModalOpen}
-                filterGroup={filterGroup}
-              />
+            {mode === "group" && isGroupMemberModalOpen && (
+                <GroupMemberModal
+                    setIsGroupMemberModalOpen={setIsGroupMemberModalOpen}
+                    filterGroup={filterGroup}
+                />
             )}
 
             {mode === "group" && isLeaveGroupModalOpen && (

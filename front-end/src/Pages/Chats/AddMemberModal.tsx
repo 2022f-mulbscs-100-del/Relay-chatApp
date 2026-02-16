@@ -17,11 +17,14 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
     const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
     const { listOfAllUsers } = useMessage();
-    const memberIds = filterGroup?.memberIds || [];
     const socket = useSocket();
+    const memberIds = useMemo(() => {
+        return filterGroup?.memberIds || [];
+    }, [filterGroup]);
+
 
     const availableUsers = useMemo(() => {
-        return listOfAllUsers.filter((user) => !memberIds.includes(String(user.id)));
+        return listOfAllUsers.filter((user) => !memberIds.includes((user.id)));
     }, [listOfAllUsers, memberIds]);
 
     useEffect(() => {
@@ -38,6 +41,8 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
         };
     }, [setIsAddMemberModalOpen]);
 
+
+
     const filteredSearch = availableUsers.filter((user) => {
         const searchTerm = searchInput.toLowerCase();
         const userName = user.username.toLowerCase();
@@ -50,11 +55,9 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
 
     const handleAddMembers = () => {
         if (!socket || !user) return;
-        console.log(selectedMemberIds);
         socket.emit("add_member", { groupId: filterGroup?.id, newMemberIds: selectedMemberIds });
         setIsAddMemberModalOpen(false);
         for (const memberId of selectedMemberIds) {
-            console.log("Emitting join_group for memberId:", memberId);
             socket.emit("join_group", { groupId: filterGroup?.id, userId: memberId });
             const addedUser = listOfAllUsers.find((user) => String(user.id) === memberId);
             if (addedUser) {

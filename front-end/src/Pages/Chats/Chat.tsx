@@ -22,7 +22,7 @@ const Chats = () => {
 
    //STATES
    const [inputMessage, setInputMessage] = useState("");
-   const [tab, setTab] = useState<"all" | "unread" | "groups">(url.searchParams.get("tab") as "all" | "unread" | "groups" || "all");
+   const [tab, setTab] = useState<"chats" | "unread" | "groups">(url.searchParams.get("tab") as "chats" | "unread" | "groups" || "chats");
    const toastRef = useRef(false);
 
    //HOOKSf
@@ -36,10 +36,10 @@ const Chats = () => {
    const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message, activeUserId, setActiveUserId } = useMessage();
    const { onlineUserIds } = useMessage();
 
-   
+
    //EFFECTS
 
-   //to fetch all users for live search in chat list
+   //to fetch chats users for live search in chat list
    useEffect(() => {
       if (!user?.id) return;
       const fetcheLiveSearchData = async () => {
@@ -199,7 +199,7 @@ const Chats = () => {
                         <h1 className="text-xl font-semibold text-slate-900">Chats</h1>
                         <p className="text-xs text-slate-500">Keep up with your team</p>
                      </div>
-                     <span className="text-xs text-slate-400">{listOfChatUsers.length} total</span>
+                     <span className="text-xs text-slate-400">{tab === "chats" ? listOfChatUsers.length : listOfgroups.length} total</span>
                   </div>
 
                   <LiveSearch
@@ -210,13 +210,13 @@ const Chats = () => {
                   />
 
                   <div className="mt-3 flex items-center gap-2 text-xs">
-                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "all" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("all")}>All</button>
-                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "unread" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("unread")}>Unread</button>
+                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "chats" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("chats")}>Chats</button>
+                     {/* <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "unread" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("unread")}>Unread</button> */}
                      <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "groups" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("groups")}>Groups</button>
                   </div>
                </div>
 
-               {tab === "all" &&
+               {tab === "chats" &&
                   <div className="px-3 py-4 h-[calc(100dvh-190px)] md:h-[calc(100dvh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
                      {usersWithOnlineStatus.map((user: chatUser) => {
                         const allMessages = [
@@ -258,7 +258,7 @@ const Chats = () => {
                   </div>}
 
             </div>
-            {tab === "all" &&
+            {tab === "chats" &&
                <main className={`${activeUserId ? "flex" : "hidden md:flex"} flex-1 min-w-0 bg-white`}>
                   {activeUserId ?
                      <ChatPage

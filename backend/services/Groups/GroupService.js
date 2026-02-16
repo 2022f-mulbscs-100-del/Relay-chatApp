@@ -22,8 +22,6 @@ class GroupService {
             order: [[{ model: GroupMessage, as: 'groupMessages' }, 'createdAt', 'ASC']]
         }
         );
-        console.log(`FindGroupByUser - found ${groups.length} groups`);
-        groups.forEach(g => console.log(`Group ${g.id} memberIds:`, g.memberIds));
         return { groups };
     }
 
