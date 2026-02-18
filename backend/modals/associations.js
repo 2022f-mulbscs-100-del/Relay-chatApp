@@ -1,5 +1,6 @@
 import Auth from "./Auth.modal.js";
 import Group from "./Group.modal.js";
+import GroupMember from "./GroupMember.modal.js";
 import GroupMessage from "./GroupMessage.modal.js";
 import { Message } from "./Message.modal.js";
 import User from "./User.modal.js";
@@ -25,7 +26,11 @@ Group.hasMany(GroupMessage, { foreignKey: "groupId", as: "groupMessages" });
 //group can have many group messages
 
 
+Group.hasMany(GroupMember, { foreignKey: "groupId", as: "members" });
+//group can have many members
 
+User.hasMany(GroupMember, { foreignKey: "userId", as: "groupMemberships" });
+//user can be member of many groups
 
 
 
@@ -42,3 +47,9 @@ Message.belongsTo(User, { foreignKey: "senderId", as: "sender" });
 
 Message.belongsTo(User, { foreignKey: "receiverId", as: "receiver" });
 //message belongs to a user (the receiver)
+
+GroupMember.belongsTo(User, { foreignKey: "userId", as: "user" });
+//group member belongs to a user
+
+GroupMember.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+//group member belongs to a group

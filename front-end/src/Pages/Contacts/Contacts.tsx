@@ -10,16 +10,7 @@ const Contacts = () => {
     { label: "Blocked", count: 5 },
   ];
 
-  const contacts = [
-    { name: "Sarah Liu", title: "Product Manager", status: "Online", tag: "Work", lastSeen: "Active now", favorite: true },
-    { name: "Mike Harper", title: "UX Designer", status: "Online", tag: "Work", lastSeen: "Active now" },
-    { name: "Nora Vega", title: "QA Lead", status: "Away", tag: "Work", lastSeen: "5 min ago" },
-    { name: "Aiden Park", title: "Software Engineer", status: "Offline", tag: "Work", lastSeen: "1 hr ago" },
-    { name: "Julia Carter", title: "Marketing", status: "Away", tag: "Family", lastSeen: "12 min ago" },
-    { name: "Omar Farouk", title: "Finance", status: "Offline", tag: "Work", lastSeen: "Yesterday" },
-    { name: "Elena Rossi", title: "HR", status: "Online", tag: "Work", lastSeen: "Active now" },
-    { name: "Priya Singh", title: "Legal", status: "Offline", tag: "Family", lastSeen: "2 days ago" },
-  ];
+
 
   const statusDot = (status: string) => {
     if (status === "Online") return "bg-emerald-500";

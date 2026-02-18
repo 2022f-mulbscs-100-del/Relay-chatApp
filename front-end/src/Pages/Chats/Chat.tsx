@@ -18,8 +18,6 @@ import useGroupApis from "../../customHooks/useGroupApis";
 const Chats = () => {
 
    const url = new URL(window.location.href);
-
-
    //STATES
    const [inputMessage, setInputMessage] = useState("");
    const [tab, setTab] = useState<"chats" | "unread" | "groups">(url.searchParams.get("tab") as "chats" | "unread" | "groups" || "chats");

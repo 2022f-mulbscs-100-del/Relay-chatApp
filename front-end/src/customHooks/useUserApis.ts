@@ -20,7 +20,6 @@ export const useUserApis = () => {
         });
 
     }
-
     // UPDATE USER PROFILE API CALL
     const UpdateProfile = async (username: string, phone: string, location?: string) => {
         setLoading(true);
@@ -36,18 +35,14 @@ export const useUserApis = () => {
             throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to update profile");
         }
     }
-
-
-
     // SETUP USER PROFILE API CALL
-    const setupProfile = async (phone: string, title: string, about: string, tags: string[]) => {
+    const setupProfile = async (phone: string, title: string, about: string,) => {
         setLoading(true);
         try {
             await AxiosClient.post("/users/UserProfileSetup", {
                 phone,
                 title,
                 about,
-                tags
             });
             setLoading(false);
         } catch (error) {
@@ -55,8 +50,6 @@ export const useUserApis = () => {
             throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to setup profile");
         }
     }
-
-
     // CHANGE PASSWORD API CALL
     const ChangePassword = async (currentPassword: string, newPassword: string) => {
         setLoading(true);
@@ -72,8 +65,54 @@ export const useUserApis = () => {
         }
     }
 
+    // UPDATE USER AUTH SETTINGS API CALL
+    const UpdateAuthSettings = async ({ emailtwoFactor, totpEnabled, passKeyEnabled }: { emailtwoFactor?: boolean, totpEnabled?: boolean, passKeyEnabled?: boolean }) => {
+        setLoading(true);
+        try {
+            await AxiosClient.post("/users/updateUserProfile", {
+                emailtwoFactor,
+                totpEnabled,
+                passKeyEnabled
+            });
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to update authentication settings");
+        }
+    }
 
-    return { getProfile, loading, setupProfile ,UpdateProfile,ChangePassword};
+    const GnerateTOTP = async () => {
+        setLoading(true);
+        try {
+            const res = await AxiosClient.get("/users/generateTOTP");
+            setLoading(false);
+            return res.data;
+        } catch (error) {
+            setLoading(false);
+            throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to generate TOTP");
+        }
+    }
+
+    const VerifyTOTP = async (code: string) => {
+        setLoading(true);
+        try {
+            const res = await AxiosClient.post("/users/verifyTOTP", {
+                token: code
+            });
+            setLoading(false);
+            return res.data;
+        } catch (error) {
+            setLoading(false);
+            throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to verify TOTP");
+        }
+    }
+
+    // const RegisterPassKey = async () => {
+    //     setLoading(true);
+       
+    // }
+
+    return { getProfile, loading, setupProfile, UpdateProfile, ChangePassword, UpdateAuthSettings, GnerateTOTP, VerifyTOTP };
 
 }
 

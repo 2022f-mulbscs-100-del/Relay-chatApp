@@ -24,6 +24,14 @@ const Group = sequelize.define("group", {
         allowNull: false,
         defaultValue: []
     },
+    Categories:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    isPinned:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
 },{
     timestamps: true,
 })

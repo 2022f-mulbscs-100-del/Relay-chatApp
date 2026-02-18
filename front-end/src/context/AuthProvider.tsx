@@ -6,29 +6,41 @@ import axios from "axios";
 type AuthContextType = {
     isAuthenticated: boolean;
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+    isloading: boolean;
+    stage: "totpTwoFactor" | "emailTwoFactor" | "passkeyTwoFactor" | null;
+    setStage: React.Dispatch<React.SetStateAction<"totpTwoFactor" | "emailTwoFactor" | "passkeyTwoFactor" | null>>;
 };
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    
+
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [isloading, setIsLoading] = useState(true);
     const { setUser } = useUser();
+    const [stage, setStage] = useState<"totpTwoFactor" | "emailTwoFactor" | "passkeyTwoFactor" | null>(null);
 
 
     useEffect(() => {
-        axios.get("http://localhost:2404/api/refresh", {
-            withCredentials: true,
-        }).then((response) => {
-            setUser(response.data.user);
-            sessionStorage.setItem("accessToken", response.data.accessToken);
-        }).catch(() => {
-            setUser(null);
-        });
+        const checkAuth = async () => {
+            setIsLoading(true);
+            axios.get("http://localhost:2404/api/refresh", {
+                withCredentials: true,
+            }).then((response) => {
+                setUser(response.data.user);
+                setIsLoading(false);
+                sessionStorage.setItem("accessToken", response.data.accessToken);
+            }).catch(() => {
+                setUser(null);
+                setIsLoading(false);
+            });
+        }
+        checkAuth();
     }, [setUser]);
 
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, isloading, stage, setStage }}>
+
             {children}
         </AuthContext.Provider>
     );

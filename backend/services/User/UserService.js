@@ -4,8 +4,13 @@ import Auth from "../../modals/Auth.modal.js";
 import { Message } from "../../modals/Message.modal.js";
 import { ErrorHandler } from "../../utlis/ErrorHandler.js";
 import { Op } from "sequelize";
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
+import { sequelize } from "../../config/dbConfig.js";
+import crypto from "crypto";
+import { verifyRegistrationResponse } from "@simplewebauthn/server";
 class UserService {
-
+    //get user by id
     static async getUserById(id) {
         try {
             const user = await User.findByPk(id, {
@@ -25,7 +30,7 @@ class UserService {
             throw error;
         }
     }
-
+    //get associated users who have messaged with the user
     static async getAssociatedUser(id) {
         try {
             const { user } = await UserService.getUserById(id);
@@ -79,8 +84,7 @@ class UserService {
             throw error
         }
     }
-
-
+    //get all users
     static async getAllUsers(id) {
         try {
             const users = await User.findAll({
@@ -99,8 +103,7 @@ class UserService {
             throw error;
         }
     }
-
-
+    //add associated user to the user who has messaged with
     static async addAssociatedUser(id, userId) {
         try {
             const { user } = await UserService.getUserById(id);
@@ -138,17 +141,23 @@ class UserService {
             throw error;
         }
     }
+    //using nullish instead of or to allow false values to be saved 
+    //update user profile
+    static async UpdateUserProfile(id, data) {
 
-    static async UpdateUserProfile(id, username, phone, location, about, title, tags) {
+        console.log("Updating user profile with data:", data);
         const { user } = await UserService.getUserById(id);
-        user.username = username || user.username;
-        user.phone = phone || user.phone;
-        user.location = location || user.location;
-        user.about = about || user.about;
-        user.title = title || user.title;
-        user.tags = tags || user.tags;
+        user.username = data.username ?? user.username;
+        user.phone = data.phone ?? user.phone;
+        user.location = data.location ?? user.location;
+        user.about = data.about ?? user.about;
+        user.title = data.title ?? user.title;
+        user.tags = data.tags ?? user.tags;
+        user.emailtwoFactor = data.emailtwoFactor ?? user.emailtwoFactor;
+        user.totpEnabled = data.totpEnabled ?? user.totpEnabled;
 
         try {
+            console.log("--------------->>>>>>>>>>>", user.emailtwoFactor)
             await user.save();
             logger.info(`User profile updated successfully with ID: ${id}`);
             return {
@@ -159,6 +168,136 @@ class UserService {
             throw error;
         }
     }
+    //generate TOTP secret and QR code for the user
+    static async GnerateTOTP(id) {
+        const { user } = await UserService.getUserById(id);
+        const secret = speakeasy.generateSecret({
+            name: `Relay (${user.email})`,
+        });
+
+        const qrCodeDataURL = await QRCode.toDataURL(secret.otpauth_url);
+
+        const auth = user.auth;
+        auth.totpSecret = secret.base32;
+        // Base32 is a way to encode binary data into readable text using 32 characters
+        await auth.save();
+
+        logger.info(`TOTP generated successfully for user ID: ${id}`);
+
+        return {
+            qrCodeDataURL,
+        }
+    }
+
+
+    //verify TOTP token and enable TOTP for the user
+    static async VerifyTOTP(id, token) {
+        const transaction = await sequelize.transaction();
+        const { user } = await UserService.getUserById(id);
+        const auth = user.auth;
+
+        if (!auth.totpSecret) {
+            logger.warn(`TOTP secret not found for user ID: ${id}`);
+            throw ErrorHandler(400, "TOTP not set up");
+        }
+
+        const isVerified = speakeasy.totp.verify({
+            secret: auth.totpSecret,
+            encoding: 'base32',
+            token,
+            window: 1,
+        })
+        if (isVerified) {
+            logger.info(`TOTP verified successfully for user ID: ${id}`);
+            user.totpEnabled = true;
+            await user.save({ transaction });
+            // Don't permanently save yet. Wait for commit
+            await transaction.commit();
+            return {
+                success: true,
+                message: "TOTP verified successfully"
+            }
+        } else {
+            await transaction.rollback();
+            logger.warn(`TOTP verification failed for user ID: ${id}`);
+            throw ErrorHandler(400, "Invalid TOTP token");
+        }
+    }
+
+
+    //register passkey and generate challenge for the user
+    static async registerPassKey(id) {
+        const transaction = await sequelize.transaction();
+        try {
+            const { user } = await UserService.getUserById(id);
+            const challenge = crypto.randomBytes(32).toString("base64url");
+            const auth = user.auth;
+            auth.passKeyChallenge = challenge;
+            await auth.save({ transaction });
+            await transaction.commit();
+
+            return ({
+                challenge,
+                rp: { name: "Relay Chat App" },
+                user: {
+                    id: Buffer.from(String(user.id)).toString("base64url"),
+                    name: user.username,
+                    displayName: user.username
+                },
+                pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+            })
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+    //verify passkey registration response and enable passkey for the user
+    static async passKeyVerification(id, attestationResponse) {
+        const transaction = await sequelize.transaction();
+        try {
+            const { user } = await UserService.getUserById(id);
+            const auth = user.auth;
+
+            if (!auth.passKeyChallenge) {
+                logger.warn(`Passkey challenge not found for user ID: ${id}`);
+                throw ErrorHandler(400, "Passkey registration not initiated");
+            }
+
+
+            const { verified, registrationInfo } = await verifyRegistrationResponse({
+                response: attestationResponse,
+                expectedChallenge: auth.passKeyChallenge,
+                expectedOrigin: "http://localhost:5173",
+                expectedRPID: "localhost",
+                requireUserVerification: false,
+            });
+
+            if (!verified) {
+                logger.warn(`Passkey registration failed for user ID: ${id}`);
+                await transaction.rollback();
+                throw ErrorHandler(400, "Passkey registration failed");
+            }
+
+
+            const base64 = Buffer.from(registrationInfo.credential.publicKey).toString("base64");
+
+            auth.passkeyCredentialID = registrationInfo.credential.id;
+            auth.passkeyPublicKey = base64;
+            auth.passKeyChallenge = null;
+            user.passKeyEnabled = true;
+            await auth.save({ transaction });
+            await user.save({ transaction });
+
+            await transaction.commit();
+
+            console.log("-------------->>>>>>>>>>>>", auth);
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error
+        }
+    }
+
 }
 
 export default UserService;

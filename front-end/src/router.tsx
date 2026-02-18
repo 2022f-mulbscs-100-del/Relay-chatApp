@@ -3,7 +3,6 @@ import ErrorBoundary from "./ErrorHandler/ErrorHandler";
 import Login from "./Pages/Auth/Login";
 import Signup from "./Pages/Auth/SignUp";
 import ForgotPassword from "./Pages/Auth/ForgotPassword";
-import MfaCode from "./Pages/Auth/MfaCode";
 import LayoutWrapper from "./LayoutWrapper";
 import Contacts from "./Pages/Contacts/Contacts";
 import Chats from "./Pages/Chats/Chat";
@@ -45,10 +44,6 @@ const Router = createBrowserRouter([
             {
                 path: "/forgot-password",
                 element: <ForgotPassword />
-            },
-            {
-                path: "/mfa-code",
-                element: <MfaCode />
             },
             {
                 path: "/contacts",
