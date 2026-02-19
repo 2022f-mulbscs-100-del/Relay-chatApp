@@ -4,11 +4,13 @@ import { MdContacts } from "react-icons/md";
 import { PiChatsCircleBold } from "react-icons/pi";
 import { RiChatSmileAiFill } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useMessage } from "../context/MessageProvider";
 
 
 const SideBar = () => {
 
     const { pathname } = useLocation();
+    const {setActiveUserId} = useMessage();
 
     const active =
         pathname === "/profile" ? 1 :
@@ -73,7 +75,12 @@ const SideBar = () => {
                                     ? "bg-slate-900 text-white shadow-sm"
                                     : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                             }`}
-                            onClick={() => navigate(item.link)}
+                            onClick={() => {
+                                navigate(item.link);
+                                if(item.id===2){
+                                    setActiveUserId(null);
+                                }
+                            }}
                         >
                             {active === item.id && (
                                 <span className="absolute -left-2 w-1.5 h-6 rounded-full bg-slate-900" />

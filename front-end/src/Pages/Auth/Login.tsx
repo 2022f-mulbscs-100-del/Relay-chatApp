@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaApple, FaGithub, FaGoogle } from "react-icons/fa6";
+import {  FaGoogle } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { useAuthCall } from "../../customHooks/useAuthCall";
 import LoadingSpinner from "../../Component/LoadingSpinner";
 import MfaCode from "./MfaCode";
 import { useUser } from "../../context/UserProvider";
 import base64ToArrayBuffer from "../../utlis/Base64ToArrayBuffer";
+import SocialLoginButton from "../../Component/SocialLoginButton";
 
 const Login = () => {
 
@@ -172,16 +173,14 @@ const Login = () => {
                                 <div className="h-px bg-slate-200 flex-1" />
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2">
-                                <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
-                                    <FaGoogle className="text-[16px]" />
-                                </button>
-                                <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
-                                    <FaApple className="text-[16px]" />
-                                </button>
-                                <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
-                                    <FaGithub className="text-[16px]" />
-                                </button>
+                            <div className="flex">
+                                <SocialLoginButton
+                                    icon={<FaGoogle className="text-[16px]" />}
+                                    title="Google"
+                                    url="http://localhost:2404/api/auth/social-login/google"
+                                    provider="google"
+                                />
+
                             </div>
                         </div>
 

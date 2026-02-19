@@ -15,6 +15,10 @@ export const VerifyToken = (req, res, next) => {
                 logger.warn(`Invalid access token: ${err.message}`);
                 return res.status(403).json({ message: 'Invalid Access Token' });
             }
+            if (!user || !user.id) {
+                logger.warn('Token decoded but missing user data');
+                return res.status(403).json({ message: 'Invalid token payload' });
+            }
             req.user = user;
             logger.info(`Token verified for user ID: ${user.id}`);
             next();
