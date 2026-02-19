@@ -1,6 +1,7 @@
 import Group from "../../modals/Group.modal.js";
 import { or, Sequelize } from "sequelize";
 import GroupMessage from "../../modals/GroupMessage.modal.js";
+import GroupMember from "../../modals/GroupMember.modal.js";
 
 class GroupService {
 
@@ -17,7 +18,12 @@ class GroupService {
             ),
             include: [{
                 model: GroupMessage,
-                as: 'groupMessages'
+                as: 'groupMessages',
+            }, {
+                
+                model: GroupMember,
+                as: 'members',
+                order: [['userId', 'DESC']]
             }],
             order: [[{ model: GroupMessage, as: 'groupMessages' }, 'createdAt', 'ASC']]
         }
@@ -40,7 +46,7 @@ class GroupService {
         try {
             const group = await Group.findOne({ where: { id: groupId } })
             return { group }
-            
+
         } catch (error) {
             throw error
         }
@@ -48,7 +54,7 @@ class GroupService {
 
     static async MarkGroupMessageAsRead(groupId, userId) {
         try {
-          
+
             const userIdStr = String(userId);
 
             const groupMessages = await GroupMessage.findAll({
@@ -56,7 +62,7 @@ class GroupService {
                     groupId,
                 }
             });
-            
+
             let markedCount = 0;
 
             for (const message of groupMessages) {
@@ -70,7 +76,7 @@ class GroupService {
                     markedCount++;
                 }
             }
-            
+
             return { message: `${markedCount} group messages marked as read` };
         }
         catch (error) {

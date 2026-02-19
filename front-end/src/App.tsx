@@ -111,7 +111,10 @@ function App() {
       if (activeUserId !== String(msg.groupId)) {
         const group = listOfgroups?.find(group => String(group.id) === String(msg.groupId));
         if (group) {
-          toast.info(`New message in group @${group.groupName}`);
+          const isMuted = group.members?.some(member => member.userId === user?.id && member.isMuted);
+          if (!isMuted) {
+            toast.info(`New message in group @${group.groupName}`);
+          }
         }
       }
 

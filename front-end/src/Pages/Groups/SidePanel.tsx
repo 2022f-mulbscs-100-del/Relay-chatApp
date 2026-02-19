@@ -1,13 +1,19 @@
+import { useState } from "react";
 import { FiBookmark, FiChevronDown } from "react-icons/fi";
+import { useGroup } from "../../context/GroupProvider";
 
 const SidePanel = () => {
+  const {listOfgroups} = useGroup();
+
+
   const categories = [
-    { label: "All groups", count: 18, active: true },
-    { label: "Workspaces", count: 6 },
-    { label: "Teams", count: 8 },
-    { label: "Social", count: 4 },
+    { label: "All groups", count: listOfgroups.length, active: true },
+    { label: "Work", count: 6 },
+    { label: "Friends", count: 8 },
+    { label: "Family", count: 4 },
   ];
 
+  const [categoriesListOpen, setCategoriesListOpen] = useState(false);
 
   return (
     <>
@@ -15,8 +21,11 @@ const SidePanel = () => {
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-slate-700">Categories</h2>
-            <FiChevronDown className="w-4 h-4 text-slate-400" />
+            <FiChevronDown className="w-4 h-4 text-slate-400 cursor-pointer" 
+            onClick={()=>{setCategoriesListOpen(!categoriesListOpen)}}
+            />
           </div>
+    {categoriesListOpen && (
           <div className="space-y-1 text-sm">
             {categories.map((category) => (
               <button
@@ -30,7 +39,7 @@ const SidePanel = () => {
                 </span>
               </button>
             ))}
-          </div>
+          </div>)}
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

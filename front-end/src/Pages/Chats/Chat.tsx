@@ -18,6 +18,7 @@ import useGroupApis from "../../customHooks/useGroupApis";
 const Chats = () => {
 
    const url = new URL(window.location.href);
+
    //STATES
    const [inputMessage, setInputMessage] = useState("");
    const [tab, setTab] = useState<"chats" | "unread" | "groups">(url.searchParams.get("tab") as "chats" | "unread" | "groups" || "chats");
@@ -26,7 +27,7 @@ const Chats = () => {
    //HOOKSf
    const socket = useSocket();
    const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
-   const { getGroupMessages,MarkGroupMessageAsRead } = useGroupApis();
+   const { getGroupMessages, MarkGroupMessageAsRead } = useGroupApis();
 
    //CONTEXT
    const { user } = useUser();
@@ -185,41 +186,42 @@ const Chats = () => {
          content: inputMessage,
          createdAt: new Date().toISOString(),
       }]);
-      
 
-         MarkGroupMessageAsRead(activeUserId, user?.id);
-         setListOfgroups((prev: Group[]) => {
-            return prev.map((group) => {
-               if (String(group.id) === String(activeUserId)) {
-                  const updateGroupMessages = [
-                     ...(group.groupMessages || []), {
-                        senderId: Number(user?.id),
-                        groupId: String(activeUserId),
-                        content: inputMessage,
-                        createdAt: new Date().toISOString(),
-                        isReadBy: user?.id ? [user.id] : []
-                     }
-                  ];
-                  return {
-                     ...group,
-                     groupMessages: updateGroupMessages
+
+      MarkGroupMessageAsRead(activeUserId, user?.id);
+      setListOfgroups((prev: Group[]) => {
+         return prev.map((group) => {
+            if (String(group.id) === String(activeUserId)) {
+               const updateGroupMessages = [
+                  ...(group.groupMessages || []), {
+                     senderId: Number(user?.id),
+                     groupId: String(activeUserId),
+                     content: inputMessage,
+                     createdAt: new Date().toISOString(),
+                     isReadBy: user?.id ? [user.id] : []
                   }
+               ];
+               return {
+                  ...group,
+                  groupMessages: updateGroupMessages
                }
-               return group;
-            })
+            }
+            return group;
          })
+      })
 
       setInputMessage("");
 
    }
 
-
+   //set tab in url
    useEffect(() => {
       url.searchParams.get("tab")
       url.searchParams.set("tab", tab);
       window.history.replaceState(null, "", url);
    }, [tab])
 
+   //updating the list to add the online user
    const usersWithOnlineStatus = useMemo(() => {
       return listOfChatUsers.map((user: chatUser) => {
 
@@ -298,6 +300,7 @@ const Chats = () => {
                               receivedMessages={group.groupMessages}
                               setActiveUserId={setActiveUserId}
                               activeUserId={activeUserId}
+                              member={group.members}
                               mode="group"
                            />
                         );

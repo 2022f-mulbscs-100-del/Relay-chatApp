@@ -23,6 +23,10 @@ const GroupMember = sequelize.define("group_member", {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
+    categoroy: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 }, {
     timestamps: true,
 })

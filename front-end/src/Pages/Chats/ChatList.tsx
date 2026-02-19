@@ -1,3 +1,5 @@
+import { FiBellOff } from "react-icons/fi";
+import { useMemo } from "react";
 import { useUser } from "../../context/UserProvider";
 
 type ChatListProps = {
@@ -15,6 +17,14 @@ type ChatListProps = {
         isRead?: boolean;
         isReadBy?: (string | number)[];
     }[];
+    member?:{
+        id?: number | string;
+        userId: string | number;
+        groupId: string | number;
+        isPinned?: boolean;
+        isMuted?: boolean;
+        categoroy?: string;
+    }[];
     isOnline?: boolean;
     mode:"group" | "private" 
 };
@@ -26,6 +36,7 @@ const ChatList = ({
     receivedMessages,
     activeUserId,
     isOnline = false,
+    member,
     mode
 }: ChatListProps) => {
 
@@ -59,7 +70,9 @@ const ChatList = ({
     const activeChat = activeUserId === id;
 
     
-   
+   const isMuted = useMemo(()=>{
+    return member?.find((mem) => Number(mem.userId) === Number(user?.id))?.isMuted || false;
+    },[member, user?.id])
     return (
         <div
             className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${activeChat ? "border-slate-300 shadow-sm" : "border-slate-200"} bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition`}
@@ -80,16 +93,23 @@ const ChatList = ({
                 </div>
                 <div className="flex items-center justify-between gap-2">
                     <p className="text-xs text-slate-500 truncate">{lastMessage ? lastMessage.content : "No messages yet"}</p>
-                    {mode === "private" && getUnreadCount() > 0 &&
-                        <span className="min-w-[18px] h-[18px] rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center">
-                            {getUnreadCount()}
-                        </span>
-                    }
-                   {mode === "group" && getUnreadCountForGroup() > 0 &&
-                        <span className="min-w-[18px] h-[18px] rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center">
-                            {getUnreadCountForGroup()}
-                        </span>
-                    }
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {mode === "group" && isMuted && (
+                            <span className="inline-flex items-center justify-center text-slate-400" title="Muted group">
+                                <FiBellOff className="w-3.5 h-3.5" />
+                            </span>
+                        )}
+                        {mode === "private" && getUnreadCount() > 0 &&
+                            <span className="min-w-[18px] h-[18px] rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center">
+                                {getUnreadCount()}
+                            </span>
+                        }
+                        {mode === "group" && getUnreadCountForGroup() > 0 &&
+                            <span className="min-w-[18px] h-[18px] rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center">
+                                {getUnreadCountForGroup()}
+                            </span>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

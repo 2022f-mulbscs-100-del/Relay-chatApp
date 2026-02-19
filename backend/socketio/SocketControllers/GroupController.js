@@ -3,6 +3,7 @@ import Group from "../../modals/Group.modal.js";
 import GroupMessage from "../../modals/GroupMessage.modal.js";
 import GroupService from "../../services/Groups/GroupService.js";
 import AuthService from "../../services/Auth/AuthService.js";
+import GroupMember from "../../modals/GroupMember.modal.js";
 
 export const leaveGroup = (socket) => {
     return async ({ groupId, userId }) => {
@@ -10,7 +11,17 @@ export const leaveGroup = (socket) => {
         const memberArray = Array.isArray(group.memberIds)
             ? group.memberIds
             : (group.memberIds ? JSON.parse(group.memberIds) : []);
-        const updatedMembers = memberArray.filter(id => Number(id) !== Number(userId));
+        const updatedMembers = memberArray.filter(async id => {
+            if(Number(id) === Number(userId)){
+                await GroupMember.destroy({
+                    where: {
+                        groupId,
+                        userId,
+                    }
+                })
+            }
+            return (Number(id) !== Number(userId))
+        });
         await group.update({ memberIds: updatedMembers });
         socket.leave(String(groupId));
         logger.info(`User ${userId} left group ${groupId}`);
@@ -35,7 +46,12 @@ export const addMemberToGroup = (io) => {
             if (!memberArray.includes(Number(newMemberId))) {
                 memberArray.push(Number(newMemberId));
                 addedMembers.push(Number(newMemberId));
+                await GroupMember.create({
+                    groupId: groupId,
+                    userId: newMemberId
+                })
             }
+            // await GroupMember.
         }
 
         // Update DB ONCE after loop using raw Sequelize update
@@ -83,8 +99,13 @@ export const createGroup = (io) => {
         })
 
 
+
         for (const memberId of allMembers) {
             io.to(String(memberId)).emit("group_created", group);
+            await GroupMember.create({
+                groupId: group.id,
+                userId: memberId,
+            })
         }
 
     }
