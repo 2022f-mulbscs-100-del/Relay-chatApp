@@ -153,7 +153,7 @@ export const forgetPasswordTokenVerificationController = async (req, res, next) 
 
 export const socialLoginController = async (req, res, next) => {
     const { provider } = req.params;
-    console.log("Provider:", provider); // Debug log to check the provider value
+  
     try {
         switch (provider) {
             case "google": {

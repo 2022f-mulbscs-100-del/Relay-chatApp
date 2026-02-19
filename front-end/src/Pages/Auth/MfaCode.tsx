@@ -27,7 +27,7 @@ const MfaCode = ({ email, stage }: MfaCodeProps) => {
       toast.error("Please enter a valid 6-digit code.");
       return;
     }
-    console.log("Verifying two-factor code:", { email, code, stage });
+
     try {
       await verifyTwoFactor(email, code, stage);
       navigate("/");

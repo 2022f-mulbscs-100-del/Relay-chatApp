@@ -49,7 +49,6 @@ const SecuritySetting = ({ setIsChangePasswordOpen }: SecuritySettingProps) => {
     const HandleAuthenticatorSetup = async () => {
         try {
             const res = await GnerateTOTP();
-            console.log("TOTP generation response:", res);
             if (res && res.qrCodeDataURL) {
                 setAuthenticatorQR(res.qrCodeDataURL);
                 setOpenTOTPSetupModal(true);

@@ -22,6 +22,7 @@ function App() {
   const { setListOfChatUsers, listOfAllUsers, activeUserId, setMessage, listOfChatUsers, setOnlineUserIds } = useMessage();
   const { user } = useUser();
   const { listOfgroups, setListOfgroups } = useGroup();
+    const { MarkGroupMessageAsRead } = useGroupApis();
 
 
   // REGISTER USER TO SOCKET.IO SERVER AND LISTEN FOR ONLINE USERS
@@ -117,6 +118,7 @@ function App() {
 
       if (activeUserId !== String(msg.groupId)) {
 
+
         setListOfgroups((prev: Group[]) => {
           return prev.map((group) => {
             if (String(group.id) === String(msg.groupId)) {
@@ -139,6 +141,32 @@ function App() {
         })
       }
 
+   
+      if(activeUserId === String(msg.groupId)){;
+
+           setListOfgroups((prev: Group[]) => {
+        return prev.map((group) => {
+          if (String(group.id) === String(msg.groupId)) {
+            const updateGroupMessages = [
+              ...(group.groupMessages || []), {
+                senderId: msg.fromUserId,
+                groupId: String(msg.groupId),
+                content: msg.content,
+                createdAt: new Date().toISOString(),
+                isReadBy: activeUserId === String(msg.groupId) && user?.id ? [user.id] : []
+              }
+            ]
+            return {
+              ...group,
+              groupMessages: updateGroupMessages
+            }
+          }
+          return group;
+        })
+      })
+        MarkGroupMessageAsRead(activeUserId, user?.id);
+      }
+
     };
 
     socket.on("group_message", handleGroupMessage);
@@ -154,13 +182,35 @@ function App() {
     if (!socket) return;
 
     const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number }) => {
-      console.log("Message received:", msg);
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
         senderId: msg.fromUserId,
         receiverId: Number(msg.toUserId),
         content: msg.content,
         createdAt: msg.timestamp
       }]);
+      
+
+
+      if(activeUserId === String(msg.fromUserId)){
+      setListOfChatUsers((prev) => {
+        return prev.map((user: chatUser) => {
+          if (String(user.id) === String(msg.fromUserId)) {
+            return {
+              ...user,
+              receivedMessages: [...(user.receivedMessages || []), {
+                id: msg.messageId,
+                senderId: msg.fromUserId,
+                receiverId: Number(msg.toUserId),
+                content: msg.content,
+                createdAt: msg.timestamp,
+                isRead: true
+              }]
+            }
+          }
+          return user;
+        })
+      })
+    }
 
       if (activeUserId !== String(msg.fromUserId)) {
         toast.info(`New message from @${listOfAllUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
@@ -191,6 +241,7 @@ function App() {
         if (!newUser) {
           const userToAdd = listOfAllUsers.find((user: chatUser) => user.id === Number(msg.fromUserId));
           if (userToAdd) {
+
             const userWithMessage: chatUser = {
               ...userToAdd,
               receivedMessages: [...(userToAdd?.receivedMessages || []), {
@@ -206,7 +257,10 @@ function App() {
           }
         }
       }
-      await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
+      if(activeUserId === String(msg.fromUserId)){
+        
+        await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
+      }
     };
 
     socket.on("private_message", handleMessageReceived);

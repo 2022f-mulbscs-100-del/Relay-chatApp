@@ -26,13 +26,14 @@ const Chats = () => {
    //HOOKSf
    const socket = useSocket();
    const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
-   const { getGroupMessages } = useGroupApis();
+   const { getGroupMessages,MarkGroupMessageAsRead } = useGroupApis();
 
    //CONTEXT
    const { user } = useUser();
-   const { listOfgroups } = useGroup();
+   const { listOfgroups, setListOfgroups } = useGroup();
    const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message, activeUserId, setActiveUserId } = useMessage();
    const { onlineUserIds } = useMessage();
+
 
 
    //EFFECTS
@@ -139,6 +140,28 @@ const Chats = () => {
          createdAt: new Date()
       }]);
 
+      setListOfChatUsers((prev) => {
+         const foundUser = prev.find((u) => String(u.id) === activeUserId);
+         if (foundUser) {
+            const updatedUser: chatUser = {
+               ...foundUser,
+               receivedMessages: [
+                  ...(foundUser.receivedMessages || []),
+                  {
+                     id: Date.now(),
+                     senderId: Number(user?.id),
+                     receiverId: Number(activeUserId),
+                     content: inputMessage,
+                     createdAt: new Date(),
+                     isRead: false
+                  }
+               ]
+            }
+            return prev.map((u) => String(u.id) === activeUserId ? updatedUser : u);
+         }
+         return prev;
+      })
+
       setInputMessage("");
       await isSaved();
 
@@ -162,6 +185,29 @@ const Chats = () => {
          content: inputMessage,
          createdAt: new Date().toISOString(),
       }]);
+      
+
+         MarkGroupMessageAsRead(activeUserId, user?.id);
+         setListOfgroups((prev: Group[]) => {
+            return prev.map((group) => {
+               if (String(group.id) === String(activeUserId)) {
+                  const updateGroupMessages = [
+                     ...(group.groupMessages || []), {
+                        senderId: Number(user?.id),
+                        groupId: String(activeUserId),
+                        content: inputMessage,
+                        createdAt: new Date().toISOString(),
+                        isReadBy: user?.id ? [user.id] : []
+                     }
+                  ];
+                  return {
+                     ...group,
+                     groupMessages: updateGroupMessages
+                  }
+               }
+               return group;
+            })
+         })
 
       setInputMessage("");
 
@@ -214,6 +260,7 @@ const Chats = () => {
                   </div>
                </div>
 
+               {/* Chat List */}
                {tab === "chats" &&
                   <div className="px-3 py-4 h-[calc(100dvh-190px)] md:h-[calc(100dvh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
                      {usersWithOnlineStatus.map((user: chatUser) => {
@@ -238,6 +285,8 @@ const Chats = () => {
                      })}
                   </div>
                }
+
+               {/* Group list */}
                {tab === "groups" &&
                   <div className="px-3 py-4 h-[calc(100dvh-190px)] md:h-[calc(100dvh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
                      {listOfgroups?.map((group: Group) => {
@@ -256,6 +305,8 @@ const Chats = () => {
                   </div>}
 
             </div>
+
+            {/* chat page */}
             {tab === "chats" &&
                <main className={`${activeUserId ? "flex" : "hidden md:flex"} flex-1 min-w-0 bg-white`}>
                   {activeUserId ?
@@ -278,6 +329,8 @@ const Chats = () => {
                      )}
                </main>
             }
+
+            {/* group page  */}
             {tab === "groups" &&
                <main className={`${activeUserId ? "flex" : "hidden md:flex"} flex-1 min-w-0 bg-white`}>
                   {activeUserId ?

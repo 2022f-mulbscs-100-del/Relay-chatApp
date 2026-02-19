@@ -149,7 +149,7 @@ class UserService {
     //update user profile
     static async UpdateUserProfile(id, data) {
 
-        console.log("Updating user profile with data:", data);
+     
         const { user } = await UserService.getUserById(id);
         user.username = data.username ?? user.username;
         user.phone = data.phone ?? user.phone;
@@ -161,7 +161,7 @@ class UserService {
         user.totpEnabled = data.totpEnabled ?? user.totpEnabled;
 
         try {
-            console.log("--------------->>>>>>>>>>>", user.emailtwoFactor)
+         
             await user.save();
             logger.info(`User profile updated successfully with ID: ${id}`);
             return {
@@ -293,8 +293,6 @@ class UserService {
             await user.save({ transaction });
 
             await transaction.commit();
-
-            console.log("-------------->>>>>>>>>>>>", auth);
 
         } catch (error) {
             await transaction.rollback();

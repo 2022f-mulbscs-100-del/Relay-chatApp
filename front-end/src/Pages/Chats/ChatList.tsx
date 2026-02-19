@@ -30,8 +30,6 @@ const ChatList = ({
 }: ChatListProps) => {
 
 
-   
-
     //context
     const { user } = useUser();
 

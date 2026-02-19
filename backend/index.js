@@ -1,7 +1,5 @@
 import dotenv from 'dotenv';
 const result = dotenv.config();
-console.log("dotenv config result:", result);
-console.log("ENV GOOGLE_CLIENT_ID after config:", process.env.GOOGLE_CLIENT_ID);
 import express from 'express';
 import "./modals/associations.js";
 import cookieParser from 'cookie-parser';
@@ -13,9 +11,9 @@ import http from 'http';
 import { initializeSocket } from './socketio/socket.js';
 import UserRoutes from './routes/UserRoutes.js';
 import { logger } from './Logger/Logger.js';
-const GooglePassport = await import('./middleware/passport/GooglePassport.js').then(m => m.default);
 import MessageRoutes from './routes/MessageRoutes.js';
 import GroupRoutes from './routes/GroupRoutes.js';
+const GooglePassport = await import('./middleware/passport/GooglePassport.js').then(m => m.default);
 // In ES modules, ALL import statements at the top of a file are resolved BEFORE any code executes, even before dotenv.config().
 // When GooglePassport.js loads, process.env variables are still undefined because dotenv hasn't loaded them yet.
 const app = express();
@@ -33,25 +31,36 @@ app.use(
     credentials: true,
   })
 );
+// Initialize Google Passport middleware
 app.use(GooglePassport.initialize());
+
+// Use cookie parser and JSON body parser middleware
 app.use(cookieParser());
+
+//middleware to parse JSON bodies
 app.use(express.json());
 
-app.use("/api",RefreshRoutes);
-app.use("/api/auth",AuthRoutes);
-app.use("/api/users",UserRoutes);
+//routes
+app.use("/api", RefreshRoutes);
+app.use("/api/auth", AuthRoutes);
+app.use("/api/users", UserRoutes);
 app.use("/api/messages", MessageRoutes);
 app.use("/api/groups", GroupRoutes);
+
+// Global error handling middleware
 app.use((err, req, res, next) => {
-    logger.error(`Error: ${err.message}`, { stack: err.stack, status: err.status });
-    return res.status(500).json({
-        success: false,
-        message: err.message || "Internal Server Error",
-        status: err.status || 500
-    });
+  logger.error(`Error: ${err.message}`, { stack: err.stack, status: err.status });
+  return res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    status: err.status || 500
+  });
 })
 
+// db connection
 authenticateDB();
+
+// start server
 server.listen(PORT, () => {
-    logger.info(`Server is running on http://localhost:${PORT}`);
+  logger.info(`Server is running on http://localhost:${PORT}`);
 });

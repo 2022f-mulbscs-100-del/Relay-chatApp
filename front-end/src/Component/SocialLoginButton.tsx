@@ -25,7 +25,7 @@ const SocialLoginButton = ({ icon, title, url, provider }: SocialLoginButtonProp
                 return;
             }
             const { token, user } = event.data;
-            console.log("Received message from popup:", event.data);
+         
             if (!token || !user) {
                 console.error("Invalid token or user data");
                 popUp?.close();
