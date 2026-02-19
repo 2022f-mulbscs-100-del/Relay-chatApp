@@ -1,5 +1,5 @@
 import express from 'express';
-import {logoutController, loginController, signUpController,checkTwoFactorController } from '../controllers/AuthController.js';
+import {logoutController,socialLoginCallbackController, loginController,socialLoginController, signUpController,checkTwoFactorController,forgetPasswordController } from '../controllers/AuthController.js';
 
 const routes  = express.Router();
 
@@ -15,5 +15,11 @@ routes.post("/logout",logoutController);
 //-------------Check Two Factor Authentication----------------
 routes.post("/check-twoFactor",checkTwoFactorController);
 
+//-------------Forget Password----------------
+routes.post("/forget-password",forgetPasswordController);
+
+//-------------social login----------------
+routes.get("/social-login/:provider", socialLoginController);
+routes.get("/google-callback", socialLoginCallbackController);
 
 export default routes;

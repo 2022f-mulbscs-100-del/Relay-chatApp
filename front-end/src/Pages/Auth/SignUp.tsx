@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaApple, FaGithub, FaGoogle } from "react-icons/fa6";
+import {  FaGoogle } from "react-icons/fa6";
 import { useAuthCall } from "../../customHooks/useAuthCall";
 import { toast } from "react-toastify";
+import SocialLoginButton from "../../Component/SocialLoginButton";
 
 const SignUp = () => {
     const [signUpData, setSignUpData] = useState({
@@ -91,27 +92,25 @@ const SignUp = () => {
                         <div className="h-px bg-slate-200 flex-1" />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
-                        <button className="flex items-center cursor-pointer justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
-                            <FaGoogle className="text-[16px]" />
-                        </button>
-                        <button className="flex items-center cursor-pointer justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
-                            <FaApple className="text-[16px]" />
-                        </button>
-                        <button className="flex items-center cursor-pointer justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
-                            <FaGithub className="text-[16px]" />
-                        </button>
-                    </div>
-                </div>
+                    <div className="flex">
+                        <SocialLoginButton
+                            icon={<FaGoogle className="text-[16px]" />}
+                            title="Google"
+                            url="http://localhost:2404/api/auth/social-login/google"
+                            provider="google"
+                        />
 
-                <div className="text-center text-sm text-slate-600 mt-4">
-                    Already have an account?{" "}
-                    <button className="text-slate-900 font-medium cursor-pointer" onClick={() => { navigate("/login") }}>
-                        Log in
-                    </button>
                 </div>
             </div>
+
+            <div className="text-center text-sm text-slate-600 mt-4">
+                Already have an account?{" "}
+                <button className="text-slate-900 font-medium cursor-pointer" onClick={() => { navigate("/login") }}>
+                    Log in
+                </button>
+            </div>
         </div>
+        </div >
     )
 
 }

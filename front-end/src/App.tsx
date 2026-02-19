@@ -10,6 +10,7 @@ import { useUser } from "./context/UserProvider"
 import type { chatUser, MessageProps } from "./types/message.types"
 import { useGroup } from "./context/GroupProvider"
 import type { Group } from "./types/group.type"
+import { AxiosClient } from "./api/AxiosClient"
 
 
 
@@ -153,6 +154,7 @@ function App() {
     if (!socket) return;
 
     const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number }) => {
+      console.log("Message received:", msg);
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
         senderId: msg.fromUserId,
         receiverId: Number(msg.toUserId),
@@ -204,7 +206,7 @@ function App() {
           }
         }
       }
-      // await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
+      await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
     };
 
     socket.on("private_message", handleMessageReceived);

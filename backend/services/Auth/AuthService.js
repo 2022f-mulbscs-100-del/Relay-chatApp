@@ -10,10 +10,15 @@ import speakeasy from "speakeasy";
 import CheckCodeExpiry from "../../utlis/CheckCodeExpiry.js";
 import crypto from "crypto";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
+import { GenerateRandomCode } from "../../utlis/GnerateRandomCode.js";
 class AuthService {
 
     static async FindById(id) {
         try {
+            if (!id) {
+                logger.warn('FindById called with undefined id');
+                throw ErrorHandler(400, "User ID is required");
+            }
             const user = await User.findOne({
                 where: { id },
                 include: [{ model: Auth, as: "auth" }],
@@ -82,7 +87,6 @@ class AuthService {
         }
     }
 
-
     static async userExists(email) {
         try {
             const user = await User.findOne({ where: { email: email.toLowerCase() } });
@@ -136,7 +140,6 @@ class AuthService {
             throw error;
         }
     }
-
 
     static async login(email, password) {
         try {
@@ -293,8 +296,36 @@ class AuthService {
         }
     }
 
-}
+    static async forgetPassword(email) {
+        try {
+            const { user } = await AuthService.FindUserByEmail(email);
+            const auth = user.auth;
+            //send email with token
+            const token = GenerateRandomCode();
+            auth.forgetPasswordToken = token;
+            auth.forgetPasswordTokenExpiry = new Date();
+            await auth.save();
+            //send email logic here 
+        } catch (error) {
+            throw error;
+        }
+    }
 
+    static async verifyForgetPasswordToken(email, token) {
+        try {
+            const { user } = await AuthService.FindUserByEmail(email);
+            const auth = user.auth;
+            if (auth.forgetPasswordToken !== token || CheckCodeExpiry(15, auth.forgetPasswordTokenExpiry)) {
+                throw ErrorHandler(400, "Invalid or expired forget password token");
+            }
+            return true;
+        } catch (error) {
+            throw error;
+        }
+
+    }
+
+}
 export default AuthService;
 
 

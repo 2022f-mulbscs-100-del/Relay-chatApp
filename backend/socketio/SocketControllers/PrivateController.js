@@ -8,7 +8,7 @@ export const handlePrivateMessage = (io,socket) => {
         logger.info(`Private message from ${socket.userId} to ${toUserId}`);
 
 
-
+        
         try {
             //storing message to db
             const message = await Message.create({

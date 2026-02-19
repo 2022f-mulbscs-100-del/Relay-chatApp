@@ -13,6 +13,10 @@ class UserService {
     //get user by id
     static async getUserById(id) {
         try {
+            if (!id) {
+                logger.warn('getUserById called with undefined id');
+                throw ErrorHandler(400, "User ID is required");
+            }
             const user = await User.findByPk(id, {
                 include: [{ model: Auth, as: "auth" }]
             });

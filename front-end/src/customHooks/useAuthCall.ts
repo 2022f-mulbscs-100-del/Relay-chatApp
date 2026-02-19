@@ -77,7 +77,7 @@ export const useAuthCall = () => {
         }
     }
 
-    const verifyTwoFactor = async (email: string, token?: string | null, twoFaMethod?: string, assertionResponse?: any) => {
+    const verifyTwoFactor = async (email: string, token?: string | null, twoFaMethod?: string, assertionResponse?: AuthenticatorAssertionResponse) => {
         try {
             setLoading(true);
             const res = await AxiosClient.post("/auth/check-twoFactor", {

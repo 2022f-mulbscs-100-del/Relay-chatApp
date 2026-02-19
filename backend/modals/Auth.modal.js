@@ -33,8 +33,14 @@ const Auth = sequelize.define("auths", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-
-
+    forgetPasswordToken:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    forgetPasswordTokenExpiry:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    }
 }, {
     timestamps: true,
 });

@@ -9,24 +9,26 @@ routes.get("/getAllUsers", VerifyToken, getAllUsersController);
 routes.get("/getUser", VerifyToken, getSingleUserController);
 routes.get("/getUserProfile", VerifyToken, getUserProfileController);
 
-//-------------Associated Users Routes----------------
 
+//-------------Associated Users Routes----------------
 routes.get("/getAssociatedUsers", VerifyToken, getAssociatedUserController);
 routes.post("/addAssociatedUser", VerifyToken, addAssociatedUserController); 
 
 
 //-------------User Profile Setup Route----------------
-
 routes.post("/UserProfileSetup", VerifyToken, UserProfileSetupController);
 routes.post("/UpdateUserProfileSetup", VerifyToken, UpdateUserProfileSetupController);
 routes.post("/updateUserProfile", VerifyToken, UpdateUserProfileController);
 
+
 //-------------Password Update Route----------------
 routes.post("/updateUserPassword", VerifyToken, UpdateUserPasswordController);
+
 
 // -------------TOTP ROUTES----------------
 routes.get("/generateTOTP", VerifyToken, generateTOTPController);
 routes.post("/verifyTOTP", VerifyToken, verifyTOTPController);
+
 
 // -------------Passkey Routes----------------
 routes.get("/passKey-registration",VerifyToken,passKeyRegistrationController)
