@@ -1,31 +1,12 @@
 import { useState } from "react";
-import { FiCamera, FiPlus, FiX } from "react-icons/fi";
+import { FiCamera, FiPlus } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useUserApis } from "../../customHooks/useUserApis";
 
 const SetupProfile = () => {
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
 
   const navigate = useNavigate();
-
-  const addTag = () => {
-    const value = tagInput.trim();
-    if (!value) return;
-    if (tags.includes(value)) {
-      setTagInput("");
-      return;
-    }
-    setTags((prev) => [...prev, value]);
-    setTagInput("");
-  };
-
-
-
-  const removeTag = (value: string) => {
-    setTags((prev) => prev.filter((tag) => tag !== value));
-  };
 
 
 const { setupProfile } = useUserApis();
@@ -56,7 +37,7 @@ if(!phone || !title || !about){
   return;
 }
   try {
-   await setupProfile(phone, title, about, tags);
+   await setupProfile(phone, title, about);
     navigate("/");
   } catch (error) {
     toast.error(error instanceof Error ? error.message : "An error occurred while setting up profile");
@@ -115,11 +96,11 @@ if(!phone || !title || !about){
                 />
               </label>
               <label className="text-sm">
-                <span className="text-slate-500">Role / Title</span>
+                <span className="text-slate-500">Name</span>
                 <input
                   name="title"
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-                  placeholder="Product Designer"
+                  placeholder="John Doe"
                   value={title}
                   onChange={HandleChange}
                 />
@@ -136,51 +117,6 @@ if(!phone || !title || !about){
                 onChange={HandleChange}
               />
             </label>
-
-            <div className="mt-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-800">Tags</p>
-                  <p className="text-xs text-slate-500">Add skills or interests</p>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
-                  >
-                    {tag}
-                    <button
-                      className="text-slate-400 hover:text-slate-600"
-                      onClick={() => removeTag(tag)}
-                    >
-                      <FiX className="w-3.5 h-3.5" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="mt-3 flex flex-col md:flex-row md:items-center gap-2">
-                <input
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-                  placeholder="Add a tag"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addTag();
-                    }
-                  }}
-                />
-                <button
-                  className="px-3 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800 transition"
-                  onClick={addTag}
-                >
-                  Add tag
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="mt-6 flex items-center justify-between">

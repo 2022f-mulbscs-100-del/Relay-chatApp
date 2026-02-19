@@ -6,7 +6,10 @@ import { ErrorHandler } from "../../utlis/ErrorHandler.js";
 import { GenerateAccessToken } from "../../utlis/GenerateAccessToken.js";
 import { GenerateRefreshToken } from "../../utlis/GenerateRefreshToken.js";
 import UserService from "../User/UserService.js";
-
+import speakeasy from "speakeasy";
+import CheckCodeExpiry from "../../utlis/CheckCodeExpiry.js";
+import crypto from "crypto";
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 class AuthService {
 
     static async FindById(id) {
@@ -124,11 +127,23 @@ class AuthService {
         }
     }
 
+    static async checkTwoFactorEnabled(userId) {
+        try {
+            const { user } = await UserService.getUserById(userId);
+            return user.passKeyEnabled ? "passkeyTwoFactor" : user.totpEnabled ? "totpTwoFactor" : user.emailtwoFactor ? "emailTwoFactor" : false;
+        } catch (error) {
+            logger.error(`Error checking two-factor enabled for user ID ${userId}: ${error.message}`, { stack: error.stack });
+            throw error;
+        }
+    }
+
+
     static async login(email, password) {
         try {
             await AuthService.VerifyCredentials(email, password);
             const { user } = await AuthService.FindUserByEmail(email);
-           
+
+
             const tokens = await AuthService.generateTokens(user.id);
             return {
                 user,
@@ -179,6 +194,105 @@ class AuthService {
             throw error;
         }
     }
+
+    static async twoFactorLoginSetup(email, type) {
+        try {
+            const { user } = await AuthService.FindUserByEmail(email);
+            const auth = user.auth;
+            switch (type) {
+                case "passkeyTwoFactor": {
+                    if (!auth.passkeyCredentialID && !auth.passkeyPublicKey) {
+                        throw ErrorHandler(400, "Passkey not found for user");
+                    }
+                    const challenge = crypto.randomBytes(32).toString("base64url");
+                    auth.passKeyChallenge = challenge;
+                    await auth.save();
+                    return {
+                        challenge,
+                        allowCredentials: [
+                            {
+                                type: "public-key",
+                                id: auth.passkeyCredentialID,
+                                transports: ["internal"] //Touch ID, Windows Hello
+                            }
+                        ],
+                        userVerification: "preferred", // can also be "required" or "discouraged"
+                    }
+
+                }
+
+                case "emailTwoFactor": { }
+                    break;
+                default:
+                    throw ErrorHandler(400, "Invalid two-factor type");
+            }
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async verifyTwoFactorToken(email, token, type, assertionResponse) {
+        const { user } = await AuthService.FindUserByEmail(email);
+        const auth = user.auth;
+        const TypeSafetoken = Number(token)
+        try {
+            switch (type) {
+                case "passkeyTwoFactor": {
+                    if (!auth.passkeyCredentialID || !auth.passkeyPublicKey) {
+                        throw ErrorHandler(400, "Passkey two-factor authentication not set up");
+                    }
+                    const base64UrlToBuffer = (value) => {
+                        const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+                        const padded = normalized + "===".slice((normalized.length + 3) % 4);
+                        return Buffer.from(padded, "base64");
+                    };
+
+                    const { verified } = await verifyAuthenticationResponse({
+                        response: assertionResponse,
+                        expectedChallenge: auth.passKeyChallenge,
+                        expectedOrigin: process.env.FRONTEND_URL,
+                        expectedRPID: "localhost", // must match registration
+                        credential: {
+                            id: base64UrlToBuffer(auth.passkeyCredentialID),
+                            publicKey: base64UrlToBuffer(auth.passkeyPublicKey),
+                            // counter: auth.passkeyCounter || 0,
+                        },
+                        requireUserVerification: false,
+                    });
+                    // auth.passkeyCounter = assertionResponse.response.signCount;
+                    auth.passKeyChallenge = null;
+                    await auth.save();
+                    return verified;
+
+                }
+                case "totpTwoFactor": {
+                    const isVerified = speakeasy.totp.verify({
+                        secret: auth.totpSecret,
+                        encoding: "base32",
+                        token: TypeSafetoken,
+                        window: 1,
+                    })
+                    if (!isVerified) {
+                        throw ErrorHandler(400, "Invalid TOTP token");
+                    }
+                    return true;
+                }
+
+                case "emailTwoFactor": {
+                    if (auth.emailTwoFactorToken !== token || CheckCodeExpiry(15, auth.emailTwoFactorTokenExpires)) {
+                        throw ErrorHandler(400, "Invalid email two-factor token");
+                    }
+                    return true;
+                }
+                default:
+                    throw ErrorHandler(400, "Invalid two-factor type");
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
 
 export default AuthService;

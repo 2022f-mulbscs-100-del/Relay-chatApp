@@ -13,19 +13,7 @@ const UserContext = createContext<UserContextProps | null>(null);
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
-    const [user, setUser] = useState<User | null>({
-        id: "",
-        username: "",
-        email: "",
-        createdAt: "",
-        hasMessaged: false,
-        phone: "",
-        title: "",
-        about: "",
-        location: "",
-        tags: [],
-        profilePic: ""
-    });
+    const [user, setUser] = useState<User | null>(null);
 
     return (
         <UserContext.Provider value={{ user, setUser }}>

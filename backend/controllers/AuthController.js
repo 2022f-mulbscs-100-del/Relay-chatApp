@@ -10,6 +10,26 @@ export const loginController = async (req, res, next) => {
     try {
 
         const { user, AccessToken, RefreshToken } = await AuthService.login(email, password);
+
+        const twoFactorEnabled = await AuthService.checkTwoFactorEnabled(user.id);
+
+        if (twoFactorEnabled === "totpTwoFactor") {
+            return res.status(HTTP_STATUS.OK).json({
+                twoFactorRequired: twoFactorEnabled,
+            });
+        }
+        if (twoFactorEnabled === "passkeyTwoFactor" || twoFactorEnabled === "emailTwoFactor") {
+            logger.info(`Two-factor authentication required for user: ${user.username} (${user.id})`);
+
+            const result = await AuthService.twoFactorLoginSetup(email, twoFactorEnabled);
+
+            return res.status(HTTP_STATUS.OK).json({
+                twoFactorRequired: twoFactorEnabled,
+                ...result
+            });
+        }
+
+
         res.cookie("RefreshToken", RefreshToken, {
             httpOnly: true,
             secure: false,
@@ -59,7 +79,7 @@ export const signUpController = async (req, res, next) => {
     }
 }
 
-export default function logoutController(req, res, next) {
+export const logoutController = (req, res, next) => {
 
     try {
         res.clearCookie("RefreshToken", {
@@ -76,4 +96,33 @@ export default function logoutController(req, res, next) {
         next(error);
     }
 
+}
+
+export const checkTwoFactorController = async (req, res, next) => {
+    const { email, token, twoFaMethod, assertionResponse} = req.body;
+    logger.info(`Checking two-factor authentication for user email: ${email}`);
+
+    try {
+        const isVerified = await AuthService.verifyTwoFactorToken(email, token, twoFaMethod, assertionResponse);
+        if (isVerified) {
+            logger.info(`Two-factor authentication successful for user email: ${email}`);
+            const { user } = await AuthService.FindUserByEmail(email);
+            const { AccessToken, RefreshToken } = await AuthService.generateTokens(user.id);
+            res.cookie("RefreshToken", RefreshToken, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "lax",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                path: "/",
+            });
+            return res.status(HTTP_STATUS.OK).json({
+                message: "Two-factor authentication successful",
+                user,
+                accessToken: AccessToken
+            });
+        }
+
+    } catch (error) {
+        next(error);
+    }
 }

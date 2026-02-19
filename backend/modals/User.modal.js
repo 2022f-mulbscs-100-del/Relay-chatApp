@@ -48,6 +48,18 @@ const User  = sequelize.define("users", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    emailtwoFactor: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    totpEnabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    passKeyEnabled:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
 }, {
     timestamps: true,
 });

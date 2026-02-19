@@ -73,7 +73,7 @@ export const UserProfileSetupController = async (req, res, next) => {
     const { username, phone, location, about, title, tags } = req.body;
 
     try {
-        const { user } = await UserService.UpdateUserProfile(id, username, phone, location, about, title, tags);
+        const { user } = await UserService.UpdateUserProfile(id, { username, phone, location, about, title, tags });
         logger.info(`User profile setup completed successfully for ID: ${id}`);
         return res.status(200).json({
             success: true,
@@ -111,7 +111,7 @@ export const UpdateUserProfileSetupController = async (req, res, next) => {
 
     try {
 
-        const { user } = await UserService.UpdateUserProfile(id, username, phone, location, about, title, tags);
+        const { user } = await UserService.UpdateUserProfile(id, { username, phone, location, about, title, tags });
 
         logger.info(`User profile updated successfully for ID: ${id}`);
 
@@ -147,6 +147,89 @@ export const UpdateUserPasswordController = async (req, res, next) => {
 
     } catch (error) {
         logger.error(`Error updating user password for ID ${id}: ${error.message}`, { stack: error.stack });
+        next(error);
+    }
+}
+
+export const UpdateUserProfileController = async (req, res, next) => {
+
+    const { id } = req.user;
+    const { totpEnabled, emailtwoFactor } = req.body;
+    try {
+        const { user } = await UserService.UpdateUserProfile(id, {
+            emailtwoFactor,
+            totpEnabled,
+        });
+        return res.status(200).json({
+            success: true,
+            message: "User profile updated successfully, Two factor authentication Updated",
+            user
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const generateTOTPController = async (req, res, next) => {
+    const { id } = req.user;
+
+    try {
+        const { qrCodeDataURL } = await UserService.GnerateTOTP(id);
+        return res.status(200).json({
+            success: true,
+            message: "TOTP generated successfully",
+            qrCodeDataURL
+        });
+    } catch (error) {
+        next(error);
+    }
+
+}
+
+
+export const verifyTOTPController = async (req, res, next) => {
+    const { id } = req.user;
+    const { token } = req.body;
+
+    try {
+        const result = await UserService.VerifyTOTP(id, token);
+        return res.status(200).json({
+            ...result
+        });
+    } catch (error) {
+        next(error);
+    }
+
+}
+
+
+export const passKeyRegistrationController = async (req, res, next) => {
+    const { id } = req.user;
+    try {
+        const result = await UserService.registerPassKey(id);
+        return res.status(200).json({
+            success: true,
+            message: "Passkey registration successful",
+            credential: {...result},
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const passKeyVerificationController = async (req, res, next) => {
+    const { id } = req.user;
+    const { attestationResponse } = req.body;
+    try {
+        const result = await UserService.passKeyVerification(id, attestationResponse);
+        return res.status(200).json({
+            success: true,
+            message: "Passkey verified successfully",
+            ...result
+        });
+    } catch (error) {
         next(error);
     }
 }

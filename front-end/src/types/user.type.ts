@@ -12,6 +12,9 @@ export interface User  {
     location: string;
     tags: string[];
     profilePic: string;
+    emailtwoFactor: boolean;
+    totpEnabled:boolean;
+    passKeyEnabled:boolean;
 };
 
 
