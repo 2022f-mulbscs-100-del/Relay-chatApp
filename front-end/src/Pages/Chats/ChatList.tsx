@@ -26,7 +26,8 @@ type ChatListProps = {
         categoroy?: string;
     }[];
     isOnline?: boolean;
-    mode:"group" | "private" 
+    mode:"group" | "private";
+    privateIsMuted?: boolean;
 };
 
 const ChatList = ({
@@ -37,7 +38,8 @@ const ChatList = ({
     activeUserId,
     isOnline = false,
     member,
-    mode
+    mode,
+    privateIsMuted = false
 }: ChatListProps) => {
 
 
@@ -71,8 +73,9 @@ const ChatList = ({
 
     
    const isMuted = useMemo(()=>{
+    if (mode === "private") return privateIsMuted;
     return member?.find((mem) => Number(mem.userId) === Number(user?.id))?.isMuted || false;
-    },[member, user?.id])
+    },[member, mode, privateIsMuted, user?.id])
     return (
         <div
             className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${activeChat ? "border-slate-300 shadow-sm" : "border-slate-200"} bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition`}
@@ -96,6 +99,11 @@ const ChatList = ({
                     <div className="flex items-center gap-1.5 shrink-0">
                         {mode === "group" && isMuted && (
                             <span className="inline-flex items-center justify-center text-slate-400" title="Muted group">
+                                <FiBellOff className="w-3.5 h-3.5" />
+                            </span>
+                        )}
+                        {mode === "private" && isMuted && (
+                            <span className="inline-flex items-center justify-center text-slate-400" title="Muted chat">
                                 <FiBellOff className="w-3.5 h-3.5" />
                             </span>
                         )}

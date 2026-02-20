@@ -1,5 +1,5 @@
 import express from "express";
-import { getSingleUserController,verifyTOTPController,passKeyVerificationController,passKeyRegistrationController, getAssociatedUserController,generateTOTPController,UpdateUserProfileController ,getAllUsersController,UpdateUserPasswordController, addAssociatedUserController,UserProfileSetupController,getUserProfileController,UpdateUserProfileSetupController} from "../controllers/UserController.js";
+import { getSingleUserController,verifyTOTPController,updateUserMessageAlertController,updateAssociatedUserController,passKeyVerificationController,passKeyRegistrationController, getAssociatedUserController,generateTOTPController,UpdateUserProfileController ,getAllUsersController,UpdateUserPasswordController, addAssociatedUserController,UserProfileSetupController,getUserProfileController,UpdateUserProfileSetupController} from "../controllers/UserController.js";
 import { VerifyToken } from "../middleware/VerifyToken.js";
 
 const routes = express.Router();
@@ -15,11 +15,16 @@ routes.get("/getAssociatedUsers", VerifyToken, getAssociatedUserController);
 routes.post("/addAssociatedUser", VerifyToken, addAssociatedUserController); 
 
 
+routes.get('/muteChat/:associateUserId', VerifyToken, updateAssociatedUserController);
+
+
 //-------------User Profile Setup Route----------------
 routes.post("/UserProfileSetup", VerifyToken, UserProfileSetupController);
 routes.post("/UpdateUserProfileSetup", VerifyToken, UpdateUserProfileSetupController);
 routes.post("/updateUserProfile", VerifyToken, UpdateUserProfileController);
 
+//-------------User message alert toggle Route----------------
+routes.get("/updateUserMessageAlert", VerifyToken, updateUserMessageAlertController);
 
 //-------------Password Update Route----------------
 routes.post("/updateUserPassword", VerifyToken, UpdateUserPasswordController);

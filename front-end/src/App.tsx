@@ -7,7 +7,7 @@ import { useEffect } from "react"
 import { useSocket } from "./context/SocketProvider"
 import { useMessage } from "./context/MessageProvider"
 import { useUser } from "./context/UserProvider"
-import type { chatUser, MessageProps } from "./types/message.types"
+import type { AssociatedUser, chatUser, MessageProps } from "./types/message.types"
 import { useGroup } from "./context/GroupProvider"
 import type { Group } from "./types/group.type"
 import { AxiosClient } from "./api/AxiosClient"
@@ -15,14 +15,19 @@ import { AxiosClient } from "./api/AxiosClient"
 
 
 function App() {
+
+
+  //apis
+  const { MarkGroupMessageAsRead } = useGroupApis();
   const socket = useSocket();
   const { getGroupByUser } = useGroupApis();
+  const { associatedUser, setAssociatedUser } = useMessage();
 
   //context
   const { setListOfChatUsers, listOfAllUsers, activeUserId, setMessage, listOfChatUsers, setOnlineUserIds } = useMessage();
   const { user } = useUser();
   const { listOfgroups, setListOfgroups } = useGroup();
-    const { MarkGroupMessageAsRead } = useGroupApis();
+
 
 
   // REGISTER USER TO SOCKET.IO SERVER AND LISTEN FOR ONLINE USERS
@@ -71,7 +76,7 @@ function App() {
 
 
 
-
+  // to listen for group creation and updates to join the group room
   useEffect(() => {
     if (!socket) return;
     socket.on("group_created", (group) => {
@@ -109,6 +114,7 @@ function App() {
         }])
 
       if (activeUserId !== String(msg.groupId)) {
+        if (!user?.messageAlerts) return;
         const group = listOfgroups?.find(group => String(group.id) === String(msg.groupId));
         if (group) {
           const isMuted = group.members?.some(member => member.userId === user?.id && member.isMuted);
@@ -144,29 +150,30 @@ function App() {
         })
       }
 
-   
-      if(activeUserId === String(msg.groupId)){;
 
-           setListOfgroups((prev: Group[]) => {
-        return prev.map((group) => {
-          if (String(group.id) === String(msg.groupId)) {
-            const updateGroupMessages = [
-              ...(group.groupMessages || []), {
-                senderId: msg.fromUserId,
-                groupId: String(msg.groupId),
-                content: msg.content,
-                createdAt: new Date().toISOString(),
-                isReadBy: activeUserId === String(msg.groupId) && user?.id ? [user.id] : []
+      if (activeUserId === String(msg.groupId)) {
+        ;
+
+        setListOfgroups((prev: Group[]) => {
+          return prev.map((group) => {
+            if (String(group.id) === String(msg.groupId)) {
+              const updateGroupMessages = [
+                ...(group.groupMessages || []), {
+                  senderId: msg.fromUserId,
+                  groupId: String(msg.groupId),
+                  content: msg.content,
+                  createdAt: new Date().toISOString(),
+                  isReadBy: activeUserId === String(msg.groupId) && user?.id ? [user.id] : []
+                }
+              ]
+              return {
+                ...group,
+                groupMessages: updateGroupMessages
               }
-            ]
-            return {
-              ...group,
-              groupMessages: updateGroupMessages
             }
-          }
-          return group;
+            return group;
+          })
         })
-      })
         MarkGroupMessageAsRead(activeUserId, user?.id);
       }
 
@@ -183,7 +190,6 @@ function App() {
   //to listen for incoming private messages
   useEffect(() => {
     if (!socket) return;
-
     const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number }) => {
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
         senderId: msg.fromUserId,
@@ -191,32 +197,36 @@ function App() {
         content: msg.content,
         createdAt: msg.timestamp
       }]);
-      
 
 
-      if(activeUserId === String(msg.fromUserId)){
-      setListOfChatUsers((prev) => {
-        return prev.map((user: chatUser) => {
-          if (String(user.id) === String(msg.fromUserId)) {
-            return {
-              ...user,
-              receivedMessages: [...(user.receivedMessages || []), {
-                id: msg.messageId,
-                senderId: msg.fromUserId,
-                receiverId: Number(msg.toUserId),
-                content: msg.content,
-                createdAt: msg.timestamp,
-                isRead: true
-              }]
+
+      if (activeUserId === String(msg.fromUserId)) {
+        setListOfChatUsers((prev) => {
+          return prev.map((user: chatUser) => {
+            if (String(user.id) === String(msg.fromUserId)) {
+              return {
+                ...user,
+                receivedMessages: [...(user.receivedMessages || []), {
+                  id: msg.messageId,
+                  senderId: msg.fromUserId,
+                  receiverId: Number(msg.toUserId),
+                  content: msg.content,
+                  createdAt: msg.timestamp,
+                  isRead: true
+                }]
+              }
             }
-          }
-          return user;
+            return user;
+          })
         })
-      })
-    }
+      }
 
       if (activeUserId !== String(msg.fromUserId)) {
-        toast.info(`New message from @${listOfAllUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
+        if (!user?.messageAlerts) return;
+        const isMuted = associatedUser?.find((user: AssociatedUser) => String(user.associateUserId) === String(msg.fromUserId))?.isMuted;
+        if (!isMuted) {
+          toast.info(`New message from @${listOfAllUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
+        }
 
         const newUser = listOfChatUsers.find((user: chatUser) => String(user.id) === String(msg.fromUserId));
         if (newUser) {
@@ -257,11 +267,32 @@ function App() {
               }]
             };
             setListOfChatUsers((prev) => [...prev, userWithMessage]);
+            setAssociatedUser((prev) => {
+              if (prev.some((association) => Number(association.associateUserId) === Number(userToAdd.id))) {
+                return prev;
+              }
+              if (!user?.id) {
+                return prev;
+              }
+              const numericUserId = Number(user.id);
+              if (Number.isNaN(numericUserId)) {
+                return prev;
+              }
+              return [...prev, {
+                id: Date.now(),
+                userId: numericUserId,
+                associateUserId: userToAdd.id,
+                associatedUser: userToAdd,
+                category: "",
+                isMuted: false,
+                isPinned: false
+              }];
+            });
           }
         }
       }
-      if(activeUserId === String(msg.fromUserId)){
-        
+      if (activeUserId === String(msg.fromUserId)) {
+
         await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
       }
     };
@@ -271,7 +302,7 @@ function App() {
     return () => {
       socket.off("private_message", handleMessageReceived);
     };
-  }, [socket, activeUserId, setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers]);
+  }, [socket, activeUserId, setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, user?.messageAlerts]);
 
 
   return (
@@ -292,7 +323,6 @@ function App() {
         toastClassName="toast-island"
       />
       <RouterProvider router={Router} />
-
     </>
   )
 }

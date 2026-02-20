@@ -14,6 +14,7 @@ import { useSocket } from "../../context/SocketProvider";
 import AddMemberModal from "./AddMemberModal";
 import GroupMemberModal from "./GroupMemberModal";
 import LeaveGroupModal from "./LeaveGroupModal";
+import { toast } from "react-toastify";
 
 
 type ChatPageProps = {
@@ -28,7 +29,6 @@ type ChatPageProps = {
     onBack?: () => void;
 }
 const ChatPage = ({
-    listOfChatUsers,
     activeUserId,
     SendMessage,
     SendGroupMessage,
@@ -40,33 +40,38 @@ const ChatPage = ({
 }: ChatPageProps) => {
 
 
-
-
     //states
     const InputRef = useRef<HTMLInputElement | null>(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [isGroupMemberModalOpen, setIsGroupMemberModalOpen] = useState(false);
     const [isLeaveGroupModalOpen, setIsLeaveGroupModalOpen] = useState(false);
+    
     //context
     const { message, onlineUserIds, setListOfChatUsers, } = useMessage();
     const { user } = useUser();
     const socket = useSocket();
 
     //hooks
-    const { MarkMessageAsRead } = useMessageApis();
+    const { MarkMessageAsRead, handleMessageMuteToggle } = useMessageApis();
     const { MarkGroupMessageAsRead } = useGroupApis();
+    const { associatedUser, setAssociatedUser } = useMessage();
 
 
     //filter user from list of chat users to show the name of the user
-    const foundUser = listOfChatUsers?.find(user => String(user.id) === activeUserId);
-    const filterUser = foundUser ? {
-        ...foundUser,
-        isOnline: onlineUserIds.includes(Number(foundUser.id))
-    } : undefined;
+    const foundUser = associatedUser?.find(user => String(user.associateUserId) === activeUserId);
 
 
+    //memoized value to show online status  
+    const filterUser = useMemo(() => {
+        return foundUser ? {
+            ...foundUser,
+            isOnline: onlineUserIds.includes(Number(foundUser.associatedUser.id))
+        } : undefined;
+    }, [foundUser, onlineUserIds]);
 
+
+    //effect to listen for user last seen and update the list of chat users and associated user
     useEffect(() => {
         if (!socket || !user?.id) return;
         socket.on("user_last_seen", ({ userId, lastSeen }) => {
@@ -77,13 +82,27 @@ const ChatPage = ({
                         : user
                 )
             );
+            setAssociatedUser((prev) => {
+                return prev.map((user) => {
+                    if (String(user.associatedUser.id) !== String(userId)) {
+                        return user;
+                    }
+                    return {
+                        ...user,
+                        associatedUser: {
+                            ...user.associatedUser,
+                            lastSeen
+                        }
+                    };
+                });
+            });
         });
         return () => {
             socket.off("user_last_seen");
         };
-    }, [socket, user?.id, setListOfChatUsers]);
+    }, [socket, user?.id, setListOfChatUsers, setAssociatedUser]);
 
-    
+
     //filter message for specific user 
     const FilterMessage = useMemo(() => {
         return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []);
@@ -113,11 +132,22 @@ const ChatPage = ({
     }, [activeUserId, setInputMessage]);
 
 
+    //effect to focus input
     useEffect(() => {
         if (InputRef.current) {
             InputRef.current.focus();
         }
     }, [activeUserId]);
+
+    //effect for toggling mute
+    const handleMuteToggle = () => {
+        try {
+            handleMessageMuteToggle(Number(activeUserId));
+        } catch {
+            toast.error("Failed to toggle mute. Please try again later.")
+        }
+    }
+
 
     return (
         <div className="flex flex-col w-full h-full">
@@ -132,7 +162,7 @@ const ChatPage = ({
                         <FiChevronLeft className="h-4 w-4" />
                     </button>
                     <div className="relative h-11 w-11 shrink-0 rounded-full ring-2 ring-slate-200">
-                        <img className="h-full w-full rounded-full object-cover" src={filterUser?.profilePic || "/153608270.jpeg"} alt={filterUser?.username || "chat user"} />
+                        <img className="h-full w-full rounded-full object-cover" src={filterUser?.associatedUser.profilePic || "/153608270.jpeg"} alt={filterUser?.associatedUser?.username || "chat user"} />
                         {mode === "private" && (
                             <span
                                 className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${filterUser?.isOnline === true ? "bg-emerald-500" : "bg-slate-400"}`}
@@ -141,12 +171,12 @@ const ChatPage = ({
                     </div>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-slate-900">
-                            {mode === "private" ? (filterUser ? filterUser.username : "Unknown User") : (filterGroup ? filterGroup?.groupName : "Unknown Group")}
+                            {mode === "private" ? (filterUser ? filterUser.associatedUser.username : "Unknown User") : (filterGroup ? filterGroup?.groupName : "Unknown Group")}
                         </p>
                         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
                             <span className="rounded-full bg-slate-100 px-2 py-0.5">
                                 {mode === "private" ? (filterUser?.isOnline === true ? "Online" :
-                                    filterUser?.lastSeen ? normalizeDate((filterUser?.lastSeen || "")).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : "Offline"
+                                    filterUser?.associatedUser?.lastSeen ? normalizeDate((filterUser?.associatedUser?.lastSeen || "")).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : "Offline"
                                 ) : "Group chat"}
                             </span>
                         </div>
@@ -172,8 +202,10 @@ const ChatPage = ({
                             >
                                 View profile
                             </button>
-                            <button className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 md:inline-flex">
-                                Mute
+                            <button className="hidden cursor-pointer rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 md:inline-flex"
+                                onClick={handleMuteToggle}
+                            >
+                                {foundUser?.isMuted ? "Unmute" : "Mute"}
                             </button>
                         </>
                     ) : (
@@ -263,7 +295,7 @@ const ChatPage = ({
             <ChatProfileModal
                 open={isProfileModalOpen}
                 onClose={() => setIsProfileModalOpen(false)}
-                user={filterUser}
+                user={filterUser?.associatedUser}
                 totalMessages={FilterMessage.length}
             />
 

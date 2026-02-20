@@ -1,11 +1,21 @@
 import { useEffect } from "react";
 import { FiMail, FiMapPin, FiPhoneCall, FiSend, FiTag, FiUser, FiVideo, FiX } from "react-icons/fi";
-import type { chatUser } from "../../types/message.types";
 
 type ChatProfileModalProps = {
   open: boolean;
   onClose: () => void;
-  user?: chatUser;
+  user?: {
+    id: number;
+    username: string;
+    email?: string;
+    profilePic?: string;
+    title?: string;
+    about?: string;
+    location?: string;
+    tags?: string[];
+    lastSeen?: string | null | Date;
+    isOnline?: boolean;
+  };
   totalMessages?: number;
   firstMessageAt?: string | Date;
 };

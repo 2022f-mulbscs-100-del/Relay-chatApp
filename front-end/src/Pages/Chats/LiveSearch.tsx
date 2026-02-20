@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import type { chatUser } from "../../types/message.types";
+import { useMessage } from "../../context/MessageProvider";
 
 interface LiveSearchProps {
     listOfAllUsers: chatUser[];
@@ -11,6 +12,7 @@ interface LiveSearchProps {
 const LiveSearch = ({ listOfAllUsers, setActiveUserId, setListOfChatUsers, listOfChatUsers }: LiveSearchProps) => {
 
     const [userListSearch, setUserListSearch] = useState("");
+    const {setAssociatedUser} = useMessage();
     const filterUser = listOfAllUsers.filter((user) => {
         
         return user.username.toLowerCase().includes(userListSearch.toLowerCase()) || user.email?.toLowerCase().includes(userListSearch.toLowerCase());
@@ -41,6 +43,15 @@ const LiveSearch = ({ listOfAllUsers, setActiveUserId, setListOfChatUsers, listO
                                             return;
                                         }
                                         setListOfChatUsers((prev) => [...prev, user]);
+                                        setAssociatedUser((prev) => [...prev, { 
+                                            id: Date.now(), 
+                                            userId: user.id, 
+                                            associateUserId: user.id, 
+                                            associatedUser: user, 
+                                            isMuted: false,
+                                            category: "",
+                                            isPinned: false
+                                        }]);
                                         setActiveUserId(String(user.id));
                                         setUserListSearch("");
                                     }}

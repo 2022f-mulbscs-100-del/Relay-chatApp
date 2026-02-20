@@ -107,12 +107,23 @@ export const useUserApis = () => {
         }
     }
 
+    const messageAlertToggle = async () => {
+        setLoading(true);
+        try {
+            const res = await AxiosClient.get("/users/updateUserMessageAlert");
+            setUser(res.data.user);
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to toggle message alerts");
+        }
+    }
     // const RegisterPassKey = async () => {
     //     setLoading(true);
        
     // }
 
-    return { getProfile, loading, setupProfile, UpdateProfile, ChangePassword, UpdateAuthSettings, GnerateTOTP, VerifyTOTP };
+    return { getProfile, loading, setupProfile, UpdateProfile, ChangePassword, UpdateAuthSettings, GnerateTOTP, VerifyTOTP, messageAlertToggle };
 
 }
 

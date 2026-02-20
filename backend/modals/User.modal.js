@@ -3,7 +3,7 @@ import { sequelize } from "../config/dbConfig.js";
 
 const User  = sequelize.define("users", {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         autoIncrement: true,
         primaryKey: true,
     },
@@ -59,7 +59,15 @@ const User  = sequelize.define("users", {
     passKeyEnabled:{
         type: DataTypes.BOOLEAN,
         defaultValue: false
-    }
+    },
+    messageAlerts:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+    },
+    isSocialLogin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
 }, {
     timestamps: true,
 });

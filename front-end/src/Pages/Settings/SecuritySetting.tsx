@@ -32,8 +32,7 @@ const SecuritySetting = ({ setIsChangePasswordOpen }: SecuritySettingProps) => {
     const [emailTwoFactor, setEmailTwoFactor] = useState(() => user?.emailtwoFactor ?? false);
     const [passKeyEnabled, setPassKeyEnabled] = useState(() => user?.passKeyEnabled ?? false);
 
-
-
+    const SOCIAL_LOGIN = user && user?.isSocialLogin === true
     const HandleTwoFactorChange = async () => {
         setEmailTwoFactor((prev) => !prev);
         try {
@@ -126,6 +125,7 @@ const SecuritySetting = ({ setIsChangePasswordOpen }: SecuritySettingProps) => {
 
     return (
         <>
+        {!SOCIAL_LOGIN &&
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                     <FiShield className="w-4 h-4 text-slate-500" />
@@ -211,6 +211,7 @@ const SecuritySetting = ({ setIsChangePasswordOpen }: SecuritySettingProps) => {
                     </div>
                 </div>
             </section>
+        }
 
             {openTOTPSetupModal && (
                 <TotpModal
