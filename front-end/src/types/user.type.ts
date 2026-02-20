@@ -15,6 +15,8 @@ export interface User  {
     emailtwoFactor: boolean;
     totpEnabled:boolean;
     passKeyEnabled:boolean;
+    messageAlerts: boolean;
+    isSocialLogin: boolean
 };
 
 

@@ -1,6 +1,9 @@
 import { logger } from "../Logger/Logger.js";
 import { UserService } from "../services/User/index.js";
 import AuthService from "../services/Auth/AuthService.js";
+import PrivateMemberModal from "../modals/PrivateMember.modal.js";
+import User from "../modals/User.modal.js";
+import Auth from "../modals/Auth.modal.js";
 
 export const getAssociatedUserController = async (req, res, next) => {
 
@@ -8,10 +11,23 @@ export const getAssociatedUserController = async (req, res, next) => {
 
     try {
         const hasMessaged = await UserService.getAssociatedUser(req.user.id);
+        const associatedUser = await PrivateMemberModal.findAll({
+            where: {
+                userId: req.user.id,
+            },
+            include: [
+                {
+                    model: User,
+                    as: "associatedUser",
+                    exclude: [Auth]
+                },
+            ],
+        });
         return res.status(200).json({
             success: true,
             message: "Users fetched successfully",
             AcssociatedUsers: hasMessaged,
+            associatedUser: associatedUser,
         });
     } catch (error) {
         next(error)
@@ -58,10 +74,58 @@ export const addAssociatedUserController = async (req, res, next) => {
 
     try {
         const { user } = await UserService.addAssociatedUser(id, userId);
+        await PrivateMemberModal.create({
+            userId: id,
+            associateUserId: userId,
+        });
         return res.status(200).json({
             success: true,
             message: "User updated successfully",
             user: user,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const updateUserMessageAlertController = async (req, res, next) => {
+    const { id } = req.user;
+    try {
+        const user = await User.findByPk(id);
+        user.messageAlerts = !user.messageAlerts;
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: "User message alerts updated successfully",
+            user: user,
+        });
+    } catch (error) {
+        next(error);
+    }
+
+}
+
+
+export const updateAssociatedUserController = async (req, res, next) => {
+    try {
+        const { id } = req.user;
+        const { associateUserId } = req.params;
+
+        const associatedUser = await PrivateMemberModal.findOne(
+            {
+                where: {
+                    userId: id,
+                    associateUserId: associateUserId,
+                },
+            }
+        );
+
+        associatedUser.isMuted = !associatedUser.isMuted;
+        await associatedUser.save();
+        return res.status(200).json({
+            success: true,
+            message: "User muted status updated successfully",
         });
     } catch (error) {
         next(error);
@@ -211,7 +275,7 @@ export const passKeyRegistrationController = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: "Passkey registration successful",
-            credential: {...result},
+            credential: { ...result },
         });
     } catch (error) {
         next(error);

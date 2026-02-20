@@ -23,6 +23,8 @@ passport.use(
                 }
                 
                 const newUser = await AuthService.createUser(profile.displayName, email);
+                newUser.isSocialLogin = true;
+                await newUser.save();
                 await AuthService.createAuthRecord(newUser.id, "google");
             
                 return done(null, newUser);  

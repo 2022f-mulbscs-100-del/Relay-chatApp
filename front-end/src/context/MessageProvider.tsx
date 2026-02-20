@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import type { chatUser, MessageProps } from "../types/message.types";
+import type { AssociatedUser, chatUser, MessageProps } from "../types/message.types";
 
 
 interface MessageContextType {
@@ -14,7 +14,10 @@ interface MessageContextType {
     activeUserId: string | null;
     setActiveUserId: React.Dispatch<React.SetStateAction<string | null>>;
     onlineUserIds: number[];
-    setOnlineUserIds: React.Dispatch<React.SetStateAction<number[]>>;
+    setOnlineUserIds: React.Dispatch<React.SetStateAction<number[]>>;   
+    associatedUser: AssociatedUser[];
+    setAssociatedUser: React.Dispatch<React.SetStateAction<AssociatedUser[]>>;
+
 }
 
 
@@ -30,6 +33,7 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
     const [ShowToastOfUnreadMessage, setShowToastOfUnreadMessage] = useState<chatUser[]>([]);
     const [activeUserId, setActiveUserId] = useState<string | null>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<number[]>([]);
+    const [associatedUser, setAssociatedUser] = useState<AssociatedUser[]>([]);
 
 useEffect(() => {
 
@@ -38,7 +42,7 @@ useEffect(() => {
 }, [setListOfAllUsers]);
 
     return (
-        <MessageContext.Provider value={{ message, setMessage, listOfAllUsers, setListOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, setShowToastOfUnreadMessage, activeUserId, setActiveUserId, onlineUserIds, setOnlineUserIds }}>
+        <MessageContext.Provider value={{ message, setMessage, listOfAllUsers, setListOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, setShowToastOfUnreadMessage, activeUserId, setActiveUserId, onlineUserIds, setOnlineUserIds, associatedUser, setAssociatedUser }}>
             {children}
         </MessageContext.Provider>
     );

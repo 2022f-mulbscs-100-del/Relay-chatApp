@@ -5,20 +5,37 @@ import FilterBar from "./FilterBar";
 import GroupsList from "./GroupsList";
 import GroupHeader from "./GroupHeader";
 import { useGroup } from "../../context/GroupProvider";
+import { useUser } from "../../context/UserProvider";
 
 const Groups = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const { listOfgroups } = useGroup();
+  const { user } = useUser();
+
+
+  const [category, setCategory] = useState<string | null>(null);
+
+const handleCategoryChange = useMemo(() => {
+  if (category === null) return listOfgroups;
+  return listOfgroups.filter(group =>
+    group?.members?.some(member =>
+      member.userId === user?.id && member.categoroy === category
+    )
+  )
+}, [category, listOfgroups, user?.id])
 
   const filterGroups = useMemo(() => {
     if (searchInput.trim() === "") return listOfgroups;
     const query = searchInput.trim();
-    return listOfgroups.filter((group) => {
+    return handleCategoryChange.filter((group) => {
       const groupName = group.groupName.toLowerCase();
       return groupName.includes(query.toLowerCase());
     })
-  },[searchInput, listOfgroups])
+  }, [searchInput, listOfgroups,handleCategoryChange])
+
+
+
 
 
   return (
@@ -28,11 +45,14 @@ const Groups = () => {
           setIsCreateOpen={setIsCreateOpen}
         />
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
-          <SidePanel />
+          <SidePanel
+            category={category}
+            setCategory={setCategory}
+          />
 
           <section className="space-y-4">
             <FilterBar searchInput={searchInput} setSearchInput={setSearchInput} />
-            <GroupsList listOfgroups={listOfgroups} filterGroups={filterGroups} searchInput={searchInput} />
+            <GroupsList listOfgroups={handleCategoryChange} filterGroups={filterGroups} searchInput={searchInput} />
           </section>
         </div>
       </div>

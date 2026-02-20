@@ -3,6 +3,7 @@ import Group from "./Group.modal.js";
 import GroupMember from "./GroupMember.modal.js";
 import GroupMessage from "./GroupMessage.modal.js";
 import { Message } from "./Message.modal.js";
+import PrivateMemberModal from "./PrivateMember.modal.js";
 import User from "./User.modal.js";
 
 
@@ -32,6 +33,11 @@ Group.hasMany(GroupMember, { foreignKey: "groupId", as: "members" });
 User.hasMany(GroupMember, { foreignKey: "userId", as: "groupMemberships" });
 //user can be member of many groups
 
+User.hasMany(PrivateMemberModal, { foreignKey: "userId", as: "privateAssociations" });
+//user can have many private associations
+
+User.hasMany(PrivateMemberModal, { foreignKey: "associateUserId", as: "associatedWith" });
+//user can be associated with many users in private chats
 
 
 // --------------------------------------     BELONGS TO     --------------------------------------
@@ -53,3 +59,9 @@ GroupMember.belongsTo(User, { foreignKey: "userId", as: "user" });
 
 GroupMember.belongsTo(Group, { foreignKey: "groupId", as: "group" });
 //group member belongs to a group
+
+PrivateMemberModal.belongsTo(User, { foreignKey: "userId", as: "user" });
+//private member belongs to a user
+
+PrivateMemberModal.belongsTo(User, { foreignKey: "associateUserId", as: "associatedUser" });
+//private member belongs to an associated user

@@ -5,7 +5,7 @@ import { useUser } from "../context/UserProvider";
 import type { chatUser } from "../types/message.types";
 
 export const useMessageApis = () => {
-    const { setListOfAllUsers, setMessage, setShowToastOfUnreadMessage, setListOfChatUsers } = useMessage();
+    const { setListOfAllUsers, setMessage, setShowToastOfUnreadMessage,setAssociatedUser, setListOfChatUsers } = useMessage();
     const [loading, setLoading] = useState(false);
     const { user } = useUser();
   
@@ -54,7 +54,8 @@ export const useMessageApis = () => {
                 };
             });
             setListOfChatUsers(dedupeUsersById(updatedListOfChatUsers));
-
+            setAssociatedUser(response.data.associatedUser);
+            
         }).catch(() => {
             setLoading(false);
             throw new Error("Failed to fetch users");
@@ -111,20 +112,42 @@ export const useMessageApis = () => {
     const getUnreadMessageChats = async () => {
         try {
             const response = await AxiosClient.get(`/messages/unreadChatList`);
+            const unreadChats = response.data.unreadChats || [];
+            //eslint-disable-next-line
+            const normalizedUsers = unreadChats.map((user: any) => {
+                const normalizedId = normalizeUserId(user.id);
+                return {
+                    ...user,
+                    id: normalizedId,
+                    receivedMessages: user.sentMessages || user.receivedMessages || []
+                } as chatUser;
+            });
             setShowToastOfUnreadMessage(response.data.unreadChats);
             setListOfChatUsers((prev) => {
-                const unreadChats = response.data.unreadChats || [];
-                //eslint-disable-next-line
-                const normalizedUsers = unreadChats.map((user: any) => {
-                    const normalizedId = normalizeUserId(user.id);
-                    return {
-                        ...user,
-                        id: normalizedId,
-                        receivedMessages: user.sentMessages || user.receivedMessages || []
-                    } as chatUser;
-                });
                 const merged = [...prev, ...normalizedUsers];
                 return dedupeUsersById(merged);
+            });
+            setAssociatedUser((prev) => {
+                if (!user?.id) {
+                    return prev;
+                }
+                const numericUserId = Number(user.id);
+                if (Number.isNaN(numericUserId)) {
+                    return prev;
+                }
+                const existingIds = new Set(prev.map((association) => Number(association.associateUserId)));
+                const additions = normalizedUsers
+                    .filter((chat: chatUser) => !existingIds.has(Number(chat.id)))
+                    .map((chat: chatUser, index: number) => ({
+                        id: Date.now() + index,
+                        userId: numericUserId,
+                        associateUserId: Number(chat.id),
+                        associatedUser: chat,
+                        category: "",
+                        isMuted: false,
+                        isPinned: false
+                    }));
+                return additions.length ? [...prev, ...additions] : prev;
             });
 
         } catch {
@@ -132,6 +155,31 @@ export const useMessageApis = () => {
         }
     }
 
+    const handleMessageMuteToggle = async (contactId: number) => {
+        
+        setAssociatedUser((prev) => 
+            prev.map((contact) => 
+                contact.associateUserId === contactId 
+                    ? { ...contact, isMuted: !contact.isMuted }
+                    : contact
+            )
+        );
 
-    return { fetchAllUsersForLiveSearch, loading, getAsscociatedUsers, getMessages, MarkMessageAsRead, getUnreadMessageChats };
+        try {
+            await AxiosClient.get(`/users/muteChat/${contactId}`);
+        } catch  {
+          
+            setAssociatedUser((prev) => 
+                prev.map((contact) => 
+                    contact.associateUserId === contactId 
+                        ? { ...contact, isMuted: !contact.isMuted }
+                        : contact
+                )
+            );
+            throw new Error("Failed to toggle mute for contact");
+        }
+    }
+
+
+    return { fetchAllUsersForLiveSearch, loading, getAsscociatedUsers, getMessages, MarkMessageAsRead, getUnreadMessageChats,handleMessageMuteToggle };
 }

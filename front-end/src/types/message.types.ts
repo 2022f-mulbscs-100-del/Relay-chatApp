@@ -1,11 +1,11 @@
 export interface MessageProps {
-    id?: number;
-    senderId?: number;
-    receiverId?: number;
-    groupId?:  string;
-    content?: string;
-    createdAt?: string | Date;
-    isRead?: boolean;
+   id?: number;
+   senderId?: number;
+   receiverId?: number;
+   groupId?: string;
+   content?: string;
+   createdAt?: string | Date;
+   isRead?: boolean;
 }
 
 
@@ -36,4 +36,25 @@ export interface chatUser {
       createdAt: Date;
       isRead: boolean;
    }[];
+}
+
+export interface AssociatedUser  {
+   id: number;
+   associateUserId: number;
+   userId: number;
+   associatedUser: {
+      id: number;
+      username: string;
+      email?: string;
+      profilePic?: string;
+      title?: string;
+      about?: string;
+      location?: string;
+      tags?: string[];
+      lastSeen?: string | null | Date;
+   }
+   category: string;
+   isMuted: boolean;
+   isPinned: boolean;
+   isOnline?: boolean;
 }

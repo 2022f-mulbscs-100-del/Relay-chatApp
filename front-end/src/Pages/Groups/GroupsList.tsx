@@ -29,35 +29,35 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput }: GroupsListProps
 
 
     //api calls
-    const { MarkGroupPinned, addGroupCategory,muteGroup } = useGroupApis();
+    const { addGroupCategory,muteGroup } = useGroupApis();
 
     //labels for categories
     const labels = ["Work", "Friends", "Family"];
 
-    const togglePinGroup = (groupId?: string) => {
-        try {
-            MarkGroupPinned(groupId ?? null);
-            setListOfgroups((prevGroups) =>
-                prevGroups.map((group) => {
-                    if (group.id === groupId) {
-                        const isCurrentlyPinned = group.members?.find(member => member.userId === user?.id)?.isPinned;
-                        const updatedMembers = group.members?.map(member => {
-                            if (member.userId === user?.id) {
-                                return { ...member, isPinned: !isCurrentlyPinned };
-                            }
-                            return member;
-                        });
-                        return { ...group, members: updatedMembers };
-                    }
-                    return group;
-                })
-            );
-            setActiveMenuId(null);
+    // const togglePinGroup = (groupId?: string) => {
+    //     try {
+    //         MarkGroupPinned(groupId ?? null);
+    //         setListOfgroups((prevGroups) =>
+    //             prevGroups.map((group) => {
+    //                 if (group.id === groupId) {
+    //                     const isCurrentlyPinned = group.members?.find(member => member.userId === user?.id)?.isPinned;
+    //                     const updatedMembers = group.members?.map(member => {
+    //                         if (member.userId === user?.id) {
+    //                             return { ...member, isPinned: !isCurrentlyPinned };
+    //                         }
+    //                         return member;
+    //                     });
+    //                     return { ...group, members: updatedMembers };
+    //                 }
+    //                 return group;
+    //             })
+    //         );
+    //         setActiveMenuId(null);
 
-        } catch {
-            toast.error("Failed to toggle pin status. Please try again.");
-        }
-    }
+    //     } catch {
+    //         toast.error("Failed to toggle pin status. Please try again.");
+    //     }
+    // }
 
     const addCategoryToGroup = (groupId?: string, category?: string) => {
         if (!groupId || !category) return;
@@ -143,7 +143,7 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput }: GroupsListProps
                             </button>
                             {activeMenuId === group.id && (
                                 <div className="absolute right-0 z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
-                                    <button
+                                    {/* <button
                                         className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
                                         onClick={() => togglePinGroup(group.id)}
                                     >
@@ -154,7 +154,7 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput }: GroupsListProps
                                             return null;
                                         })}
 
-                                    </button>
+                                    </button> */}
                                     {labels.map((label) => (
                                         <button
                                             key={`${group.id}-${label}`}

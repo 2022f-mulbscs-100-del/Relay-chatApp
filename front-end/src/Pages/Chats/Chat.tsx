@@ -32,7 +32,7 @@ const Chats = () => {
    //CONTEXT
    const { user } = useUser();
    const { listOfgroups, setListOfgroups } = useGroup();
-   const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message, activeUserId, setActiveUserId } = useMessage();
+   const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message, activeUserId, setActiveUserId, associatedUser, setAssociatedUser } = useMessage();
    const { onlineUserIds } = useMessage();
 
 
@@ -163,6 +163,29 @@ const Chats = () => {
          return prev;
       })
 
+      setAssociatedUser((prev) => {
+         if (prev.some((association) => String(association.associateUserId) === String(activeUserId))) {
+            return prev;
+         }
+         const userToAdd = listOfAllUsers.find((chatUser) => String(chatUser.id) === String(activeUserId));
+         if (!userToAdd || !user?.id) {
+            return prev;
+         }
+         const numericUserId = Number(user.id);
+         if (Number.isNaN(numericUserId)) {
+            return prev;
+         }
+         return [...prev, {
+            id: Date.now(),
+            userId: numericUserId,
+            associateUserId: userToAdd.id,
+            associatedUser: userToAdd,
+            category: "",
+            isMuted: false,
+            isPinned: false
+         }];
+      });
+
       setInputMessage("");
       await isSaved();
 
@@ -282,6 +305,7 @@ const Chats = () => {
                               receivedMessages={allMessages}
                               isOnline={user.isOnline}
                               mode="private"
+                              privateIsMuted={associatedUser?.find((association) => Number(association.associateUserId) === Number(user.id))?.isMuted || false}
                            />
                         );
                      })}
