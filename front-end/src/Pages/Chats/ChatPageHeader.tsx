@@ -5,6 +5,8 @@ import type { AssociatedUser } from "../../types/message.types";
 import { useMessage } from "../../context/MessageProvider";
 import { useUserApis } from "../../customHooks/useUserApis";
 import { toast } from "react-toastify";
+import { useGroup } from "../../context/GroupProvider";
+import useGroupApis from "../../customHooks/useGroupApis";
 
 type FilterUser = AssociatedUser & { isOnline: boolean };
 
@@ -22,8 +24,10 @@ interface ChatPageHeaderProps {
 }
 const ChatPageHeader = ({ onBack, setIsProfileModalOpen, setIsAddMemberModalOpen, setIsGroupMemberModalOpen, setIsLeaveGroupModalOpen, mode, filterUser, filterGroup, handleMuteToggle, foundUser }: ChatPageHeaderProps) => {
 
-    const { activeUserId, setAssociatedUser } = useMessage();
+    const { activeUserId, setAssociatedUser, } = useMessage();
+    const {setListOfgroups} = useGroup();
     const { deletePrivateChat } = useUserApis();
+    const {deleteGroup} = useGroupApis();
 
     const handleDeleteChat = async () => {
         try {
@@ -37,7 +41,18 @@ const ChatPageHeader = ({ onBack, setIsProfileModalOpen, setIsAddMemberModalOpen
         }
     };
 
-    return (
+    const handleGroupChatDeletion = async () => { 
+        try {
+            await deleteGroup(String(activeUserId));
+            setListOfgroups((prev) => prev.filter(group => group.id !== filterGroup?.id));
+            onBack();
+            toast.success("Group deleted successfully");
+        } catch {
+            toast.error("Failed to delete group");
+        }
+    }
+
+return (
         <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-3 sm:px-4">
             <div className="flex min-w-0 items-center gap-3">
                 <button
@@ -135,7 +150,11 @@ const ChatPageHeader = ({ onBack, setIsProfileModalOpen, setIsAddMemberModalOpen
                     className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
                     onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteChat();
+                        if (mode === "private") {
+                            handleDeleteChat();
+                        } else {
+                            handleGroupChatDeletion();
+                        }
                     }}
                 >
                     Delete {mode === "private" ? "chat" : "group"}

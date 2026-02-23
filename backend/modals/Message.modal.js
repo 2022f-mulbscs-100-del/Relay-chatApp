@@ -47,9 +47,9 @@ export const Message = sequelize.define("Message", {
 
 
 // {
-//                         senderId: associateUserId,
-//                         receiverId: id,
-//                     },
+//  senderId: associateUserId,
+//  receiverId: id,
+//   },
 
 
 // a message to user b 

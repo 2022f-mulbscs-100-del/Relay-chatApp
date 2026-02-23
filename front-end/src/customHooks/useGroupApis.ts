@@ -92,8 +92,23 @@ const [loading, setLoading] = useState(false);
             throw error;
         }
     }
+
+
+
+//-------------delete group-----------------
+
+const deleteGroup = async (groupId: string | null) => {
+    if (!groupId) return;
+    try {
+        await AxiosClient.delete(`/groups/deleteGroup/${groupId}`);
+        setListOfgroups((prev) => prev.filter(group => group.id !== groupId));
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        throw error;
+    }
+}
     
-    return { getGroupByUser, getGroupMessages, MarkGroupMessageAsRead, MarkGroupPinned, addGroupCategory, muteGroup, loading };
+    return { getGroupByUser, getGroupMessages, MarkGroupMessageAsRead, MarkGroupPinned, addGroupCategory, muteGroup, deleteGroup, loading };
 }
 
 export default useGroupApis;

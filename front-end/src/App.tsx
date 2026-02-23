@@ -101,6 +101,7 @@ function App() {
 
     const handleGroupMessage = (msg: { groupId: number; fromUserId: number; content: string; timestamp: Date }) => {
       if (String(msg.fromUserId) === String(user?.id)) return;
+      console.log("Received group message:", msg);
       setMessage((prev: MessageProps[] | null) =>
         [...(prev || []), {
           senderId: msg.fromUserId,
@@ -115,7 +116,17 @@ function App() {
         if (group) {
           const isMuted = group.members?.some(member => member.userId === user?.id && member.isMuted);
           if (!isMuted) {
-            toast.info(`New message in group @${group.groupName}`);
+            toast.info(
+              <div
+                onClick={() => {
+                  window.history.pushState({}, "", "/?tab=groups");
+                  setActiveUserId(String(msg.groupId))
+                }}
+              >
+                {`New message in group @${group.groupName}`}
+              </div>
+
+            );
           }
         }
       }
@@ -190,8 +201,6 @@ function App() {
         content: msg.content,
         createdAt: msg.timestamp
       }]);
-
-
 
       if (activeUserId === String(msg.fromUserId)) {
         setAssociatedUser((prev) => {
