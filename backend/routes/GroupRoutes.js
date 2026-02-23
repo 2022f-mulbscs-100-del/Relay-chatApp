@@ -1,5 +1,5 @@
 import express from "express";
-import {  getUserGroupsController,muteGroupController,getGroupMessagesController,markGroupPinnedController,markGroupMessageAsReadController, addGroupCategoryController } from "../controllers/GroupController.js";
+import {  getUserGroupsController,muteGroupController,getGroupMessagesController,markGroupPinnedController,markGroupMessageAsReadController, addGroupCategoryController,deleteGroupController } from "../controllers/GroupController.js";
 import { VerifyToken } from "../middleware/VerifyToken.js";
 
 const routes = express.Router();
@@ -25,6 +25,7 @@ routes.post("/addCategoryToGroup", VerifyToken, addGroupCategoryController);
 //-------------mute Group ----------------
 routes.post("/muteGroup", VerifyToken, muteGroupController);
 
+routes.delete("/deleteGroup/:groupId", VerifyToken,deleteGroupController);
 
 // routes.post("/addGroupMessage", VerifyToken, addGroupMessageController);
 

@@ -27,6 +27,10 @@ const GroupMessage  = sequelize.define("groupMessage", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    isDeletedBy: {
+        type: DataTypes.JSON,
+        defaultValue: [],
+    },
 },{
     timestamps: true,
 })

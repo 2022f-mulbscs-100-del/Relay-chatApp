@@ -1,5 +1,5 @@
 import Group from "../../modals/Group.modal.js";
-import { or, Sequelize } from "sequelize";
+import { Op, or, Sequelize } from "sequelize";
 import GroupMessage from "../../modals/GroupMessage.modal.js";
 import GroupMember from "../../modals/GroupMember.modal.js";
 
@@ -18,7 +18,13 @@ class GroupService {
             ),
             include: [{
                 model: GroupMessage,
-                as: 'groupMessages',
+                as: 'groupMessages',    
+                where: Sequelize.where(
+                    Sequelize.fn('JSON_CONTAINS', Sequelize.col('isDeletedBy'), JSON.stringify(Number(id))),
+                    Op.eq,
+                    0
+                ),
+                required: false
             }, {
                 
                 model: GroupMember,
@@ -31,10 +37,17 @@ class GroupService {
         return { groups };
     }
 
-    static async GetGroupMessages(groupId) {
+    static async GetGroupMessages(groupId, userId) {
         const groupMessage = await GroupMessage.findAll({
             where: {
-                groupId,
+                [Op.and]: [
+                    { groupId },
+                    Sequelize.where(
+                        Sequelize.fn('JSON_CONTAINS', Sequelize.col('isDeletedBy'), JSON.stringify(Number(userId))),
+                        Op.eq,
+                        0
+                    )
+                ]
             },
             order: [['createdAt', 'ASC']]
         })

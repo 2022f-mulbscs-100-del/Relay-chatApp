@@ -137,7 +137,7 @@ const Chats = () => {
 
       setAssociatedUser((prev) => {
          const existingAssociation = prev.find((association) => String(association.associateUserId) === String(activeUserId));
-         
+
          if (existingAssociation) {
             return prev.map((association) => {
                if (String(association.associateUserId) === String(activeUserId)) {
@@ -162,7 +162,7 @@ const Chats = () => {
                return association;
             });
          }
-         
+
 
          const userToAdd = listOfAllUsers.find((chatUser) => String(chatUser.id) === String(activeUserId));
          if (!userToAdd || !user?.id) {
