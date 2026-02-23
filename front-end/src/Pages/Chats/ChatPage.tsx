@@ -7,18 +7,15 @@ import { useUser } from "../../context/UserProvider";
 import type { Group } from "../../types/group.type";
 import useGroupApis from "../../customHooks/useGroupApis";
 import ChatProfileModal from "./ChatProfileModal";
-import type { chatUser } from "../../types/message.types";
-import { FiChevronLeft, FiInfo } from "react-icons/fi";
-import { normalizeDate } from "../../utlis/NormalizeDate";
 import { useSocket } from "../../context/SocketProvider";
 import AddMemberModal from "./AddMemberModal";
 import GroupMemberModal from "./GroupMemberModal";
 import LeaveGroupModal from "./LeaveGroupModal";
 import { toast } from "react-toastify";
+import ChatPageHeader from "./ChatPageHeader";
 
 
 type ChatPageProps = {
-    listOfChatUsers?: chatUser[];
     activeUserId: string | null;
     SendMessage?: (e: React.FormEvent<HTMLFormElement>) => void;
     SendGroupMessage?: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -46,9 +43,9 @@ const ChatPage = ({
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [isGroupMemberModalOpen, setIsGroupMemberModalOpen] = useState(false);
     const [isLeaveGroupModalOpen, setIsLeaveGroupModalOpen] = useState(false);
-    
+
     //context
-    const { message, onlineUserIds, setListOfChatUsers, } = useMessage();
+    const { message, onlineUserIds } = useMessage();
     const { user } = useUser();
     const socket = useSocket();
 
@@ -61,7 +58,6 @@ const ChatPage = ({
     //filter user from list of chat users to show the name of the user
     const foundUser = associatedUser?.find(user => String(user.associateUserId) === activeUserId);
 
-
     //memoized value to show online status  
     const filterUser = useMemo(() => {
         return foundUser ? {
@@ -70,18 +66,10 @@ const ChatPage = ({
         } : undefined;
     }, [foundUser, onlineUserIds]);
 
-
     //effect to listen for user last seen and update the list of chat users and associated user
     useEffect(() => {
         if (!socket || !user?.id) return;
         socket.on("user_last_seen", ({ userId, lastSeen }) => {
-            setListOfChatUsers((prev) =>
-                prev.map((user) =>
-                    String(user.id) === String(userId)
-                        ? { ...user, lastSeen }
-                        : user
-                )
-            );
             setAssociatedUser((prev) => {
                 return prev.map((user) => {
                     if (String(user.associatedUser.id) !== String(userId)) {
@@ -100,14 +88,12 @@ const ChatPage = ({
         return () => {
             socket.off("user_last_seen");
         };
-    }, [socket, user?.id, setListOfChatUsers, setAssociatedUser]);
-
+    }, [socket, user?.id, setAssociatedUser]);
 
     //filter message for specific user 
     const FilterMessage = useMemo(() => {
         return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []);
     }, [message, activeUserId, user?.id]);
-
 
     //filter group from list of groups to show the name of the group
     const filterGroup = listOfgroups?.find((group: Group) => (String(group.id)) === activeUserId);
@@ -116,9 +102,6 @@ const ChatPage = ({
     const filteredGroupMessages = useMemo(() => {
         return message?.filter(msg => msg.groupId === activeUserId) || [];
     }, [message, activeUserId]);
-
-
-
 
     //effect to mark messages as read
     useEffect(() => {
@@ -151,99 +134,19 @@ const ChatPage = ({
 
     return (
         <div className="flex flex-col w-full h-full">
-            <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-3 sm:px-4">
-                <div className="flex min-w-0 items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={onBack}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 md:hidden"
-                        aria-label="Back to chats"
-                    >
-                        <FiChevronLeft className="h-4 w-4" />
-                    </button>
-                    <div className="relative h-11 w-11 shrink-0 rounded-full ring-2 ring-slate-200">
-                        <img className="h-full w-full rounded-full object-cover" src={filterUser?.associatedUser.profilePic || "/153608270.jpeg"} alt={filterUser?.associatedUser?.username || "chat user"} />
-                        {mode === "private" && (
-                            <span
-                                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${filterUser?.isOnline === true ? "bg-emerald-500" : "bg-slate-400"}`}
-                            />
-                        )}
-                    </div>
-                    <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-900">
-                            {mode === "private" ? (filterUser ? filterUser.associatedUser.username : "Unknown User") : (filterGroup ? filterGroup?.groupName : "Unknown Group")}
-                        </p>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5">
-                                {mode === "private" ? (filterUser?.isOnline === true ? "Online" :
-                                    filterUser?.associatedUser?.lastSeen ? normalizeDate((filterUser?.associatedUser?.lastSeen || "")).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : "Offline"
-                                ) : "Group chat"}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                    {mode === "private" ? (
-                        <>
-                            <button
-                                type="button"
-                                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
-                                onClick={() => setIsProfileModalOpen(true)}
-                                disabled={!filterUser}
-                                aria-label="View profile details"
-                            >
-                                <FiInfo className="h-4 w-4" />
-                            </button>
-                            <button
-                                type="button"
-                                className="hidden rounded-md bg-slate-900 px-3 py-1.5 text-xs text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex"
-                                onClick={() => setIsProfileModalOpen(true)}
-                                disabled={!filterUser}
-                            >
-                                View profile
-                            </button>
-                            <button className="hidden cursor-pointer rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 md:inline-flex"
-                                onClick={handleMuteToggle}
-                            >
-                                {foundUser?.isMuted ? "Unmute" : "Mute"}
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button
-                                type="button"
-                                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsAddMemberModalOpen(true)
-                                }}
-                            >
-                                Add member
-                            </button>
-                            <button
-                                type="button"
-                                className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsGroupMemberModalOpen(true)
-                                }}
-                            >
-                                Members ({filterGroup?.memberIds?.length || 0})
-                            </button>
-                            <button
-                                type="button"
-                                className="rounded-md bg-rose-600 px-3 py-1.5 text-xs text-white transition hover:bg-rose-700"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsLeaveGroupModalOpen(true);
-                                }}
-                            >
-                                Leave group
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
+
+            <ChatPageHeader
+                filterUser={filterUser}
+                mode={mode}
+                setIsProfileModalOpen={setIsProfileModalOpen}
+                setIsAddMemberModalOpen={setIsAddMemberModalOpen}
+                setIsGroupMemberModalOpen={setIsGroupMemberModalOpen}
+                setIsLeaveGroupModalOpen={setIsLeaveGroupModalOpen}
+                handleMuteToggle={handleMuteToggle}
+                foundUser={foundUser}
+                filterGroup={filterGroup}
+                onBack={onBack || (() => { })}
+            />
 
             <div className="flex-1 overflow-auto customScrollbar bg-slate-50 px-3 py-4 sm:px-4">
 

@@ -2,29 +2,29 @@ import { useState } from "react";
 import { AxiosClient } from "../api/AxiosClient";
 import { useMessage } from "../context/MessageProvider";
 import { useUser } from "../context/UserProvider";
-import type { chatUser } from "../types/message.types";
+import type {  chatUser } from "../types/message.types";
 
 export const useMessageApis = () => {
-    const { setListOfAllUsers, setMessage, setShowToastOfUnreadMessage,setAssociatedUser, setListOfChatUsers } = useMessage();
+    const { setListOfAllUsers, setMessage, setShowToastOfUnreadMessage, setAssociatedUser } = useMessage();
     const [loading, setLoading] = useState(false);
     const { user } = useUser();
-  
+
 
     const normalizeUserId = (id: unknown) => {
         const numericId = Number(id);
         return Number.isNaN(numericId) ? 0 : numericId;
     };
 
-    const dedupeUsersById = (users: chatUser[]) => {
-        const map = new Map<number, chatUser>();
-        users.forEach((user) => {
-            const normalizedId = normalizeUserId(user.id);
-            if (normalizedId !== null) {
-                map.set(normalizedId, { ...user, id: normalizedId });
-            }
-        });
-        return Array.from(map.values());
-    };
+    // const dedupeUsersById = (users: chatUser[]) => {
+    //     const map = new Map<number, chatUser>();
+    //     users.forEach((user) => {
+    //         const normalizedId = normalizeUserId(user.id);
+    //         if (normalizedId !== null) {
+    //             map.set(normalizedId, { ...user, id: normalizedId });
+    //         }
+    //     });
+    //     return Array.from(map.values());
+    // };
 
     // FETCH ALL USERS FOR LIVE SEARCH API CALL
     const fetchAllUsersForLiveSearch = async () => {
@@ -46,16 +46,16 @@ export const useMessageApis = () => {
         setLoading(true);
         AxiosClient.get("/users/getAssociatedUsers").then((response) => {
             setLoading(false);
-            const updatedListOfChatUsers = response.data.AcssociatedUsers.hasMessaged.map((user: chatUser) => {
-                const normalizedId = normalizeUserId(user.id);
-                return {
-                    ...user,
-                    id: normalizedId,
-                };
-            });
-            setListOfChatUsers(dedupeUsersById(updatedListOfChatUsers));
+            // const updatedListOfChatUsers = response.data.associatedUser.map((user: AssociatedUser) => {
+            //     const normalizedId = normalizeUserId(user.associatedUser.id);
+            //     return {
+            //         ...user,
+            //         id: normalizedId,
+            //     };
+            // });
+            console.log("Fetched associated users:", response.data.associatedUser);
             setAssociatedUser(response.data.associatedUser);
-            
+
         }).catch(() => {
             setLoading(false);
             throw new Error("Failed to fetch users");
@@ -79,25 +79,26 @@ export const useMessageApis = () => {
     // MARK MESSAGES AS READ API CALL
     const MarkMessageAsRead = async (activeUserId: string | null) => {
         if (!activeUserId) return;
-        
-        try {
-            setListOfChatUsers((prev) => {
-                return prev.map((user: chatUser) => {
-                    if (String(user.id) === activeUserId) {
 
-                        const updatedSentMessages = user.receivedMessages?.map((msg) => ({
+        try {
+            setAssociatedUser((prev) => {
+                return prev.map((association) => {
+                    if (String(association.associateUserId) === activeUserId) {
+                        const updatedReceivedMessages = association.associatedUser.receivedMessages?.map((msg) => ({
                             ...msg,
                             isRead: true
                         }));
                         return {
-                            ...user,
-                            receivedMessages: updatedSentMessages
+                            ...association,
+                            associatedUser: {
+                                ...association.associatedUser,
+                                receivedMessages: updatedReceivedMessages
+                            }
                         };
                     }
-                    return user;
+                    return association;
                 });
             })
-            
             await AxiosClient.post(`/messages/UpdateMessages/${activeUserId}`, {
                 userId: user?.id,
             });
@@ -123,10 +124,6 @@ export const useMessageApis = () => {
                 } as chatUser;
             });
             setShowToastOfUnreadMessage(response.data.unreadChats);
-            setListOfChatUsers((prev) => {
-                const merged = [...prev, ...normalizedUsers];
-                return dedupeUsersById(merged);
-            });
             setAssociatedUser((prev) => {
                 if (!user?.id) {
                     return prev;
@@ -156,10 +153,10 @@ export const useMessageApis = () => {
     }
 
     const handleMessageMuteToggle = async (contactId: number) => {
-        
-        setAssociatedUser((prev) => 
-            prev.map((contact) => 
-                contact.associateUserId === contactId 
+
+        setAssociatedUser((prev) =>
+            prev.map((contact) =>
+                contact.associateUserId === contactId
                     ? { ...contact, isMuted: !contact.isMuted }
                     : contact
             )
@@ -167,11 +164,11 @@ export const useMessageApis = () => {
 
         try {
             await AxiosClient.get(`/users/muteChat/${contactId}`);
-        } catch  {
-          
-            setAssociatedUser((prev) => 
-                prev.map((contact) => 
-                    contact.associateUserId === contactId 
+        } catch {
+
+            setAssociatedUser((prev) =>
+                prev.map((contact) =>
+                    contact.associateUserId === contactId
                         ? { ...contact, isMuted: !contact.isMuted }
                         : contact
                 )
@@ -181,5 +178,5 @@ export const useMessageApis = () => {
     }
 
 
-    return { fetchAllUsersForLiveSearch, loading, getAsscociatedUsers, getMessages, MarkMessageAsRead, getUnreadMessageChats,handleMessageMuteToggle };
+    return { fetchAllUsersForLiveSearch, loading, getAsscociatedUsers, getMessages, MarkMessageAsRead, getUnreadMessageChats, handleMessageMuteToggle };
 }

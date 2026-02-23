@@ -5,6 +5,7 @@ import { useMessage } from "../../context/MessageProvider";
 import { useNavigate } from "react-router-dom";
 import { useMessageApis } from "../../customHooks/useMessageApis";
 import { toast } from "react-toastify";
+import { useUserApis } from "../../customHooks/useUserApis";
 
 interface ContactsListProps {
     associatedUser: AssociatedUser[];
@@ -20,12 +21,10 @@ const ContactsList = ({ associatedUser }: ContactsListProps) => {
     const { setActiveUserId, onlineUserIds } = useMessage();
 
     //custom hooks
-    const { handleMessageMuteToggle } = useMessageApis();
-
+    const { handleMessageMuteToggle, getAsscociatedUsers } = useMessageApis();
+    const { categorizeChat } = useUserApis();
 
     const navigate = useNavigate();
-
-
 
     const handleMuteToggle = (contactId: number) => {
         try {
@@ -36,15 +35,20 @@ const ContactsList = ({ associatedUser }: ContactsListProps) => {
         }
     }
 
-    const handleCategoryChange = (contactId: number, category: string) => {
+    const handleCategoryChange = async (contactId: number, category: string) => {
+        categorizeChat(contactId, category);
         setContactCategories((prev) => ({
             ...prev,
             [contactId]: category
         }));
         setOpenMenuId(null);
+        try {
+            await getAsscociatedUsers();
+        } catch (error) {
+            toast.error(String(error));
+        }
     };
 
-  
     const usersWithOnlineStatus = useMemo(() => {
         return associatedUser.map((user: AssociatedUser) => {
 
@@ -78,7 +82,7 @@ const ContactsList = ({ associatedUser }: ContactsListProps) => {
                             <div>
                                 <div className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                                     {contact.associatedUser.username}
-                                    {(contactCategories[contact.id] === "Favourite" || contact.category === "Favourite") && <FiStar className="w-3.5 h-3.5 text-amber-500" />}
+                                    {(contactCategories[contact.associateUserId] === "Favourite" || contact.category === "Favourite") && <FiStar className="w-3.5 h-3.5 text-amber-500" />}
                                     {contact.isMuted && <FiVolumeX className="w-3.5 h-3.5 text-slate-400" title="Muted" />}
                                 </div>
                                 <div className="text-xs text-slate-500">{contact.associatedUser.email}</div>
@@ -86,6 +90,9 @@ const ContactsList = ({ associatedUser }: ContactsListProps) => {
                                     hour: "2-digit",
                                     minute: "2-digit",
                                 })}</div>
+                                <div>
+                                    {contact.category && <span className="text-xs mt-1 inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-800">{contact.category}</span>}
+                                </div>
                             </div>
                         </div>
                         <div className="relative">
@@ -101,8 +108,8 @@ const ContactsList = ({ associatedUser }: ContactsListProps) => {
                                     {["Favourite", "Work", "Family"].map((category) => (
                                         <button
                                             key={category}
-                                            className={`w-full px-3 py-2 text-left text-sm transition ${contactCategories[contact.id] === category ? "bg-slate-100 text-slate-900" : "text-slate-600 hover:bg-slate-50"}`}
-                                            onClick={() => handleCategoryChange(contact.id, category)}
+                                            className={`w-full px-3 py-2 text-left text-sm transition ${contactCategories[contact.associateUserId] === category ? "bg-slate-100 text-slate-900" : "text-slate-600 hover:bg-slate-50"}`}
+                                            onClick={() => handleCategoryChange(contact.associateUserId, category)}
                                         >
                                             {category}
                                         </button>

@@ -1,26 +1,36 @@
 import { useState } from "react";
-import { FiUsers } from "react-icons/fi";
+import { FiChevronDown } from "react-icons/fi";
+import type { AssociatedUser } from "../../types/message.types";
 
-const SidePanel = () => {
+interface SidePanelProps {
+    selectedGroup: string;
+    setSelectedGroup: (group: string) => void;
+    associatedUser: AssociatedUser[];
+}
+const SidePanel = ({ selectedGroup, setSelectedGroup,associatedUser }: SidePanelProps) => {
 
+    const coungGroupMembers = (group: string) =>{
+        if(group === "All contacts") return associatedUser.length;
+       return  (associatedUser.filter(user => user.category === group).length);
+
+    }
     const groups = [
-        { label: "All contacts", count: 328 },
-        { label: "Favorites", count: 24 },
-        { label: "Work", count: 96 },
-        { label: "Family", count: 18 },
-        { label: "Blocked", count: 5 },
+        { label: "All contacts", count: coungGroupMembers("All contacts") },
+        { label: "Favourite", count: coungGroupMembers("Favourite") },
+        { label: "Work", count: coungGroupMembers("Work") },
+        { label: "Family", count: coungGroupMembers("Family") },
+        { label: "Blocked", count: coungGroupMembers("Blocked") },
     ];
 
     const [dropDownOpen, setDropdownOpen] = useState(false);
-    const [selectedGroup, setSelectedGroup] = useState("All contacts");
 
 
     return (
         <aside className="space-y-6">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className={`flex items-center justify-between ${dropDownOpen ? "mb-3" : ""}`}>
-                    <h2 className="text-sm font-semibold text-slate-700">Groups</h2>
-                    <FiUsers className="w-4 h-4 text-slate-400 cursor-pointer" onClick={() => setDropdownOpen(!dropDownOpen)} />
+                    <h2 className="text-sm font-semibold text-slate-700">Categories</h2>
+                    <FiChevronDown className="w-4 h-4 text-slate-400 cursor-pointer" onClick={() => setDropdownOpen(!dropDownOpen)} />
                 </div>
                 {dropDownOpen &&
                     <div className="space-y-1 text-sm">

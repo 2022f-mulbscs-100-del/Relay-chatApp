@@ -29,6 +29,34 @@ export const Message = sequelize.define("Message", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    deletedForSender: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    deletedForReceiver: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    deletedForEveryone: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
 },{
     timestamps: true,
 })
+
+
+// {
+//                         senderId: associateUserId,
+//                         receiverId: id,
+//                     },
+
+
+// a message to user b 
+// a is the sender  b is the receiver
+
+// b get the messages in which b is the reciver and a is the sender 
+// mark those message as deleted for the for the sender cause the user a is deletung the msgs
+
+
+// now how to correct the recived messages thing 

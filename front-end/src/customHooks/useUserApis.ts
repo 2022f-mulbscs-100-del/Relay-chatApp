@@ -2,10 +2,12 @@ import { useState } from "react";
 import { AxiosClient } from "../api/AxiosClient"
 import { useUser } from "../context/UserProvider";
 import { isAxiosError } from "axios";
+import { useMessage } from "../context/MessageProvider";
 
 export const useUserApis = () => {
     const { setUser } = useUser();
     const [loading, setLoading] = useState(false);
+    const { setActiveUserId } = useMessage();
 
 
     // GET USER PROFILE API CALL
@@ -118,12 +120,35 @@ export const useUserApis = () => {
             throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to toggle message alerts");
         }
     }
-    // const RegisterPassKey = async () => {
-    //     setLoading(true);
-       
-    // }
 
-    return { getProfile, loading, setupProfile, UpdateProfile, ChangePassword, UpdateAuthSettings, GnerateTOTP, VerifyTOTP, messageAlertToggle };
+    const categorizeChat = async (associateUserId: number, category: string) => {
+        setLoading(true);
+        try {
+            await AxiosClient.post(`/users/categorizeChat`, {
+                associateUserId,
+                category
+            });
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to categorize chat");
+        }
+    }
+
+    const deletePrivateChat = async (associateUserId: string) => {
+        setLoading(true);
+        try {
+            await AxiosClient.get(`/users/deleteChat/${associateUserId}`);
+            setActiveUserId(null);
+           
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to delete chat");
+        }
+    }
+
+    return { getProfile, loading, setupProfile, UpdateProfile, ChangePassword, UpdateAuthSettings, GnerateTOTP, VerifyTOTP, messageAlertToggle, categorizeChat, deletePrivateChat };
 
 }
 

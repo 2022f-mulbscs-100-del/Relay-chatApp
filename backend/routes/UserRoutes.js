@@ -1,5 +1,5 @@
 import express from "express";
-import { getSingleUserController,verifyTOTPController,updateUserMessageAlertController,updateAssociatedUserController,passKeyVerificationController,passKeyRegistrationController, getAssociatedUserController,generateTOTPController,UpdateUserProfileController ,getAllUsersController,UpdateUserPasswordController, addAssociatedUserController,UserProfileSetupController,getUserProfileController,UpdateUserProfileSetupController} from "../controllers/UserController.js";
+import { getSingleUserController,verifyTOTPController,deleteChatController,updateUserMessageAlertController,catrgorizeChatController,updateAssociatedUserController,passKeyVerificationController,passKeyRegistrationController, getAssociatedUserController,generateTOTPController,UpdateUserProfileController ,getAllUsersController,UpdateUserPasswordController, addAssociatedUserController,UserProfileSetupController,getUserProfileController,UpdateUserProfileSetupController} from "../controllers/UserController.js";
 import { VerifyToken } from "../middleware/VerifyToken.js";
 
 const routes = express.Router();
@@ -14,9 +14,12 @@ routes.get("/getUserProfile", VerifyToken, getUserProfileController);
 routes.get("/getAssociatedUsers", VerifyToken, getAssociatedUserController);
 routes.post("/addAssociatedUser", VerifyToken, addAssociatedUserController); 
 
-
+//-------------Private Chat prefrences Routes----------------
 routes.get('/muteChat/:associateUserId', VerifyToken, updateAssociatedUserController);
+routes.post('/categorizeChat', VerifyToken, catrgorizeChatController);
 
+//-------------Delete Chat Routes----------------
+routes.get("/deleteChat/:associateUserId", VerifyToken, deleteChatController);
 
 //-------------User Profile Setup Route----------------
 routes.post("/UserProfileSetup", VerifyToken, UserProfileSetupController);
