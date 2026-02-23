@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
-import type { chatUser } from "../../types/message.types";
+import type { AssociatedUser, chatUser } from "../../types/message.types";
 import { useMessage } from "../../context/MessageProvider";
 
 interface LiveSearchProps {
     listOfAllUsers: chatUser[];
     setActiveUserId: React.Dispatch<React.SetStateAction<string | null>>;
-    setListOfChatUsers: React.Dispatch<React.SetStateAction<chatUser[]>>;
-    listOfChatUsers: chatUser[];
+    associatedUser: AssociatedUser[];
 }
-const LiveSearch = ({ listOfAllUsers, setActiveUserId, setListOfChatUsers, listOfChatUsers }: LiveSearchProps) => {
+const LiveSearch = ({ listOfAllUsers, setActiveUserId, associatedUser }: LiveSearchProps) => {
 
     const [userListSearch, setUserListSearch] = useState("");
     const {setAssociatedUser} = useMessage();
@@ -37,12 +36,11 @@ const LiveSearch = ({ listOfAllUsers, setActiveUserId, setListOfChatUsers, listO
                                     key={user.id}
                                     className="px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition"
                                     onClick={() => {
-                                        if (listOfChatUsers.find((chatUser) => chatUser.id === user.id)) {
+                                        if (associatedUser.find((chatUser) => chatUser.associateUserId === user.id)) {
                                             setActiveUserId(String(user.id));
                                             setUserListSearch("");
                                             return;
                                         }
-                                        setListOfChatUsers((prev) => [...prev, user]);
                                         setAssociatedUser((prev) => [...prev, { 
                                             id: Date.now(), 
                                             userId: user.id, 

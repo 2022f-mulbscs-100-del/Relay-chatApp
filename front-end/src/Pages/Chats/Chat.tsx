@@ -5,18 +5,14 @@ import { useSocket } from "../../context/SocketProvider";
 import { useUser } from "../../context/UserProvider";
 import { useMessage } from "../../context/MessageProvider";
 import { toast } from "react-toastify";
-import type { chatUser, MessageProps } from "../../types/message.types";
+import type { AssociatedUser, chatUser, MessageProps } from "../../types/message.types";
 import { useMessageApis } from "../../customHooks/useMessageApis";
-import { AxiosClient } from "../../api/AxiosClient";
 import LiveSearch from "./LiveSearch";
 import { useGroup } from "../../context/GroupProvider";
 import type { Group } from "../../types/group.type";
 import useGroupApis from "../../customHooks/useGroupApis";
 
-
-
 const Chats = () => {
-
    const url = new URL(window.location.href);
 
    //STATES
@@ -32,10 +28,8 @@ const Chats = () => {
    //CONTEXT
    const { user } = useUser();
    const { listOfgroups, setListOfgroups } = useGroup();
-   const { setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, ShowToastOfUnreadMessage, message, activeUserId, setActiveUserId, associatedUser, setAssociatedUser } = useMessage();
+   const { setMessage, listOfAllUsers, ShowToastOfUnreadMessage, activeUserId, setActiveUserId, associatedUser, setAssociatedUser } = useMessage();
    const { onlineUserIds } = useMessage();
-
-
 
    //EFFECTS
 
@@ -120,18 +114,18 @@ const Chats = () => {
          toUserId: String(activeUserId)
       });
 
-      const isSaved = async () => {
-         if (message?.length === 0) {
-            await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
-         }
-         const FilterMessage = message?.some((msg) => {
-            return (msg.senderId === Number(user?.id) && String(msg.senderId) === activeUserId && msg.isRead === false);
+      // const isSaved = async () => {
+      //    if (message?.length === 0) {
+      //       await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
+      //    }
+      //    const FilterMessage = message?.some((msg) => {
+      //       return (msg.senderId === Number(user?.id) && String(msg.senderId) === activeUserId && msg.isRead === false);
 
-         })
-         if (!FilterMessage) return false;
-         await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
-         return FilterMessage;
-      }
+      //    })
+      //    if (!FilterMessage) return false;
+      //    await AxiosClient.post("/users/UpdateUser", { userId: activeUserId });
+      //    return FilterMessage;
+      // }
 
 
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
@@ -141,32 +135,35 @@ const Chats = () => {
          createdAt: new Date()
       }]);
 
-      setListOfChatUsers((prev) => {
-         const foundUser = prev.find((u) => String(u.id) === activeUserId);
-         if (foundUser) {
-            const updatedUser: chatUser = {
-               ...foundUser,
-               receivedMessages: [
-                  ...(foundUser.receivedMessages || []),
-                  {
-                     id: Date.now(),
-                     senderId: Number(user?.id),
-                     receiverId: Number(activeUserId),
-                     content: inputMessage,
-                     createdAt: new Date(),
-                     isRead: false
-                  }
-               ]
-            }
-            return prev.map((u) => String(u.id) === activeUserId ? updatedUser : u);
-         }
-         return prev;
-      })
-
       setAssociatedUser((prev) => {
-         if (prev.some((association) => String(association.associateUserId) === String(activeUserId))) {
-            return prev;
+         const existingAssociation = prev.find((association) => String(association.associateUserId) === String(activeUserId));
+         
+         if (existingAssociation) {
+            return prev.map((association) => {
+               if (String(association.associateUserId) === String(activeUserId)) {
+                  return {
+                     ...association,
+                     associatedUser: {
+                        ...association.associatedUser,
+                        receivedMessages: [
+                           ...(association.associatedUser.receivedMessages || []),
+                           {
+                              id: Date.now(),
+                              senderId: Number(user?.id),
+                              receiverId: Number(activeUserId),
+                              content: inputMessage,
+                              createdAt: new Date(),
+                              isRead: false
+                           }
+                        ]
+                     }
+                  };
+               }
+               return association;
+            });
          }
+         
+
          const userToAdd = listOfAllUsers.find((chatUser) => String(chatUser.id) === String(activeUserId));
          if (!userToAdd || !user?.id) {
             return prev;
@@ -179,7 +176,17 @@ const Chats = () => {
             id: Date.now(),
             userId: numericUserId,
             associateUserId: userToAdd.id,
-            associatedUser: userToAdd,
+            associatedUser: {
+               ...userToAdd,
+               receivedMessages: [{
+                  id: Date.now(),
+                  senderId: Number(user?.id),
+                  receiverId: Number(activeUserId),
+                  content: inputMessage,
+                  createdAt: new Date(),
+                  isRead: false
+               }]
+            },
             category: "",
             isMuted: false,
             isPinned: false
@@ -187,7 +194,7 @@ const Chats = () => {
       });
 
       setInputMessage("");
-      await isSaved();
+      // await isSaved();
 
    }
 
@@ -246,19 +253,19 @@ const Chats = () => {
 
    //updating the list to add the online user
    const usersWithOnlineStatus = useMemo(() => {
-      return listOfChatUsers.map((user: chatUser) => {
+      return associatedUser.map((user: AssociatedUser) => {
 
-         const isOnline = onlineUserIds.includes(Number(user.id));
+         const isOnline = onlineUserIds.includes(Number(user.associatedUser.id));
          return {
             ...user,
             isOnline
          }
       })
-   }, [onlineUserIds, listOfChatUsers]);
+   }, [onlineUserIds, associatedUser]);
+
 
 
    return (
-
       <div className="h-[100dvh] bg-slate-50">
          <div className="flex h-full overflow-hidden">
             <div className={`${activeUserId ? "hidden md:flex" : "flex"} w-full md:w-[340px] md:shrink-0 md:border-r border-slate-200 bg-white flex-col`}>
@@ -268,14 +275,13 @@ const Chats = () => {
                         <h1 className="text-xl font-semibold text-slate-900">Chats</h1>
                         <p className="text-xs text-slate-500">Keep up with your team</p>
                      </div>
-                     <span className="text-xs text-slate-400">{tab === "chats" ? listOfChatUsers.length : listOfgroups.length} total</span>
+                     <span className="text-xs text-slate-400">{tab === "chats" ? associatedUser.length : listOfgroups.length} total</span>
                   </div>
 
                   <LiveSearch
                      listOfAllUsers={listOfAllUsers}
                      setActiveUserId={setActiveUserId}
-                     setListOfChatUsers={setListOfChatUsers}
-                     listOfChatUsers={listOfChatUsers}
+                     associatedUser={associatedUser}
                   />
 
                   <div className="mt-3 flex items-center gap-2 text-xs">
@@ -288,18 +294,18 @@ const Chats = () => {
                {/* Chat List */}
                {tab === "chats" &&
                   <div className="px-3 py-4 h-[calc(100dvh-190px)] md:h-[calc(100dvh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
-                     {usersWithOnlineStatus.map((user: chatUser) => {
+                     {usersWithOnlineStatus.map((user: AssociatedUser) => {
                         const allMessages = [
-                           ...(user.sentMessages || []),
-                           ...(user.receivedMessages || [])
+                           ...(user.associatedUser.sentMessages || []),
+                           ...(user.associatedUser.receivedMessages || [])
                         ];
 
                         return (
 
                            <ChatList
                               key={user.id}
-                              id={String(user.id)}
-                              username={user.username}
+                              id={String(user.associatedUser.id)}
+                              username={user.associatedUser.username}
                               setActiveUserId={setActiveUserId}
                               activeUserId={activeUserId}
                               receivedMessages={allMessages}
@@ -342,7 +348,6 @@ const Chats = () => {
                         setInputMessage={setInputMessage}
                         SendMessage={SendMessage}
                         key={activeUserId}
-                        listOfChatUsers={listOfChatUsers}
                         activeUserId={activeUserId}
                         onBack={() => setActiveUserId(null)}
                      />
@@ -381,13 +386,8 @@ const Chats = () => {
                      )}
                </main>
             }
-
-
          </div>
       </div>
-
-
-
    )
 };
 

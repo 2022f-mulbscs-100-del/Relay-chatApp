@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useMessageApis } from "../../customHooks/useMessageApis";
 
 const ProfileSecondaryCards = () => {
-    const { listOfChatUsers } = useMessage();
+    const { associatedUser } = useMessage();
     const { getAsscociatedUsers } = useMessageApis();
     // useEffect(() => {
     //      getAsscociatedUsers();
@@ -23,7 +23,7 @@ const ProfileSecondaryCards = () => {
  
     const stats = [
         { icon: FiMessageCircle, label: 'Messages', value: '2,847', color: 'from-purple-500 to-pink-500' },
-        { icon: FiUsers, label: 'Contacts', value: listOfChatUsers.length, color: 'from-blue-500 to-cyan-500' },
+        { icon: FiUsers, label: 'Contacts', value: associatedUser.length, color: 'from-blue-500 to-cyan-500' },
     ];
 
 

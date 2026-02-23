@@ -1,6 +1,5 @@
 import { Message } from "../../modals/Message.modal.js";
 import { Op } from "sequelize";
-import { logger } from "../../Logger/Logger.js";
 
 class MessageService {
 
@@ -9,8 +8,18 @@ class MessageService {
             const messages = await Message.findAll({
                 where: {
                     [Op.or]: [
-                        { senderId, receiverId },
-                        { senderId: receiverId, receiverId: senderId }
+                        {
+                            senderId,
+                            receiverId,
+                            deletedForSender: false,
+                            deletedForEveryone: false
+                        },
+                        {
+                            senderId: receiverId,
+                            receiverId: senderId,
+                            deletedForReceiver: false,
+                            deletedForEveryone: false
+                        }
                     ]
                 },
                 order: [['createdAt', 'ASC']]
@@ -21,11 +30,11 @@ class MessageService {
         }
     }
 
-    static async getMessages() {}
+    static async getMessages() { }
 
-    static async getMessageById() {}
+    static async getMessageById() { }
 
-    static async getUnreadMessagesByUserId() {}
+    static async getUnreadMessagesByUserId() { }
 }
 
 export default MessageService;

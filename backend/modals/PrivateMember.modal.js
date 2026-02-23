@@ -29,6 +29,14 @@ const PrivateMemberModal = sequelize.define("private_members", {
     },
 },{
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['userId', 'associateUserId'],
+            name: 'unique_user_association'
+        }
+    ]
+    // Composite UNIQUE Index
 });
 
 export default PrivateMemberModal;

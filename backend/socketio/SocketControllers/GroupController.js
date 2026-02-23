@@ -11,7 +11,7 @@ export const leaveGroup = (socket) => {
         const memberArray = Array.isArray(group.memberIds)
             ? group.memberIds
             : (group.memberIds ? JSON.parse(group.memberIds) : []);
-        
+
         // Remove from GroupMember table
         await GroupMember.destroy({
             where: {
@@ -20,7 +20,7 @@ export const leaveGroup = (socket) => {
             }
         });
         const updatedMembers = memberArray.filter(id => Number(id) !== Number(userId));
-        
+
         await group.update({ memberIds: updatedMembers });
         socket.leave(String(groupId));
         logger.info(`User ${userId} left group ${groupId}`);

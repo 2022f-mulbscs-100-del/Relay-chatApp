@@ -19,15 +19,13 @@ function App() {
 
   //apis
   const { MarkGroupMessageAsRead } = useGroupApis();
-  const socket = useSocket();
   const { getGroupByUser } = useGroupApis();
-  const { associatedUser, setAssociatedUser } = useMessage();
 
   //context
-  const { setListOfChatUsers, listOfAllUsers, activeUserId, setMessage, listOfChatUsers, setOnlineUserIds } = useMessage();
+  const socket = useSocket();
+  const { listOfAllUsers, activeUserId, setMessage, setOnlineUserIds, associatedUser, setAssociatedUser, setActiveUserId } = useMessage();
   const { user } = useUser();
   const { listOfgroups, setListOfgroups } = useGroup();
-
 
 
   // REGISTER USER TO SOCKET.IO SERVER AND LISTEN FOR ONLINE USERS
@@ -73,8 +71,6 @@ function App() {
       socket.off("user_offline", handleofflineUser);
     };
   }, [socket, user?.id, setOnlineUserIds]);
-
-
 
   // to listen for group creation and updates to join the group room
   useEffect(() => {
@@ -152,8 +148,6 @@ function App() {
 
 
       if (activeUserId === String(msg.groupId)) {
-        ;
-
         setListOfgroups((prev: Group[]) => {
           return prev.map((group) => {
             if (String(group.id) === String(msg.groupId)) {
@@ -184,8 +178,7 @@ function App() {
     return () => {
       socket.off("group_message", handleGroupMessage);
     };
-  }, [socket, activeUserId, setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, listOfgroups, user?.id]);
-
+  }, [socket, activeUserId, setMessage, listOfAllUsers, listOfgroups, user?.id]);
 
   //to listen for incoming private messages
   useEffect(() => {
@@ -201,72 +194,78 @@ function App() {
 
 
       if (activeUserId === String(msg.fromUserId)) {
-        setListOfChatUsers((prev) => {
-          return prev.map((user: chatUser) => {
-            if (String(user.id) === String(msg.fromUserId)) {
+        setAssociatedUser((prev) => {
+          return prev.map((association) => {
+            if (String(association.associateUserId) === String(msg.fromUserId)) {
+              const updatedReceivedMessages = [...(association.associatedUser?.receivedMessages || []), {
+                id: msg.messageId,
+                senderId: msg.fromUserId,
+                receiverId: Number(msg.toUserId),
+                content: msg.content,
+                createdAt: msg.timestamp,
+                isRead: true
+              }]
               return {
-                ...user,
-                receivedMessages: [...(user.receivedMessages || []), {
-                  id: msg.messageId,
-                  senderId: msg.fromUserId,
-                  receiverId: Number(msg.toUserId),
-                  content: msg.content,
-                  createdAt: msg.timestamp,
-                  isRead: true
-                }]
+                ...association,
+                associatedUser: {
+                  ...association.associatedUser,
+                  receivedMessages: updatedReceivedMessages
+                }
               }
             }
-            return user;
+            return association;
           })
         })
       }
+
 
       if (activeUserId !== String(msg.fromUserId)) {
         if (!user?.messageAlerts) return;
         const isMuted = associatedUser?.find((user: AssociatedUser) => String(user.associateUserId) === String(msg.fromUserId))?.isMuted;
         if (!isMuted) {
-          toast.info(`New message from @${listOfAllUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`);
+          toast.info(
+            <div
+              onClick={() => {
+                window.history.pushState({}, "", "/?tab=chats");
+                setActiveUserId(String(msg.fromUserId))
+              }}
+            >
+              {`New message from @${listOfAllUsers.find((user: chatUser) => user.id === msg.fromUserId)?.username || "Unknown User"}`}
+            </div>
+
+          );
         }
 
-        const newUser = listOfChatUsers.find((user: chatUser) => String(user.id) === String(msg.fromUserId));
+        const newUser = associatedUser?.find((user: AssociatedUser) => String(user.associateUserId) === String(msg.fromUserId));
         if (newUser) {
-          setListOfChatUsers((prev) => {
-            return prev.map((user: chatUser) => {
-              if (String(user.id) === String(msg.fromUserId)) {
+
+          setAssociatedUser((prev) => {
+            return prev.map((association) => {
+              if (String(association.associateUserId) === String(msg.fromUserId)) {
+                const updatedReceivedMessages = [...(association.associatedUser?.receivedMessages || []), {
+                  id: msg.messageId,
+                  senderId: msg.fromUserId,
+                  receiverId: Number(msg.toUserId),
+                  content: msg.content,
+                  createdAt: msg.timestamp,
+                  isRead: false
+                }]
                 return {
-                  ...user,
-                  receivedMessages: [...(user.receivedMessages || []), {
-                    id: msg.messageId,
-                    senderId: msg.fromUserId,
-                    receiverId: Number(msg.toUserId),
-                    content: msg.content,
-                    createdAt: msg.timestamp,
-                    isRead: false
-                  }]
+                  ...association,
+                  associatedUser: {
+                    ...association.associatedUser,
+                    receivedMessages: updatedReceivedMessages
+                  }
                 }
               }
-              return user;
+              return association;
             })
-
-
           })
         }
         if (!newUser) {
           const userToAdd = listOfAllUsers.find((user: chatUser) => user.id === Number(msg.fromUserId));
           if (userToAdd) {
 
-            const userWithMessage: chatUser = {
-              ...userToAdd,
-              receivedMessages: [...(userToAdd?.receivedMessages || []), {
-                id: msg.messageId,
-                senderId: msg.fromUserId,
-                receiverId: Number(msg.toUserId),
-                content: msg.content,
-                createdAt: msg.timestamp,
-                isRead: false
-              }]
-            };
-            setListOfChatUsers((prev) => [...prev, userWithMessage]);
             setAssociatedUser((prev) => {
               if (prev.some((association) => Number(association.associateUserId) === Number(userToAdd.id))) {
                 return prev;
@@ -287,12 +286,13 @@ function App() {
                 isMuted: false,
                 isPinned: false
               }];
-            });
+            }
+
+            );
           }
         }
       }
       if (activeUserId === String(msg.fromUserId)) {
-
         await AxiosClient.post("/messages/updateMessage", { messageId: msg.messageId });
       }
     };
@@ -302,7 +302,7 @@ function App() {
     return () => {
       socket.off("private_message", handleMessageReceived);
     };
-  }, [socket, activeUserId, setMessage, listOfAllUsers, listOfChatUsers, setListOfChatUsers, user?.messageAlerts]);
+  }, [socket, activeUserId, setMessage, listOfAllUsers, associatedUser, setAssociatedUser, user?.messageAlerts]);
 
 
   return (

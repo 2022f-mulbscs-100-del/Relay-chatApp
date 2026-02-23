@@ -17,7 +17,7 @@ type ChatListProps = {
         isRead?: boolean;
         isReadBy?: (string | number)[];
     }[];
-    member?:{
+    member?: {
         id?: number | string;
         userId: string | number;
         groupId: string | number;
@@ -26,7 +26,7 @@ type ChatListProps = {
         categoroy?: string;
     }[];
     isOnline?: boolean;
-    mode:"group" | "private";
+    mode: "group" | "private";
     privateIsMuted?: boolean;
 };
 
@@ -43,6 +43,8 @@ const ChatList = ({
 }: ChatListProps) => {
 
 
+
+
     //context
     const { user } = useUser();
 
@@ -52,9 +54,10 @@ const ChatList = ({
         })
     }
 
-    const getUnreadCountForGroup = ()=>{
+
+    const getUnreadCountForGroup = () => {
         if (!receivedMessages || !user?.id) return 0;
-        return receivedMessages.filter((msg)=> !msg.isReadBy?.includes(user.id)).length;
+        return receivedMessages.filter((msg) => !msg.isReadBy?.includes(user.id)).length;
     }
 
 
@@ -71,11 +74,13 @@ const ChatList = ({
     const lastMessage = sortedMessages && sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1] : undefined;
     const activeChat = activeUserId === id;
 
-    
-   const isMuted = useMemo(()=>{
-    if (mode === "private") return privateIsMuted;
-    return member?.find((mem) => Number(mem.userId) === Number(user?.id))?.isMuted || false;
-    },[member, mode, privateIsMuted, user?.id])
+
+
+    const isMuted = useMemo(() => {
+        if (mode === "private") return privateIsMuted;
+        return member?.find((mem) => Number(mem.userId) === Number(user?.id))?.isMuted || false;
+    }, [member, mode, privateIsMuted, user?.id])
+
     return (
         <div
             className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${activeChat ? "border-slate-300 shadow-sm" : "border-slate-200"} bg-white hover:border-slate-300 hover:shadow-sm cursor-pointer transition`}

@@ -38,7 +38,7 @@ export interface chatUser {
    }[];
 }
 
-export interface AssociatedUser  {
+export interface AssociatedUser {
    id: number;
    associateUserId: number;
    userId: number;
@@ -52,6 +52,24 @@ export interface AssociatedUser  {
       location?: string;
       tags?: string[];
       lastSeen?: string | null | Date;
+      sentMessages?: {
+         id: number;
+         senderId: number;
+         receiverId: number;
+         content: string;
+         isRead: boolean;
+         ImageUrl?: string;
+         createdAt: string | Date;
+      }[];
+      receivedMessages?: {
+         id: number;
+         senderId: number;
+         receiverId: number;
+         content: string;
+         isRead: boolean;
+         ImageUrl?: string;
+         createdAt: string | Date;
+      }[]
    }
    category: string;
    isMuted: boolean;
