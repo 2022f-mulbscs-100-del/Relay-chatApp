@@ -44,9 +44,9 @@ const ChatList = ({
 
 
 
-
     //context
     const { user } = useUser();
+    const activeChat = activeUserId === id;
 
     const SortingMessage = (receivedMessages: ChatListProps["receivedMessages"]) => {
         return receivedMessages?.sort((a, b) => {
@@ -54,12 +54,10 @@ const ChatList = ({
         })
     }
 
-
     const getUnreadCountForGroup = () => {
         if (!receivedMessages || !user?.id) return 0;
         return receivedMessages.filter((msg) => !msg.isReadBy?.includes(user.id)).length;
     }
-
 
     const getUnreadCount = () => {
         if (!receivedMessages) return 0;
@@ -72,9 +70,6 @@ const ChatList = ({
 
     const sortedMessages = SortingMessage(receivedMessages || []);
     const lastMessage = sortedMessages && sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1] : undefined;
-    const activeChat = activeUserId === id;
-
-
 
     const isMuted = useMemo(() => {
         if (mode === "private") return privateIsMuted;

@@ -29,6 +29,7 @@ const ChatPageHeader = ({ onBack, setIsProfileModalOpen, setIsAddMemberModalOpen
     const { deletePrivateChat } = useUserApis();
     const {deleteGroup} = useGroupApis();
 
+    //delete private chat
     const handleDeleteChat = async () => {
         try {
             await deletePrivateChat(String(activeUserId));
@@ -41,6 +42,7 @@ const ChatPageHeader = ({ onBack, setIsProfileModalOpen, setIsAddMemberModalOpen
         }
     };
 
+    //delete group chat
     const handleGroupChatDeletion = async () => { 
         try {
             await deleteGroup(String(activeUserId));

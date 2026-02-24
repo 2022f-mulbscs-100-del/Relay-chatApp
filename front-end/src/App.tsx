@@ -102,6 +102,11 @@ function App() {
     const handleGroupMessage = (msg: { groupId: number; fromUserId: number; content: string; timestamp: Date }) => {
       if (String(msg.fromUserId) === String(user?.id)) return;
       console.log("Received group message:", msg);
+      const incomingGroupExists = listOfgroups?.some(group => String(group.id) === String(msg.groupId));
+      if (!incomingGroupExists) {
+        getGroupByUser();
+      }
+
       setMessage((prev: MessageProps[] | null) =>
         [...(prev || []), {
           senderId: msg.fromUserId,
@@ -130,11 +135,7 @@ function App() {
           }
         }
       }
-
-
       if (activeUserId !== String(msg.groupId)) {
-
-
         setListOfgroups((prev: Group[]) => {
           return prev.map((group) => {
             if (String(group.id) === String(msg.groupId)) {
@@ -156,8 +157,6 @@ function App() {
           })
         })
       }
-
-
       if (activeUserId === String(msg.groupId)) {
         setListOfgroups((prev: Group[]) => {
           return prev.map((group) => {
@@ -181,7 +180,6 @@ function App() {
         })
         MarkGroupMessageAsRead(activeUserId, user?.id);
       }
-
     };
 
     socket.on("group_message", handleGroupMessage);

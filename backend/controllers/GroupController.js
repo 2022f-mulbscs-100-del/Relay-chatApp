@@ -118,13 +118,13 @@ export const deleteGroupController = async (req, res, next) => {
         const groupMessage = await GroupMessage.findAll({
             where: {
                 groupId,
-                isDeletedBy: {
-                    where: Sequelize.where(
-                        Sequelize.fn('JSON_CONTAINS', Sequelize.col('isDeletedBy'), JSON.stringify(Number(id))),
-                        Op.eq,
-                        0
-                    ),
-                }
+                // isDeletedBy: {
+                //     where: Sequelize.where(
+                //         Sequelize.fn('JSON_CONTAINS', Sequelize.col('isDeletedBy'), JSON.stringify(Number(id))),
+                //         Op.eq,
+                //         0
+                //     ),
+                // }
             }
         })
 

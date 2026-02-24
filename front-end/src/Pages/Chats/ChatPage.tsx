@@ -45,7 +45,7 @@ const ChatPage = ({
     const [isLeaveGroupModalOpen, setIsLeaveGroupModalOpen] = useState(false);
 
     //context
-    const { message, onlineUserIds } = useMessage();
+    const { message,setMessage, onlineUserIds } = useMessage();
     const { user } = useUser();
     const socket = useSocket();
 
@@ -131,6 +131,11 @@ const ChatPage = ({
         }
     }
 
+    useEffect(() => {
+        return () => {
+            setMessage([]);
+        };
+    }, []);
 
     return (
         <div className="flex flex-col w-full h-full">

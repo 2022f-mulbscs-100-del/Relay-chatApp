@@ -18,6 +18,8 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
 
     const { listOfAllUsers } = useMessage();
     const socket = useSocket();
+    const { user } = useUser();
+
     const memberIds = useMemo(() => {
         return filterGroup?.memberIds || [];
     }, [filterGroup]);
@@ -41,8 +43,6 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
         };
     }, [setIsAddMemberModalOpen]);
 
-
-
     const filteredSearch = availableUsers.filter((user) => {
         const searchTerm = searchInput.toLowerCase();
         const userName = user.username.toLowerCase();
@@ -51,7 +51,6 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
     });
 
     const usersToRender = searchInput.trim().length === 0 ? availableUsers.slice(0, 12) : filteredSearch;
-    const { user } = useUser();
 
     const handleAddMembers = () => {
         if (!socket || !user) return;
