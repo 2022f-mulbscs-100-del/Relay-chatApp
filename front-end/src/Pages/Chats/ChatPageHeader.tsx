@@ -1,4 +1,5 @@
-import { FiChevronLeft, FiInfo } from "react-icons/fi";
+import { useEffect, useRef, useState } from "react";
+import { FiChevronLeft, FiInfo, FiMoreVertical } from "react-icons/fi";
 import { normalizeDate } from "../../utlis/NormalizeDate";
 import type { Group } from "../../types/group.type";
 import type { AssociatedUser } from "../../types/message.types";
@@ -28,6 +29,22 @@ const ChatPageHeader = ({ onBack, setIsProfileModalOpen, setIsAddMemberModalOpen
     const {setListOfgroups} = useGroup();
     const { deletePrivateChat } = useUserApis();
     const {deleteGroup} = useGroupApis();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const handleOutsideClick = (event: MouseEvent) => {
+            if (!menuRef.current) return;
+            if (!menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+        };
+    }, []);
 
     //delete private chat
     const handleDeleteChat = async () => {
@@ -56,7 +73,7 @@ const ChatPageHeader = ({ onBack, setIsProfileModalOpen, setIsAddMemberModalOpen
 
 return (
         <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-3 sm:px-4">
-            <div className="flex min-w-0 items-center gap-3">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
                 <button
                     type="button"
                     onClick={onBack}
@@ -86,81 +103,97 @@ return (
                     </div>
                 </div>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-
-                {mode === "private" ? (
-                    <>
-                        <button
-                            type="button"
-                            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
-                            onClick={() => setIsProfileModalOpen(true)}
-                            disabled={!filterUser}
-                            aria-label="View profile details"
-                        >
-                            <FiInfo className="h-4 w-4" />
-                        </button>
-                        <button
-                            type="button"
-                            className="hidden rounded-md bg-slate-900 px-3 py-1.5 text-xs text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex"
-                            onClick={() => setIsProfileModalOpen(true)}
-                            disabled={!filterUser}
-                        >
-                            View profile
-                        </button>
-                        <button className="hidden cursor-pointer rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 md:inline-flex"
-                            onClick={handleMuteToggle}
-                        >
-                            {foundUser?.isMuted ? "Unmute" : "Mute"}
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <button
-                            type="button"
-                            className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsAddMemberModalOpen(true)
-                            }}
-                        >
-                            Add member
-                        </button>
-                        <button
-                            type="button"
-                            className="hidden rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsGroupMemberModalOpen(true)
-                            }}
-                        >
-                            Members ({filterGroup?.memberIds?.length || 0})
-                        </button>
-                        <button
-                            type="button"
-                            className="rounded-md bg-rose-600 px-3 py-1.5 text-xs text-white transition hover:bg-rose-700"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsLeaveGroupModalOpen(true);
-                            }}
-                        >
-                            Leave group
-                        </button>
-                    </>
-                )}
+            <div className="relative ml-2 shrink-0" ref={menuRef}>
                 <button
                     type="button"
-                    className="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-50"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (mode === "private") {
-                            handleDeleteChat();
-                        } else {
-                            handleGroupChatDeletion();
-                        }
-                    }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+                    aria-label="Open chat actions"
+                    onClick={() => setIsMenuOpen((prev) => !prev)}
                 >
-                    Delete {mode === "private" ? "chat" : "group"}
+                    <FiMoreVertical className="h-4 w-4" />
                 </button>
+
+                {isMenuOpen && (
+                    <div className="absolute right-0 top-11 z-30 w-44 rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg">
+                        {mode === "private" ? (
+                            <>
+                                <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-xs text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    onClick={() => {
+                                        setIsProfileModalOpen(true);
+                                        setIsMenuOpen(false);
+                                    }}
+                                    disabled={!filterUser}
+                                >
+                                    <FiInfo className="h-4 w-4" />
+                                    View profile
+                                </button>
+                                <button
+                                    type="button"
+                                    className="flex w-full items-center rounded-md px-2.5 py-2 text-left text-xs text-slate-700 transition hover:bg-slate-50"
+                                    onClick={() => {
+                                        handleMuteToggle?.();
+                                        setIsMenuOpen(false);
+                                    }}
+                                >
+                                    {foundUser?.isMuted ? "Unmute" : "Mute"}
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    className="flex w-full items-center rounded-md px-2.5 py-2 text-left text-xs text-slate-700 transition hover:bg-slate-50"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsAddMemberModalOpen(true);
+                                        setIsMenuOpen(false);
+                                    }}
+                                >
+                                    Add member
+                                </button>
+                                <button
+                                    type="button"
+                                    className="flex w-full items-center rounded-md px-2.5 py-2 text-left text-xs text-slate-700 transition hover:bg-slate-50"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsGroupMemberModalOpen(true);
+                                        setIsMenuOpen(false);
+                                    }}
+                                >
+                                    Members ({filterGroup?.memberIds?.length || 0})
+                                </button>
+                                <button
+                                    type="button"
+                                    className="flex w-full items-center rounded-md px-2.5 py-2 text-left text-xs text-rose-600 transition hover:bg-rose-50"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsLeaveGroupModalOpen(true);
+                                        setIsMenuOpen(false);
+                                    }}
+                                >
+                                    Leave group
+                                </button>
+                            </>
+                        )}
+                        <button
+                            type="button"
+                            className="flex w-full items-center rounded-md px-2.5 py-2 text-left text-xs text-rose-600 transition hover:bg-rose-50"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (mode === "private") {
+                                    handleDeleteChat();
+                                } else {
+                                    handleGroupChatDeletion();
+                                }
+                                setIsMenuOpen(false);
+                            }}
+                        >
+                            Delete {mode === "private" ? "chat" : "group"}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -311,7 +311,7 @@ const Chats = () => {
                               receivedMessages={allMessages}
                               isOnline={user.isOnline}
                               mode="private"
-                              privateIsMuted={associatedUser?.find((association) => Number(association.associateUserId) === Number(user.id))?.isMuted || false}
+                              privateIsMuted={associatedUser?.find((association) => Number(association.associateUserId) === Number(user.associatedUser.id))?.isMuted || false}
                            />
                         );
                      })}

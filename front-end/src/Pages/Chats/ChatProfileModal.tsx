@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FiMail, FiMapPin, FiPhoneCall, FiSend, FiTag, FiUser, FiVideo, FiX } from "react-icons/fi";
+import { FiMail, FiMapPin, FiSend, FiTag, FiUser, FiX } from "react-icons/fi";
 
 type ChatProfileModalProps = {
   open: boolean;
@@ -15,6 +15,7 @@ type ChatProfileModalProps = {
     tags?: string[];
     lastSeen?: string | null | Date;
     isOnline?: boolean;
+    createdAt?: Date;
   };
   totalMessages?: number;
   firstMessageAt?: string | Date;
@@ -25,10 +26,11 @@ const ChatProfileModal = ({
   onClose,
   user,
   totalMessages = 0,
-  firstMessageAt,
 }: ChatProfileModalProps) => {
   useEffect(() => {
     if (!open) return;
+
+    console.log("ChatProfileModal opened for user:", user);
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -50,11 +52,7 @@ const ChatProfileModal = ({
 
   if (!open) return null;
 
-  const joinedDate = firstMessageAt ? new Date(firstMessageAt) : null;
-  const formattedJoinedDate =
-    joinedDate && !Number.isNaN(joinedDate.getTime())
-      ? joinedDate.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
-      : "No history yet";
+
 
   return (
     <div
@@ -95,7 +93,10 @@ const ChatProfileModal = ({
                 <p className={`text-sm font-medium ${user?.isOnline ? "text-emerald-600" : "text-slate-500"}`}>
                   {user?.isOnline ? "Online now" : "Away"}
                 </p>
-                <p className="text-xs text-slate-500">Connected since {formattedJoinedDate}</p>
+                <p className="text-xs text-slate-500">Connected since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, {
+                  month: "short", day: "numeric",
+                  year: "numeric"
+                }) : "Unknown"}</p>
               </div>
             </div>
 
@@ -129,27 +130,14 @@ const ChatProfileModal = ({
           <section className="space-y-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-sm font-semibold text-slate-800">Quick actions</p>
-              <div className="mt-3 grid grid-cols-3 gap-2">
+              <div className="mt-3 ">
                 <button
                   type="button"
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-700 transition hover:bg-slate-100"
+                  className="rounded-xl w-full border border-slate-200 bg-slate-50 p-3 text-slate-700 transition hover:bg-slate-100"
+                  onClick={() => { onClose() }}
                 >
                   <FiSend className="mx-auto h-4 w-4" />
                   <span className="mt-1 block text-[11px]">Message</span>
-                </button>
-                <button
-                  type="button"
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-700 transition hover:bg-slate-100"
-                >
-                  <FiPhoneCall className="mx-auto h-4 w-4" />
-                  <span className="mt-1 block text-[11px]">Audio</span>
-                </button>
-                <button
-                  type="button"
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-700 transition hover:bg-slate-100"
-                >
-                  <FiVideo className="mx-auto h-4 w-4" />
-                  <span className="mt-1 block text-[11px]">Video</span>
                 </button>
               </div>
             </div>

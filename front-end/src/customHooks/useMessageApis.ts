@@ -53,7 +53,6 @@ export const useMessageApis = () => {
             //         id: normalizedId,
             //     };
             // });
-            console.log("Fetched associated users:", response.data.associatedUser);
             setAssociatedUser(response.data.associatedUser);
 
         }).catch(() => {

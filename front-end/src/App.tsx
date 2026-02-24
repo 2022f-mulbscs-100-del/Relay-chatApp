@@ -101,7 +101,6 @@ function App() {
 
     const handleGroupMessage = (msg: { groupId: number; fromUserId: number; content: string; timestamp: Date }) => {
       if (String(msg.fromUserId) === String(user?.id)) return;
-      console.log("Received group message:", msg);
       const incomingGroupExists = listOfgroups?.some(group => String(group.id) === String(msg.groupId));
       if (!incomingGroupExists) {
         getGroupByUser();
