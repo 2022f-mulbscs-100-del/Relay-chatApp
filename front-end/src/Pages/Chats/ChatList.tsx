@@ -28,6 +28,7 @@ type ChatListProps = {
     isOnline?: boolean;
     mode: "group" | "private";
     privateIsMuted?: boolean;
+    image?: string | null;
 };
 
 const ChatList = ({
@@ -39,7 +40,8 @@ const ChatList = ({
     isOnline = false,
     member,
     mode,
-    privateIsMuted = false
+    privateIsMuted = false,
+    image
 }: ChatListProps) => {
 
 
@@ -84,7 +86,7 @@ const ChatList = ({
             }}
         >
             <div className="relative w-11 h-11 shrink-0">
-                <img className="w-full h-full rounded-full object-cover" src="/360_F_133149161_cZzY9SYCE9FjMOwMGRJ26W8OqMZx1opU.jpg" alt="" />
+                <img className="w-full h-full rounded-full object-cover" src={image || "/360_F_133149161_cZzY9SYCE9FjMOwMGRJ26W8OqMZx1opU.jpg"} alt="" />
                 {isOnline === true &&
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
                 }

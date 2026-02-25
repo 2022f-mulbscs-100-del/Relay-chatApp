@@ -9,7 +9,7 @@ const ProfileInfoCard = () => {
                 <div className="flex flex-col md:flex-row md:items-end gap-5 pt-5">
                     <div className="flex gap-3">
                         <img
-                            src={user?.profilePic || "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=300&h=300&fit=crop"}
+                            src={user?.ImageUrl || "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=300&h=300&fit=crop"}
                             alt={user?.username}
                             className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-sm"
                         />

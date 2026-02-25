@@ -159,6 +159,7 @@ class UserService {
         user.tags = data.tags ?? user.tags;
         user.emailtwoFactor = data.emailtwoFactor ?? user.emailtwoFactor;
         user.totpEnabled = data.totpEnabled ?? user.totpEnabled;
+        user.imageUrl = data.imageUrl ?? user.imageUrl;
 
         try {
          

@@ -30,7 +30,6 @@ const ChatProfileModal = ({
   useEffect(() => {
     if (!open) return;
 
-    console.log("ChatProfileModal opened for user:", user);
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {

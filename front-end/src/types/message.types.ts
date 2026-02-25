@@ -5,6 +5,7 @@ export interface MessageProps {
    groupId?: string;
    content?: string;
    createdAt?: string | Date;
+   ImageUrl?: string | null;
    isRead?: boolean;
 }
 
@@ -46,7 +47,7 @@ export interface AssociatedUser {
       id: number;
       username: string;
       email?: string;
-      profilePic?: string;
+      ImageUrl?: string | null;
       title?: string;
       about?: string;
       location?: string;
@@ -58,7 +59,7 @@ export interface AssociatedUser {
          receiverId: number;
          content: string;
          isRead: boolean;
-         ImageUrl?: string;
+         ImageUrl?: string | null;
          createdAt: string | Date;
       }[];
       receivedMessages?: {
@@ -67,7 +68,7 @@ export interface AssociatedUser {
          receiverId: number;
          content: string;
          isRead: boolean;
-         ImageUrl?: string;
+         ImageUrl?: string | null;
          createdAt: string | Date;
       }[]
    }

@@ -3,9 +3,10 @@ import { useUser } from "../../context/UserProvider";
 import { normalizeDate } from "../../utlis/NormalizeDate";
 type ChatMessageProps = {
     messageList: {
-        fromUserId: number ;
+        fromUserId: number;
         content: string;
         createdAt?: Date | string;
+        ImageUrl?: string | null
     }[];
 }
 
@@ -19,17 +20,12 @@ const ChatMessage = ({
 
     useLayoutEffect(() => {
         if (!lastMessageRef.current) return;
-
-
-
         if (!hasMountedRef.current) {
             lastMessageRef.current.scrollIntoView({ behavior: "auto", block: "end" });
             hasMountedRef.current = true;
             InitialScrollRef.current = true;
             lastMessageRef.current.scrollIntoView({ behavior: "auto", block: "end" });
             return;
-
-
         }
     }, [messageList]);
 
@@ -38,7 +34,7 @@ const ChatMessage = ({
         lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }, [messageList.length]);
 
-
+    console.log("Rendering ChatMessage with messages:", messageList);
     return (
         <>
             {messageList.map((message, index) => {
@@ -51,6 +47,13 @@ const ChatMessage = ({
                                 : 'bg-white text-slate-900 border border-slate-200 rounded-bl-md'
                                 }`}
                         >
+                            {message.ImageUrl && (
+                                <img
+                                    src={message.ImageUrl}
+                                    alt="Sent image"
+                                    className="mb-2 max-h-60 w-auto rounded-lg border border-slate-200 object-cover shadow-sm"
+                                />
+                            )}
                             <p className=" max-w-[500px] h-full   wrap-break-word" ref={index === messageList.length - 1 ? lastMessageRef : null}>
                                 {message.content}
                             </p>
