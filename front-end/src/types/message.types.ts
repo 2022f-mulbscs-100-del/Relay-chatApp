@@ -47,7 +47,7 @@ export interface AssociatedUser {
       id: number;
       username: string;
       email?: string;
-      ImageUrl?: string | null;
+      imageUrl?: string | null;
       title?: string;
       about?: string;
       location?: string;

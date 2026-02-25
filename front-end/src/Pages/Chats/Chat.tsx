@@ -46,6 +46,7 @@ const Chats = () => {
          if (inputMessage.trim() === "") return;
       }
       const imageBuffer = await toBuffer(previewImageUrl);
+      console.log("akljkfjdsf",imageBuffer)
       socket.emit("private_message", {
          content: inputMessage,
          toUserId: String(activeUserId),
@@ -366,7 +367,7 @@ const Chats = () => {
                                  activeUserId={activeUserId}
                                  receivedMessages={allMessages}
                                  isOnline={user.isOnline}
-                                 image={user.associatedUser.ImageUrl}
+                                 image={user.associatedUser.imageUrl}
                                  mode="private"
                                  privateIsMuted={associatedUser?.find((association) => Number(association.associateUserId) === Number(user.associatedUser.id))?.isMuted || false}
                               />

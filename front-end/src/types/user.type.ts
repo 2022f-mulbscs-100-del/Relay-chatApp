@@ -11,7 +11,7 @@ export interface User  {
     about: string;
     location: string;
     tags: string[];
-    ImageUrl: string | null;
+    imageUrl: string | null;
     emailtwoFactor: boolean;
     totpEnabled:boolean;
     passKeyEnabled:boolean;

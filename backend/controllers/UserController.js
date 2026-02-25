@@ -185,10 +185,10 @@ export const updateAssociatedUserController = async (req, res, next) => {
 
 export const UserProfileSetupController = async (req, res, next) => {
     const { id } = req.user;
-    const { username, phone, location, about, title, tags,imageUrl } = req.body;
+    const { username, phone, location, about, title, tags, imageUrl } = req.body;
 
     try {
-        const { user } = await UserService.UpdateUserProfile(id, { username, phone, location, about, title, tags,imageUrl });
+        const { user } = await UserService.UpdateUserProfile(id, { username, phone, location, about, title, tags, imageUrl });
         logger.info(`User profile setup completed successfully for ID: ${id}`);
         return res.status(200).json({
             success: true,
@@ -387,7 +387,7 @@ export const deleteChatController = async (req, res, next) => {
         logger.info(`Delete chat requested by user ID: ${id} for associated user ID: ${associateUserId}`);
 
         const user = await User.findByPk(id);
-        
+
         let associatedUserArray = [];
         if (user.hasMessaged) {
             try {
@@ -396,7 +396,7 @@ export const deleteChatController = async (req, res, next) => {
                 associatedUserArray = [];
             }
         }
-        
+
         const updatedAssociatedUserArray = associatedUserArray.filter((userId) => userId !== associateUserId);
         user.hasMessaged = updatedAssociatedUserArray;
         await user.save();
@@ -464,6 +464,47 @@ export const deleteChatController = async (req, res, next) => {
         });
     } catch (error) {
         logger.error(`Error deleting chat for user ID ${id} and associate user ID ${associateUserId}: ${error.message}`, { stack: error.stack });
+        next(error);
+    }
+}
+
+
+export const getSharedMediaController = async (req, res, next) => {
+
+    const { id } = req.user;
+    const { limit } = req.query;
+    try {
+        const messages = await Message.findAll({
+            where: {
+                [Op.or]: [
+                    { senderId: id },
+                    { receiverId: id }
+                ],
+                ImageUrl: {
+                    [Op.ne]: null
+                },
+                deletedForEveryone: false,
+                [Op.or]: [
+                    { deletedForSender: false },
+                    { deletedForReceiver: false }
+                ]
+            },
+            order: [['createdAt', 'DESC']],
+            limit: parseInt(limit) || 20
+        });
+        const sharedMedia = [];
+        for (const message of messages) {
+            if (message.ImageUrl) {
+                sharedMedia.push(message.ImageUrl);
+                console.log(`Shared media found: ${message.ImageUrl} for message ID: ${message.id}`);
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            sharedMedia: sharedMedia
+        });
+    } catch (error) {
         next(error);
     }
 }

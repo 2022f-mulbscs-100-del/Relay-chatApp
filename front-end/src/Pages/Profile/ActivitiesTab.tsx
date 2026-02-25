@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { useUser } from "../../context/UserProvider";
-
-const ActivitiesTab = () => {
+import GlobalImagePreviewContainer from "../../Component/GlobalImagePreviewContainer";
+interface ActivitiesTabProps {
+    sharedMedia: string[];
+}
+const ActivitiesTab = ({ sharedMedia }: ActivitiesTabProps) => {
 
     const [activeTab, setActiveTab] = useState('about');
     const { user } = useUser();
-    const recentMedia = [
-        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=300&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1618556450994-a6a128ef0d9d?w=300&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=300&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1618004652321-13a63e576b80?w=300&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1618005198946-4e1b2e0c2ebb?w=300&h=300&fit=crop'
-    ];
+
+    const [imagePreview, setImagePreview]= useState<string | null>(null);
 
     const activities = [
         { text: 'Sent a message to Sarah', time: '2 hours ago', color: 'bg-purple-500' },
@@ -62,13 +59,25 @@ const ActivitiesTab = () => {
             {activeTab === 'media' && (
                 <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <h3 className="text-lg font-semibold mb-4">Shared media</h3>
-                    <div className="grid grid-cols-3 gap-3">
-                        {recentMedia.map((url, index) => (
-                            <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200">
+                    <div className="max-h-[410px] overflow-auto ">
+                    <div className="grid grid-cols-4 gap-3">
+                        {sharedMedia.map((url, index) => (
+                            <>
+                            {imagePreview === url &&
+                            <GlobalImagePreviewContainer
+                                key={`preview-${index}`}
+                                imageUrl={url}
+                                onClose={() => setImagePreview(null)}
+                            />}
+                            <div key={index} className="relative   rounded-lg overflow-hidden border border-slate-200" 
+                            onClick={() => setImagePreview(url)}
+                            >
                                 <img src={url} alt={`Media ${index + 1}`} className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition" />
                             </div>
+                            </>
                         ))}
+                    </div>
                     </div>
                 </div>
             )}
