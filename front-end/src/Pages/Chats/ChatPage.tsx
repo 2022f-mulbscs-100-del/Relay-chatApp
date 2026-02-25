@@ -63,7 +63,6 @@ const ChatPage = ({
     const { MarkGroupMessageAsRead } = useGroupApis();
     const { associatedUser, setAssociatedUser } = useMessage();
 
-console.log("--------->>>>>mesage",message)
 
     //filter user from list of chat users to show the name of the user
     const foundUser = associatedUser?.find(user => String(user.associateUserId) === activeUserId);
@@ -105,7 +104,6 @@ console.log("--------->>>>>mesage",message)
         return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []);
     }, [message, activeUserId, user?.id]);
 
-    console.log("------------>>>>>filter message", FilterMessage);
 
     //filter group from list of groups to show the name of the group
     const filterGroup = listOfgroups?.find((group: Group) => (String(group.id)) === activeUserId);
@@ -200,7 +198,8 @@ console.log("--------->>>>>mesage",message)
                                 key: msg.id,
                                 fromUserId: Number(msg.senderId) || 0,
                                 content: msg.content || '',
-                                createdAt: msg.createdAt || ""
+                                createdAt: msg.createdAt || "",
+                                ImageUrl: msg.ImageUrl
                             }))}
                         />
                     }

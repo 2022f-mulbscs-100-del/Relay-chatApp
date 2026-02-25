@@ -19,7 +19,6 @@ export const upload = multer({ storage });
 export const uploadHandler = (req, res, next) => { // multer's single file upload middleware
     upload.single("file")(req, res, (err) => {
         if (err) {
-            console.log("FULL ERROR:", err); 
             logger.error("Multer upload error:", err.message);
 
             return res.status(400).json({

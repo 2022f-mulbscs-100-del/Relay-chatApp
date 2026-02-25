@@ -4,6 +4,7 @@ import GroupMessage from "../../modals/GroupMessage.modal.js";
 import GroupService from "../../services/Groups/GroupService.js";
 import AuthService from "../../services/Auth/AuthService.js";
 import GroupMember from "../../modals/GroupMember.modal.js";
+import axios from "axios";
 
 export const leaveGroup = (socket) => {
     return async ({ groupId, userId }) => {
@@ -68,18 +69,43 @@ export const addMemberToGroup = (io) => {
 }
 
 export const groupMessage = (io, socket) => {
-    return async ({ groupId, content, userId }) => {
+    return async ({ groupId, content, userId, ImageUrl }) => {
         if (!socket.userId) return;
+        const rawBufferImage = ImageUrl;
+        let safeURL = null;
+
+        if (rawBufferImage) {
+            //converting arraybuffer to blob
+            const blob = new Blob(
+                [new Uint8Array(rawBufferImage)],
+                { type: "image/png" }
+            );
+
+            //blob to file
+            const file = new File([blob], "image.png", { type: "image/png" });
+
+            //formdata to send file 
+            const form = new FormData();
+            form.append("file", file);
+
+            //uploading image
+            const res = await axios.post("http://localhost:2404/api/images/upload", form);
+            safeURL = res.data.imageUrl;
+            console.log("Image uploaded successfully, URL:", safeURL);
+        }
+
         io.to(String(groupId)).emit("group_message", {
             groupId,
             content,
             fromUserId: userId,
+            ImageUrl: rawBufferImage || null,
         })
 
         await GroupMessage.create({
             groupId,
             senderId: socket.userId,
             content,
+            ImageUrl: rawBufferImage ? safeURL : null
         })
     }
 }
