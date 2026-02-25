@@ -185,10 +185,10 @@ export const updateAssociatedUserController = async (req, res, next) => {
 
 export const UserProfileSetupController = async (req, res, next) => {
     const { id } = req.user;
-    const { username, phone, location, about, title, tags } = req.body;
+    const { username, phone, location, about, title, tags,imageUrl } = req.body;
 
     try {
-        const { user } = await UserService.UpdateUserProfile(id, { username, phone, location, about, title, tags });
+        const { user } = await UserService.UpdateUserProfile(id, { username, phone, location, about, title, tags,imageUrl });
         logger.info(`User profile setup completed successfully for ID: ${id}`);
         return res.status(200).json({
             success: true,

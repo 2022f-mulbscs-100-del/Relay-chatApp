@@ -68,8 +68,10 @@ export const useMessageApis = () => {
         AxiosClient.get(`/messages/getMessages/${userId}`)
             .then((response) => {
                 setMessage(response.data.messages);
+                setLoading(false);
             })
             .catch(() => {
+                setLoading(false);
                 throw new Error("Failed to fetch messages for user");
             });
     }

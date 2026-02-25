@@ -32,10 +32,6 @@ const User  = sequelize.define("users", {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    profilePic: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
     tags:{
         type: DataTypes.JSON,
         defaultValue: [],
@@ -67,6 +63,10 @@ const User  = sequelize.define("users", {
     isSocialLogin: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+    },
+    imageUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
 }, {
     timestamps: true,

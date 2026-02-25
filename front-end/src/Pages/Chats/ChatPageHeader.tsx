@@ -83,7 +83,7 @@ return (
                     <FiChevronLeft className="h-4 w-4" />
                 </button>
                 <div className="relative h-11 w-11 shrink-0 rounded-full ring-2 ring-slate-200">
-                    <img className="h-full w-full rounded-full object-cover" src={filterUser?.associatedUser.profilePic || "/153608270.jpeg"} alt={filterUser?.associatedUser?.username || "chat user"} />
+                    <img className="h-full w-full rounded-full object-cover" src={filterUser?.associatedUser.ImageUrl || "/153608270.jpeg"} alt={filterUser?.associatedUser?.username || "chat user"} />
                     {mode === "private" && (
                         <span
                             className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${filterUser?.isOnline === true ? "bg-emerald-500" : "bg-slate-400"}`}

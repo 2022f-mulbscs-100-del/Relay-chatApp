@@ -38,13 +38,14 @@ export const useUserApis = () => {
         }
     }
     // SETUP USER PROFILE API CALL
-    const setupProfile = async (phone: string, title: string, about: string,) => {
+    const setupProfile = async (phone: string, title: string, about: string, imageUrl?: string) => {
         setLoading(true);
         try {
             await AxiosClient.post("/users/UserProfileSetup", {
                 phone,
                 title,
                 about,
+                imageUrl,
             });
             setLoading(false);
         } catch (error) {

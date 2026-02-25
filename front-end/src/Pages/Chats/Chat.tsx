@@ -19,6 +19,7 @@ const Chats = () => {
    const [inputMessage, setInputMessage] = useState("");
    const [tab, setTab] = useState<"chats" | "unread" | "groups">(url.searchParams.get("tab") as "chats" | "unread" | "groups" || "chats");
    const toastRef = useRef(false);
+   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
    //HOOKSf
    const socket = useSocket();
@@ -108,10 +109,16 @@ const Chats = () => {
    const SendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!socket || activeUserId === null) return;
-      if (inputMessage.trim() === "") return;
+      if(!previewImageUrl){
+
+         if (inputMessage.trim() === "") return;
+      }
+      const imageBuffer = await toBuffer(previewImageUrl);
+      console.log("Image buffer:", previewImageUrl);
       socket.emit("private_message", {
          content: inputMessage,
-         toUserId: String(activeUserId)
+         toUserId: String(activeUserId),
+         imageUrl: imageBuffer
       });
 
       // const isSaved = async () => {
@@ -127,11 +134,11 @@ const Chats = () => {
       //    return FilterMessage;
       // }
 
-
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
          senderId: Number(user?.id),
          receiverId: Number(activeUserId),
          content: inputMessage,
+         ImageUrl: previewImageUrl || undefined,
          createdAt: new Date()
       }]);
 
@@ -194,6 +201,7 @@ const Chats = () => {
       });
 
       setInputMessage("");
+      setPreviewImageUrl(null);
       // await isSaved();
 
    }
@@ -264,6 +272,14 @@ const Chats = () => {
    }, [onlineUserIds, associatedUser]);
 
 
+   const toBuffer = async (fileUrl: string | null): Promise<ArrayBuffer | null> => {
+      if (!fileUrl) return null;
+
+      const response = await fetch(fileUrl);
+      const fileBlob = await response.blob();
+      return fileBlob.arrayBuffer();
+   }
+
 
    return (
       <div className="h-[100dvh] bg-slate-50">
@@ -310,6 +326,7 @@ const Chats = () => {
                               activeUserId={activeUserId}
                               receivedMessages={allMessages}
                               isOnline={user.isOnline}
+                              image={user.associatedUser.ImageUrl}
                               mode="private"
                               privateIsMuted={associatedUser?.find((association) => Number(association.associateUserId) === Number(user.associatedUser.id))?.isMuted || false}
                            />
@@ -350,6 +367,8 @@ const Chats = () => {
                         key={activeUserId}
                         activeUserId={activeUserId}
                         onBack={() => setActiveUserId(null)}
+                        previewImageUrl={previewImageUrl}
+                        setPreviewImageUrl={setPreviewImageUrl}
                      />
                      : (
                         <div className="flex h-full w-full items-center justify-center bg-slate-50">

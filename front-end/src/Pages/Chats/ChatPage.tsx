@@ -13,6 +13,8 @@ import GroupMemberModal from "./GroupMemberModal";
 import LeaveGroupModal from "./LeaveGroupModal";
 import { toast } from "react-toastify";
 import ChatPageHeader from "./ChatPageHeader";
+import { GoPaperclip } from "react-icons/go";
+import ImagePreviewComponent from "../../Component/ImagePreviewComponent";
 
 
 type ChatPageProps = {
@@ -24,6 +26,9 @@ type ChatPageProps = {
     mode?: "private" | "group";
     listOfgroups?: Group[];
     onBack?: () => void;
+    previewImageUrl?: string | null;
+    setPreviewImageUrl?: React.Dispatch<React.SetStateAction<string | null>>;
+
 }
 const ChatPage = ({
     activeUserId,
@@ -33,7 +38,9 @@ const ChatPage = ({
     setInputMessage,
     listOfgroups,
     mode = "private",
-    onBack
+    onBack,
+    previewImageUrl,
+    setPreviewImageUrl
 }: ChatPageProps) => {
 
 
@@ -43,9 +50,11 @@ const ChatPage = ({
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [isGroupMemberModalOpen, setIsGroupMemberModalOpen] = useState(false);
     const [isLeaveGroupModalOpen, setIsLeaveGroupModalOpen] = useState(false);
+    const ImageRef = useRef<HTMLInputElement | null>(null);
+
 
     //context
-    const { message,setMessage, onlineUserIds } = useMessage();
+    const { message, setMessage, onlineUserIds } = useMessage();
     const { user } = useUser();
     const socket = useSocket();
 
@@ -54,6 +63,7 @@ const ChatPage = ({
     const { MarkGroupMessageAsRead } = useGroupApis();
     const { associatedUser, setAssociatedUser } = useMessage();
 
+console.log("--------->>>>>mesage",message)
 
     //filter user from list of chat users to show the name of the user
     const foundUser = associatedUser?.find(user => String(user.associateUserId) === activeUserId);
@@ -95,6 +105,8 @@ const ChatPage = ({
         return (message?.filter(msg => (String(msg.senderId) === activeUserId && msg.receiverId === user?.id) || (msg.senderId === user?.id && String(msg.receiverId) === activeUserId)) || []);
     }, [message, activeUserId, user?.id]);
 
+    console.log("------------>>>>>filter message", FilterMessage);
+
     //filter group from list of groups to show the name of the group
     const filterGroup = listOfgroups?.find((group: Group) => (String(group.id)) === activeUserId);
 
@@ -131,14 +143,28 @@ const ChatPage = ({
         }
     }
 
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.currentTarget.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setPreviewImageUrl?.(url);
+            console.log("Selected file:", url);
+        }
+    }
+
     useEffect(() => {
         return () => {
             setMessage([]);
         };
     }, []);
 
+
+    // useEffect(() => {
+    //     console.log(previewImageUrl)
+    // }, [previewImageUrl])
+
     return (
-        <div className="flex flex-col w-full h-full">
+        <div className="relative flex flex-col w-full h-full">
 
             <ChatPageHeader
                 filterUser={filterUser}
@@ -163,7 +189,8 @@ const ChatPage = ({
                                 key: msg.id,
                                 fromUserId: msg.senderId || 0,
                                 content: msg.content || '',
-                                createdAt: msg.createdAt
+                                createdAt: msg.createdAt,
+                                ImageUrl: msg.ImageUrl
                             }))}
                         />
 
@@ -181,7 +208,6 @@ const ChatPage = ({
                 </div>
 
             </div>
-
             <form onSubmit={mode === "private" ? SendMessage : SendGroupMessage} className="border-t border-slate-200 bg-white px-3 py-3 sm:px-4">
                 <div className="flex items-center gap-2">
                     <input
@@ -189,9 +215,18 @@ const ChatPage = ({
                         className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
                         type="text"
                         placeholder="Type a message…"
-                        value={inputMessage}
+                        value={previewImageUrl ? "" : inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                     />
+                    <input ref={ImageRef} type="file" accept="image/*" className="hidden"
+                        onChange={handleFileUpload}
+                    />
+                    <button
+                        onClick={() => { ImageRef.current?.click() }}
+                        type="button"
+                        className="px-3 py-2 cursor-pointer rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition">
+                        <GoPaperclip />
+                    </button>
                     <button
                         type="submit"
                         className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800 transition">
@@ -227,6 +262,13 @@ const ChatPage = ({
                     filterGroup={filterGroup}
                 />
             )}
+            {previewImageUrl &&
+                <ImagePreviewComponent imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl?.("")}
+                    sendMessage={(e) => (mode === "private" ? SendMessage : SendGroupMessage)?.(e)}
+                    inputMessage={inputMessage}
+                    setInputMessage={setInputMessage}
+                />
+            }
         </div>
     )
 }
@@ -244,3 +286,8 @@ export default ChatPage;
 //we just using the privatemessage as an route to send message to the specific 
 //user the private message event is an route in which all the users/rooms
 //exist and we send message to specific user by specifying their id using the private room event (the route)
+
+
+
+// Either encode to Base64 and send as JSON (easy), for image sharing on websocket 
+// Or send raw binary (ArrayBuffer/Blob) for efficiency

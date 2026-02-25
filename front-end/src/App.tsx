@@ -191,11 +191,17 @@ function App() {
   //to listen for incoming private messages
   useEffect(() => {
     if (!socket) return;
-    const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number }) => {
+    const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number,ImageUrl:string }) => {
+    let ImageUrl: string | null = null;
+      if(msg.ImageUrl){
+      const blob = new Blob([msg.ImageUrl], { type: "image/png" }); 
+       ImageUrl = URL.createObjectURL(blob);
+    }
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
         senderId: msg.fromUserId,
         receiverId: Number(msg.toUserId),
         content: msg.content,
+        ImageUrl: ImageUrl || null,
         createdAt: msg.timestamp
       }]);
 

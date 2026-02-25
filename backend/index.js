@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-const result = dotenv.config();
+dotenv.config();
 import express from 'express';
 import "./modals/associations.js";
 import cookieParser from 'cookie-parser';
@@ -13,6 +13,7 @@ import UserRoutes from './routes/UserRoutes.js';
 import { logger } from './Logger/Logger.js';
 import MessageRoutes from './routes/MessageRoutes.js';
 import GroupRoutes from './routes/GroupRoutes.js';
+import ImageUploadRoutes from './routes/ImageUploadRoutes.js';
 const GooglePassport = await import('./middleware/passport/GooglePassport.js').then(m => m.default);
 // In ES modules, ALL import statements at the top of a file are resolved BEFORE any code executes, even before dotenv.config().
 // When GooglePassport.js loads, process.env variables are still undefined because dotenv hasn't loaded them yet.
@@ -46,6 +47,7 @@ app.use("/api/auth", AuthRoutes);
 app.use("/api/users", UserRoutes);
 app.use("/api/messages", MessageRoutes);
 app.use("/api/groups", GroupRoutes);
+app.use("/api/images", ImageUploadRoutes);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
