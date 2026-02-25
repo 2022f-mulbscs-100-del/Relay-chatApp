@@ -3,6 +3,8 @@ dotenv.config();
 import express from 'express';
 import "./modals/associations.js";
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import AuthRoutes from './routes/AuthRoutes.js';
 import { authenticateDB } from './config/dbConfig.js';
 import RefreshRoutes from './routes/RefreshRoute.js';
@@ -19,19 +21,33 @@ const GooglePassport = await import('./middleware/passport/GooglePassport.js').t
 // When GooglePassport.js loads, process.env variables are still undefined because dotenv hasn't loaded them yet.
 const app = express();
 const PORT = 2404;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicPath = path.join(__dirname, 'public');
+const isProduction = process.env.NODE_ENV === 'production';
 
 const server = http.createServer(app);
 
 initializeSocket(server);
 
 
-app.use(
-  cors({
-    origin: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
-  })
-);
+if (!isProduction) {
+  app.use(
+    cors({
+      origin: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      credentials: true,
+    })
+  );
+} else if (process.env.FRONTEND_URL) {
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      credentials: true,
+    })
+  );
+}
 // Initialize Google Passport middleware
 app.use(GooglePassport.initialize());
 
@@ -48,6 +64,18 @@ app.use("/api/users", UserRoutes);
 app.use("/api/messages", MessageRoutes);
 app.use("/api/groups", GroupRoutes);
 app.use("/api/images", ImageUploadRoutes);
+
+app.use(express.static(publicPath));
+
+app.get(/^(?!\/api).*/, (req, res) => {
+  return res.sendFile(path.join(publicPath, 'index.html'));
+});
+
+
+// it is the fallback route for any route that is not defined in the backend 
+//it is used to serve the index.html file for any route that is not defined in the backend
+//cause the frontend is a single page application and it will handle the routing on the client side
+
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

@@ -7,4 +7,14 @@ export default defineConfig({
     react(),
     tailwindcss(), // ✅ this is correct
   ],
+  build: {
+    outDir: '../backend/public',
+    emptyOutDir: true, //emptyOutDir: true
+  },
 })
+
+
+// • auto build script
+// • deployment ready
+// • nginx ready
+// • domain ready
