@@ -36,14 +36,14 @@ const ContactsList = ({ associatedUser }: ContactsListProps) => {
     }
 
     const handleCategoryChange = async (contactId: number, category: string) => {
-        categorizeChat(contactId, category);
-        setContactCategories((prev) => ({
-            ...prev,
-            [contactId]: category
-        }));
-        setOpenMenuId(null);
         try {
+            await categorizeChat(contactId, category);
+            setContactCategories((prev) => ({
+                ...prev,
+                [contactId]: category
+            }));
             await getAsscociatedUsers();
+            setOpenMenuId(null);
         } catch (error) {
             toast.error(String(error));
         }
