@@ -6,16 +6,20 @@ import { useUserApis } from "../customHooks/useUserApis";
 type ChangePasswordModalProps = {
   open: boolean;
   onClose: () => void;
-
 };
 
 const ChangePasswordModal = ({ open, onClose }: ChangePasswordModalProps) => {
+
+  // state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // hooks
   const { ChangePassword } = useUserApis();
+
   if (!open) return null;
+
   const handleSubmit = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast.error("Please fill out all password fields.");

@@ -29,23 +29,22 @@ export const useMessageApis = () => {
     // FETCH ALL USERS FOR LIVE SEARCH API CALL
     const fetchAllUsersForLiveSearch = async () => {
         setLoading(true);
-        AxiosClient.get(`/users/getAllUsers`)
-            .then((response) => {
-                setLoading(false);
-                setListOfAllUsers(response.data.users);
-            })
-            .catch(() => {
-                setLoading(false);
-                throw new Error("Failed to fetch all users");
-            })
+        try {
+            const response = await AxiosClient.get(`/users/getAllUsers`);
+            setListOfAllUsers(response.data.users);
+        } catch {
+            throw new Error("Failed to fetch all users");
+        } finally {
+            setLoading(false);
+        }
     }
 
 
     // GET ASSOCIATED USERS FOR CHAT LIST API CALL
     const getAsscociatedUsers = async () => {
         setLoading(true);
-        AxiosClient.get("/users/getAssociatedUsers").then((response) => {
-            setLoading(false);
+        try {
+            const response = await AxiosClient.get("/users/getAssociatedUsers");
             // const updatedListOfChatUsers = response.data.associatedUser.map((user: AssociatedUser) => {
             //     const normalizedId = normalizeUserId(user.associatedUser.id);
             //     return {
@@ -54,26 +53,25 @@ export const useMessageApis = () => {
             //     };
             // });
             setAssociatedUser(response.data.associatedUser);
-
-        }).catch(() => {
-            setLoading(false);
+        } catch {
             throw new Error("Failed to fetch users");
-        });
+        } finally {
+            setLoading(false);
+        }
     }
 
 
     // GET MESSAGES WITH A USER API CALL
     const getMessages = async (userId: string) => {
         setLoading(true);
-        AxiosClient.get(`/messages/getMessages/${userId}`)
-            .then((response) => {
-                setMessage(response.data.messages);
-                setLoading(false);
-            })
-            .catch(() => {
-                setLoading(false);
-                throw new Error("Failed to fetch messages for user");
-            });
+        try {
+            const response = await AxiosClient.get(`/messages/getMessages/${userId}`);
+            setMessage(response.data.messages);
+        } catch {
+            throw new Error("Failed to fetch messages for user");
+        } finally {
+            setLoading(false);
+        }
     }
 
 

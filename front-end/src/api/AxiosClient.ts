@@ -1,21 +1,21 @@
 import axios from "axios";
 
 export const AxiosClient = axios.create({
-    baseURL: "http://localhost:2404/api",
-    withCredentials: true,
+  baseURL: "http://localhost:2404/api",
+  withCredentials: true, 
 });
 
 AxiosClient.interceptors.request.use(
-    (config) => {
-        const token = sessionStorage.getItem("accessToken");
-        if (token) {
-            config.headers["Authorization"] = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    },
+  (config) => {
+    const token = sessionStorage.getItem("accessToken");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
 
 )
 
