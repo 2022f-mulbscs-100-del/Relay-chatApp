@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 const Contacts = () => {
   const { associatedUser } = useMessage();
-  const { getAsscociatedUsers } = useMessageApis();
+  const { getAsscociatedUsers, loading: contactsLoading } = useMessageApis();
   const [selectedGroup, setSelectedGroup] = useState("All contacts");
 
   const normalizeCategory = (value?: string | null) =>
@@ -18,11 +18,14 @@ const Contacts = () => {
 
 
   useEffect(() => {
-    try {
-      getAsscociatedUsers();
-    } catch {
-      toast.error("Failed to fetch contacts. Please try again later.")
-    }
+    const fetchContacts = async () => {
+      try {
+        await getAsscociatedUsers();
+      } catch {
+        toast.error("Failed to fetch contacts. Please try again later.");
+      }
+    };
+    fetchContacts();
   }, []);
 
 
@@ -46,7 +49,7 @@ const Contacts = () => {
           />
           <section className="space-y-4">
             <ContactsFilter />
-            <ContactsList associatedUser={filteredContacts} />
+            <ContactsList associatedUser={filteredContacts} isLoading={contactsLoading} />
           </section>
         </div>
       </div>

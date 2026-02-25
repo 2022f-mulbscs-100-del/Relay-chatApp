@@ -11,6 +11,7 @@ import LiveSearch from "./LiveSearch";
 import { useGroup } from "../../context/GroupProvider";
 import type { Group } from "../../types/group.type";
 import useGroupApis from "../../customHooks/useGroupApis";
+import SkeletonBlock from "../../Component/SkeletonBlock";
 
 const Chats = () => {
    const url = new URL(window.location.href);
@@ -21,89 +22,21 @@ const Chats = () => {
    const toastRef = useRef(false);
    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
+   //loading states
+   const [chatListLoading, setChatListLoading] = useState(false);
+
    //HOOKSf
    const socket = useSocket();
-   const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats } = useMessageApis();
-   const { getGroupMessages, MarkGroupMessageAsRead } = useGroupApis();
+   const { fetchAllUsersForLiveSearch, getAsscociatedUsers, getMessages, getUnreadMessageChats, loading: messageLoading } = useMessageApis();
+   const { getGroupMessages, MarkGroupMessageAsRead, loading: groupMessageLoading } = useGroupApis();
 
    //CONTEXT
    const { user } = useUser();
-   const { listOfgroups, setListOfgroups } = useGroup();
-   const { setMessage,message, listOfAllUsers, ShowToastOfUnreadMessage, activeUserId, setActiveUserId, associatedUser, setAssociatedUser } = useMessage();
+   const { listOfgroups, setListOfgroups, loading: groupListLoading } = useGroup();
+   const { setMessage, listOfAllUsers, ShowToastOfUnreadMessage, activeUserId, setActiveUserId, associatedUser, setAssociatedUser } = useMessage();
    const { onlineUserIds } = useMessage();
 
-   //EFFECTS
 
-   //to fetch chats users for live search in chat list
-   useEffect(() => {
-      if (!user?.id) return;
-      const fetcheLiveSearchData = async () => {
-         try {
-            await fetchAllUsersForLiveSearch();
-
-         } catch (error) {
-            toast.error(String(error));
-         }
-      }
-      fetcheLiveSearchData();
-   }, [user?.id]);
-
-   //to fetch associated users for chat list and to fetch unread message chats when user logs in
-   useEffect(() => {
-      if (!user?.id) return;
-      const getUsers = async () => {
-         try {
-            await getAsscociatedUsers();
-         } catch (error) {
-            toast.error(String(error));
-         }
-
-      }
-      const fetchUnreadChats = async () => {
-         try {
-            await getUnreadMessageChats();
-         } catch (error) {
-            toast.error(String(error));
-         }
-      }
-      fetchUnreadChats();
-      getUsers();
-   }, [user?.id]);
-
-   //to fetch messages for active user or group when active user or group changes
-   useEffect(() => {
-      const getMessagesForActiveUser = async () => {
-         if (activeUserId === null) return;
-         try {
-            if (tab === "groups") {
-               await getGroupMessages(activeUserId);
-            } else {
-               await getMessages(activeUserId);
-            }
-         } catch (error) {
-            toast.error(String(error));
-         }
-      }
-      setTimeout(() => {
-         getMessagesForActiveUser();
-      }, 100);
-   }, [activeUserId]);
-
-   useEffect(() => {
-      return () => {
-         setActiveUserId(null);
-      }
-   }, [tab])
-
-   //Toast for unread messages
-   useEffect(() => {
-      if (ShowToastOfUnreadMessage && ShowToastOfUnreadMessage.length > 0 && !toastRef.current) {
-         ShowToastOfUnreadMessage.forEach((user: chatUser) => {
-            toast.info(`New message from @${user.username}`)
-         })
-         toastRef.current = true;
-      }
-   }, [ShowToastOfUnreadMessage]);
 
    //Send Private Message
    const SendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -208,7 +141,7 @@ const Chats = () => {
    const SendGroupMessage = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!socket || activeUserId === null) return;
-      if(!previewImageUrl){
+      if (!previewImageUrl) {
          if (inputMessage.trim() === "") return;
       }
       const imageBuffer = await toBuffer(previewImageUrl);
@@ -255,6 +188,83 @@ const Chats = () => {
 
    }
 
+   //EFFECTS
+
+   //to fetch chats users for live search in chat list
+   useEffect(() => {
+      if (!user?.id) return;
+      const fetcheLiveSearchData = async () => {
+         try {
+            await fetchAllUsersForLiveSearch();
+
+         } catch (error) {
+            toast.error(String(error));
+         }
+      }
+      fetcheLiveSearchData();
+   }, [user?.id]);
+
+   //to fetch associated users for chat list and to fetch unread message chats when user logs in
+   useEffect(() => {
+      if (!user?.id) return;
+      const getUsers = async () => {
+         setChatListLoading(true);
+         try {
+            await getAsscociatedUsers();
+         } catch (error) {
+            toast.error(String(error));
+         } finally {
+            setChatListLoading(false);
+         }
+
+      }
+      const fetchUnreadChats = async () => {
+         try {
+            await getUnreadMessageChats();
+         } catch (error) {
+            toast.error(String(error));
+         }
+      }
+
+      fetchUnreadChats();
+      getUsers();
+   }, [user?.id]);
+
+   //to fetch messages for active user or group when active user or group changes
+   useEffect(() => {
+      const getMessagesForActiveUser = async () => {
+         if (activeUserId === null) return;
+         try {
+            if (tab === "groups") {
+               await getGroupMessages(activeUserId);
+            } else {
+               await getMessages(activeUserId);
+            }
+         } catch (error) {
+            toast.error(String(error));
+         }
+      }
+      setTimeout(() => {
+         getMessagesForActiveUser();
+      }, 100);
+   }, [activeUserId]);
+
+   useEffect(() => {
+      return () => {
+         setActiveUserId(null);
+      }
+   }, [tab])
+
+   //Toast for unread messages
+   useEffect(() => {
+      if (ShowToastOfUnreadMessage && ShowToastOfUnreadMessage.length > 0 && !toastRef.current) {
+         ShowToastOfUnreadMessage.forEach((user: chatUser) => {
+            toast.info(`New message from @${user.username}`)
+         })
+         toastRef.current = true;
+      }
+   }, [ShowToastOfUnreadMessage]);
+
    //set tab in url
    useEffect(() => {
       url.searchParams.get("tab")
@@ -283,7 +293,31 @@ const Chats = () => {
       return fileBlob.arrayBuffer();
    }
 
-   console.log("----->>>>>>>>>", message);
+   const renderChatListSkeleton = (keyPrefix: string) =>
+      Array.from({ length: 6 }).map((_, index) => (
+         <div
+            key={`${keyPrefix}-skeleton-${index}`}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3"
+         >
+            <div className="flex items-center gap-3">
+               <div className="relative shrink-0">
+                  <SkeletonBlock width={44} height={44} radius={999} />
+                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-200" />
+               </div>
+               <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                     <SkeletonBlock width="42%" height={12} />
+                     <SkeletonBlock width={44} height={10} />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                     <SkeletonBlock width="68%" height={10} />
+                     <SkeletonBlock width={18} height={18} radius={999} />
+                  </div>
+               </div>
+            </div>
+         </div>
+      ));
+
 
    return (
       <div className="h-[100dvh] bg-slate-50">
@@ -314,48 +348,55 @@ const Chats = () => {
                {/* Chat List */}
                {tab === "chats" &&
                   <div className="px-3 py-4 h-[calc(100dvh-190px)] md:h-[calc(100dvh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
-                     {usersWithOnlineStatus.map((user: AssociatedUser) => {
-                        const allMessages = [
-                           ...(user.associatedUser.sentMessages || []),
-                           ...(user.associatedUser.receivedMessages || [])
-                        ];
+                     {chatListLoading ? (
+                        renderChatListSkeleton("chat")
+                     ) : (
+                        usersWithOnlineStatus.map((user: AssociatedUser) => {
+                           const allMessages = [
+                              ...(user.associatedUser.sentMessages || []),
+                              ...(user.associatedUser.receivedMessages || [])
+                           ];
 
-                        return (
-
-                           <ChatList
-                              key={user.id}
-                              id={String(user.associatedUser.id)}
-                              username={user.associatedUser.username}
-                              setActiveUserId={setActiveUserId}
-                              activeUserId={activeUserId}
-                              receivedMessages={allMessages}
-                              isOnline={user.isOnline}
-                              image={user.associatedUser.ImageUrl}
-                              mode="private"
-                              privateIsMuted={associatedUser?.find((association) => Number(association.associateUserId) === Number(user.associatedUser.id))?.isMuted || false}
-                           />
-                        );
-                     })}
+                           return (
+                              <ChatList
+                                 key={user.id}
+                                 id={String(user.associatedUser.id)}
+                                 username={user.associatedUser.username}
+                                 setActiveUserId={setActiveUserId}
+                                 activeUserId={activeUserId}
+                                 receivedMessages={allMessages}
+                                 isOnline={user.isOnline}
+                                 image={user.associatedUser.ImageUrl}
+                                 mode="private"
+                                 privateIsMuted={associatedUser?.find((association) => Number(association.associateUserId) === Number(user.associatedUser.id))?.isMuted || false}
+                              />
+                           );
+                        })
+                     )}
                   </div>
                }
 
                {/* Group list */}
                {tab === "groups" &&
                   <div className="px-3 py-4 h-[calc(100dvh-190px)] md:h-[calc(100dvh-200px)] overflow-y-auto flex flex-col gap-2 customScrollbar pr-1">
-                     {listOfgroups?.map((group: Group) => {
-                        return (
-                           <ChatList
-                              key={group.id}
-                              id={String(group.id)}
-                              username={group.groupName}
-                              receivedMessages={group.groupMessages}
-                              setActiveUserId={setActiveUserId}
-                              activeUserId={activeUserId}
-                              member={group.members}
-                              mode="group"
-                           />
-                        );
-                     })}
+                     {groupListLoading ? (
+                        renderChatListSkeleton("group")
+                     ) : (
+                        listOfgroups?.map((group: Group) => {
+                           return (
+                              <ChatList
+                                 key={group.id}
+                                 id={String(group.id)}
+                                 username={group.groupName}
+                                 receivedMessages={group.groupMessages}
+                                 setActiveUserId={setActiveUserId}
+                                 activeUserId={activeUserId}
+                                 member={group.members}
+                                 mode="group"
+                              />
+                           );
+                        })
+                     )}
                   </div>}
 
             </div>
@@ -373,6 +414,7 @@ const Chats = () => {
                         onBack={() => setActiveUserId(null)}
                         previewImageUrl={previewImageUrl}
                         setPreviewImageUrl={setPreviewImageUrl}
+                        isMessagesLoading={messageLoading}
                      />
                      : (
                         <div className="flex h-full w-full items-center justify-center bg-slate-50">
@@ -400,6 +442,7 @@ const Chats = () => {
                         onBack={() => setActiveUserId(null)}
                         previewImageUrl={previewImageUrl}
                         setPreviewImageUrl={setPreviewImageUrl}
+                        isMessagesLoading={groupMessageLoading}
                      />
                      : (
                         <div className="flex items-center justify-center w-full h-full bg-slate-50">

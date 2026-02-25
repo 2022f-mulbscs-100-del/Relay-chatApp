@@ -28,6 +28,7 @@ type ChatPageProps = {
     onBack?: () => void;
     previewImageUrl?: string | null;
     setPreviewImageUrl?: React.Dispatch<React.SetStateAction<string | null>>;
+    isMessagesLoading?: boolean;
 
 }
 const ChatPage = ({
@@ -40,7 +41,8 @@ const ChatPage = ({
     mode = "private",
     onBack,
     previewImageUrl,
-    setPreviewImageUrl
+    setPreviewImageUrl,
+    isMessagesLoading = false
 }: ChatPageProps) => {
 
 
@@ -190,6 +192,7 @@ const ChatPage = ({
                                 createdAt: msg.createdAt,
                                 ImageUrl: msg.ImageUrl
                             }))}
+                            isLoading={isMessagesLoading}
                         />
 
                         :
@@ -201,6 +204,7 @@ const ChatPage = ({
                                 createdAt: msg.createdAt || "",
                                 ImageUrl: msg.ImageUrl
                             }))}
+                            isLoading={isMessagesLoading}
                         />
                     }
 

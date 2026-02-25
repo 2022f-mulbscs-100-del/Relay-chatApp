@@ -7,15 +7,17 @@ import { useGroup } from "../../context/GroupProvider";
 import { toast } from "react-toastify";
 import useGroupApis from "../../customHooks/useGroupApis";
 import { useUser } from "../../context/UserProvider";
+import SkeletonBlock from "../../Component/SkeletonBlock";
 
 
 interface GroupsListProps {
     listOfgroups: Group[];
     filterGroups: Group[];
     searchInput: string;
+    isLoading?: boolean;
 }
 
-const GroupsList = ({ listOfgroups, filterGroups, searchInput }: GroupsListProps) => {
+const GroupsList = ({ listOfgroups, filterGroups, searchInput, isLoading = false }: GroupsListProps) => {
 
     const navigate = useNavigate();
 
@@ -106,6 +108,37 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput }: GroupsListProps
         } catch {
             toast.error("Failed to toggle mute status. Please try again.");
         }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={`group-skeleton-${index}`} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                                <SkeletonBlock width={48} height={48} radius={12} />
+                                <div className="space-y-2">
+                                    <SkeletonBlock width={130} height={12} />
+                                    <SkeletonBlock width={90} height={10} />
+                                    <SkeletonBlock width={70} height={18} radius={999} />
+                                </div>
+                            </div>
+                            <SkeletonBlock width={24} height={24} radius={8} />
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                            <SkeletonBlock width={90} height={10} />
+                            <SkeletonBlock width={48} height={18} radius={999} />
+                        </div>
+                        <div className="mt-4 flex items-center gap-2">
+                            <SkeletonBlock width={34} height={34} radius={8} />
+                            <SkeletonBlock width={34} height={34} radius={8} />
+                            <SkeletonBlock width={34} height={34} radius={8} />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
     }
 
     return (

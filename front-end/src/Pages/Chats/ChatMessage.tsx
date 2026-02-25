@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useUser } from "../../context/UserProvider";
 import { normalizeDate } from "../../utlis/NormalizeDate";
+import LoadingSpinner from "../../Component/LoadingSpinner";
 type ChatMessageProps = {
     messageList: {
         fromUserId: number;
@@ -8,10 +9,12 @@ type ChatMessageProps = {
         createdAt?: Date | string;
         ImageUrl?: string | null
     }[];
+    isLoading?: boolean;
 }
 
 const ChatMessage = ({
-    messageList
+    messageList,
+    isLoading = false
 }: ChatMessageProps) => {
     const { user } = useUser();
     const lastMessageRef = useRef<HTMLDivElement | null>(null);
@@ -34,7 +37,13 @@ const ChatMessage = ({
         lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }, [messageList.length]);
 
-    console.log("000",messageList);
+    if (isLoading) {
+        return (
+            <div className="flex min-h-[750px] items-center justify-center">
+                <LoadingSpinner size={28} thickness={3} className="inline-flex" ariaLabel="Loading messages" />
+            </div>
+        );
+    }
 
     return (
         <>

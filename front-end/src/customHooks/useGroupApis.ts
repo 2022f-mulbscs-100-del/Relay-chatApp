@@ -11,29 +11,31 @@ const {setMessage} = useMessage();
 const [loading, setLoading] = useState(false);
 
 //-------------get Group By User----------------
-    const getGroupByUser = () => {
+    const getGroupByUser = async () => {
         setLoading(true);
-        AxiosClient.get('/groups/getUserGroups').then((response) => {
+        try {
+            const response = await AxiosClient.get('/groups/getUserGroups');
             setListOfgroups(response.data.groups);
-            setLoading(false);
-        }).catch((error) => {
+        } catch (error) {
             console.error("Error fetching groups:", error);
-            setLoading(false);
             throw error;
-        });
+        } finally {
+            setLoading(false);
+        }
     }
 
     //-------------get Group Messages----------------
     const getGroupMessages = async (groupId:string)=>{
         setLoading(true)
-        AxiosClient.get(`/groups/getGroupMessages/${groupId}`).then((response) => {
+        try {
+            const response = await AxiosClient.get(`/groups/getGroupMessages/${groupId}`);
             setMessage(response.data.groupMessage)
-            setLoading(false);
-        }).catch((error) => {
+        } catch (error) {
             console.error("Error fetching group messages:", error);
-            setLoading(false);
             throw error;
-        });
+        } finally {
+            setLoading(false);
+        }
     }
 
 //-------------mark Group Message As Read----------------

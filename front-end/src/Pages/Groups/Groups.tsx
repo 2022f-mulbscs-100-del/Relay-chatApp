@@ -10,7 +10,7 @@ import { useUser } from "../../context/UserProvider";
 const Groups = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
-  const { listOfgroups } = useGroup();
+  const { listOfgroups, loading: groupsLoading } = useGroup();
   const { user } = useUser();
 
 
@@ -52,7 +52,7 @@ const handleCategoryChange = useMemo(() => {
 
           <section className="space-y-4">
             <FilterBar searchInput={searchInput} setSearchInput={setSearchInput} />
-            <GroupsList listOfgroups={handleCategoryChange} filterGroups={filterGroups} searchInput={searchInput} />
+            <GroupsList listOfgroups={handleCategoryChange} filterGroups={filterGroups} searchInput={searchInput} isLoading={groupsLoading} />
           </section>
         </div>
       </div>

@@ -3,15 +3,16 @@ import { FaPaperPlane } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 
 interface ImagePreviewComponentProps {
-    imageUrl: string; 
+    imageUrl: string;
     onClose: () => void;
     sendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
     inputMessage: string;
     setInputMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const ImagePreviewComponent = ({ imageUrl, onClose, sendMessage,inputMessage,setInputMessage }: ImagePreviewComponentProps) => {
+const ImagePreviewComponent = ({ imageUrl, onClose, sendMessage, inputMessage, setInputMessage }: ImagePreviewComponentProps) => {
 
+    //sideEffects
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
