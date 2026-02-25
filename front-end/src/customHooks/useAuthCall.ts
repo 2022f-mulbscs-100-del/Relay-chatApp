@@ -5,6 +5,18 @@ import type { SignUpDataType, UserDataType } from "../types/auth.types";
 import { isAxiosError } from "axios";
 import { useAuth } from "../context/AuthProvider";
 
+type PasskeyAssertionPayload = {
+    id: string;
+    rawId: string;
+    type: PublicKeyCredentialType;
+    response: {
+        clientDataJSON: string;
+        authenticatorData: string;
+        signature: string;
+        userHandle: string | null;
+    };
+};
+
 export const useAuthCall = () => {
     const { setUser } = useUser();
     const [loading, setLoading] = useState(false);
@@ -77,7 +89,7 @@ export const useAuthCall = () => {
         }
     }
 
-    const verifyTwoFactor = async (email: string, token?: string | null, twoFaMethod?: string, assertionResponse?: AuthenticatorAssertionResponse) => {
+    const verifyTwoFactor = async (email: string, token?: string | null, twoFaMethod?: string, assertionResponse?: PasskeyAssertionPayload) => {
         try {
             setLoading(true);
             const res = await AxiosClient.post("/auth/check-twoFactor", {

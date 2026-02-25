@@ -94,7 +94,7 @@ const Login = () => {
                         {
                             id: assertion.id,
                             rawId: arrayBufferToBase64Url(assertion.rawId),
-                            type: assertion.type,
+                            type: "public-key",
                             response: {
                                 clientDataJSON: arrayBufferToBase64Url(response.clientDataJSON),
                                 authenticatorData: arrayBufferToBase64Url(response.authenticatorData),
