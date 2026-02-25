@@ -141,7 +141,7 @@ export const useUserApis = () => {
         try {
             await AxiosClient.get(`/users/deleteChat/${associateUserId}`);
             setActiveUserId(null);
-           
+
             setLoading(false);
         } catch (error) {
             setLoading(false);
@@ -149,7 +149,21 @@ export const useUserApis = () => {
         }
     }
 
-    return { getProfile, loading, setupProfile, UpdateProfile, ChangePassword, UpdateAuthSettings, GnerateTOTP, VerifyTOTP, messageAlertToggle, categorizeChat, deletePrivateChat };
+    // get shared media
+    const getSharedMedia = async () => {
+        setLoading(true);
+        try {
+            const response = await AxiosClient.get("/users/getSharedMedia?limit=20");
+            console.log(response.data.sharedMedia);
+            return response.data.sharedMedia;
+        } catch (error) {
+            throw new Error(isAxiosError(error) ? error.response?.data.message : "Failed to fetch shared media");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return { getProfile, loading, setupProfile, UpdateProfile, ChangePassword, UpdateAuthSettings, GnerateTOTP, VerifyTOTP, messageAlertToggle, categorizeChat, deletePrivateChat, getSharedMedia };
 
 }
 
