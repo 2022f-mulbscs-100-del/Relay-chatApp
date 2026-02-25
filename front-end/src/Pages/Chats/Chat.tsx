@@ -29,7 +29,7 @@ const Chats = () => {
    //CONTEXT
    const { user } = useUser();
    const { listOfgroups, setListOfgroups } = useGroup();
-   const { setMessage, listOfAllUsers, ShowToastOfUnreadMessage, activeUserId, setActiveUserId, associatedUser, setAssociatedUser } = useMessage();
+   const { setMessage,message, listOfAllUsers, ShowToastOfUnreadMessage, activeUserId, setActiveUserId, associatedUser, setAssociatedUser } = useMessage();
    const { onlineUserIds } = useMessage();
 
    //EFFECTS
@@ -109,12 +109,10 @@ const Chats = () => {
    const SendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!socket || activeUserId === null) return;
-      if(!previewImageUrl){
-
+      if (!previewImageUrl) {
          if (inputMessage.trim() === "") return;
       }
       const imageBuffer = await toBuffer(previewImageUrl);
-      console.log("Image buffer:", previewImageUrl);
       socket.emit("private_message", {
          content: inputMessage,
          toUserId: String(activeUserId),
@@ -210,19 +208,24 @@ const Chats = () => {
    const SendGroupMessage = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!socket || activeUserId === null) return;
-      if (inputMessage.trim() === "") return;
-
+      if(!previewImageUrl){
+         if (inputMessage.trim() === "") return;
+      }
+      const imageBuffer = await toBuffer(previewImageUrl);
+      console.log("---->>>>>>>", imageBuffer);
       socket.emit("group_message", {
          content: inputMessage,
          userId: String(user?.id),
          groupId: String(activeUserId),
-         timestamp: new Date()
+         timestamp: new Date(),
+         ImageUrl: imageBuffer
       });
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
          groupId: String(activeUserId),
          senderId: Number(user?.id),
          content: inputMessage,
          createdAt: new Date().toISOString(),
+         ImageUrl: previewImageUrl || undefined
       }]);
 
 
@@ -280,6 +283,7 @@ const Chats = () => {
       return fileBlob.arrayBuffer();
    }
 
+   console.log("----->>>>>>>>>", message);
 
    return (
       <div className="h-[100dvh] bg-slate-50">
@@ -394,6 +398,8 @@ const Chats = () => {
                         activeUserId={activeUserId}
                         mode="group"
                         onBack={() => setActiveUserId(null)}
+                        previewImageUrl={previewImageUrl}
+                        setPreviewImageUrl={setPreviewImageUrl}
                      />
                      : (
                         <div className="flex items-center justify-center w-full h-full bg-slate-50">

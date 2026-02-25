@@ -34,7 +34,8 @@ const ChatMessage = ({
         lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }, [messageList.length]);
 
-    console.log("Rendering ChatMessage with messages:", messageList);
+    console.log("000",messageList);
+
     return (
         <>
             {messageList.map((message, index) => {

@@ -15,8 +15,6 @@ import { AxiosClient } from "./api/AxiosClient"
 
 
 function App() {
-
-
   //apis
   const { MarkGroupMessageAsRead } = useGroupApis();
   const { getGroupByUser } = useGroupApis();
@@ -99,19 +97,27 @@ function App() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleGroupMessage = (msg: { groupId: number; fromUserId: number; content: string; timestamp: Date }) => {
+    const handleGroupMessage = (msg: { groupId: number; fromUserId: number; content: string; timestamp: Date; ImageUrl?: string }) => {
       if (String(msg.fromUserId) === String(user?.id)) return;
       const incomingGroupExists = listOfgroups?.some(group => String(group.id) === String(msg.groupId));
       if (!incomingGroupExists) {
         getGroupByUser();
       }
+      let ImageUrl: string | null = null;
+      if (msg.ImageUrl) {
+        const blob = new Blob([msg.ImageUrl], { type: "image/png" });
+        ImageUrl = URL.createObjectURL(blob);
+      }
+      console.log("Received group message:", ImageUrl)
 
       setMessage((prev: MessageProps[] | null) =>
         [...(prev || []), {
           senderId: msg.fromUserId,
           groupId: String(msg.groupId),
           content: msg.content,
-          createdAt: msg.timestamp
+          createdAt: msg.timestamp,
+          ImageUrl: ImageUrl || undefined
+
         }])
 
       if (activeUserId !== String(msg.groupId)) {
@@ -191,12 +197,12 @@ function App() {
   //to listen for incoming private messages
   useEffect(() => {
     if (!socket) return;
-    const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number,ImageUrl:string }) => {
-    let ImageUrl: string | null = null;
-      if(msg.ImageUrl){
-      const blob = new Blob([msg.ImageUrl], { type: "image/png" }); 
-       ImageUrl = URL.createObjectURL(blob);
-    }
+    const handleMessageReceived = async (msg: { fromUserId: number; toUserId: number; content: string; timestamp: Date, messageId: number, ImageUrl: string }) => {
+      let ImageUrl: string | null = null;
+      if (msg.ImageUrl) {
+        const blob = new Blob([msg.ImageUrl], { type: "image/png" });
+        ImageUrl = URL.createObjectURL(blob);
+      }
       setMessage((prev: MessageProps[] | null) => [...(prev || []), {
         senderId: msg.fromUserId,
         receiverId: Number(msg.toUserId),
