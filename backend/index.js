@@ -29,24 +29,14 @@ const isProduction = process.env.NODE_ENV === 'production';
 const server = http.createServer(app);
 initializeSocket(server);
 
-
-if (!isProduction) {
-  app.use(
-    cors({
-      origin: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-      credentials: true,
-    })
-  );
-} else if (process.env.FRONTEND_URL) {
-  app.use(
-    cors({
-      origin: process.env.FRONTEND_URL,
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-      credentials: true,
-    })
-  );
-}
+// Enable CORS
+app.use(
+  cors({
+    origin: true, // Allow all origins since frontend is served from same server
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
+  })
+);
 // Initialize Google Passport middleware
 app.use(GooglePassport.initialize());
 

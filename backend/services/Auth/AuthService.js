@@ -254,7 +254,7 @@ class AuthService {
                     const { verified } = await verifyAuthenticationResponse({
                         response: assertionResponse,
                         expectedChallenge: auth.passKeyChallenge,
-                        expectedOrigin: process.env.FRONTEND_URL,
+                        expectedOrigin: new URL(process.env.API_BASE_URL || "http://localhost:2404").origin,
                         expectedRPID: "localhost", // must match registration
                         credential: {
                             id: base64UrlToBuffer(auth.passkeyCredentialID),
