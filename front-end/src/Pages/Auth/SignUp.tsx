@@ -96,12 +96,10 @@ const SignUp = () => {
                         <SocialLoginButton
                             icon={<FaGoogle className="text-[16px]" />}
                             title="Google"
-                            url="http://localhost:2404/api/auth/social-login/google"
-                            provider="google"
+                                    url={`${import.meta.env.VITE_API_BASE_URL || "http://localhost:2404"}/api/auth/social-login/google`}
                         />
-
-                </div>
-            </div>
+                                    </div>
+                                     </div>
 
             <div className="text-center text-sm text-slate-600 mt-4">
                 Already have an account?{" "}

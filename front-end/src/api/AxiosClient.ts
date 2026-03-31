@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:2404";
+
 export const AxiosClient = axios.create({
-  baseURL: "http://localhost:2404/api",
+  baseURL: `${apiBaseUrl}/api`,
   withCredentials: true, 
 });
 
@@ -35,7 +37,7 @@ AxiosClient.interceptors.response.use(
 
       try {
         const res = await axios.get(
-          `http://localhost:2404/api/refresh`,
+          `${apiBaseUrl}/api/refresh`,
           {
             withCredentials: true,
           },

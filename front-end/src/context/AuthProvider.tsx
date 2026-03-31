@@ -23,7 +23,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const checkAuth = async () => {
             setIsLoading(true);
-            axios.get("http://localhost:2404/api/refresh", {
+            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:2404";
+            axios.get(`${apiBaseUrl}/api/refresh`, {
                 withCredentials: true,
             }).then((response) => {
                 setUser(response.data.user);

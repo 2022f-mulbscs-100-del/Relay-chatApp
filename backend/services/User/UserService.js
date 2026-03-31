@@ -272,7 +272,7 @@ class UserService {
             const { verified, registrationInfo } = await verifyRegistrationResponse({
                 response: attestationResponse,
                 expectedChallenge: auth.passKeyChallenge,
-                expectedOrigin: "http://localhost:5173",
+                expectedOrigin: process.env.FRONTEND_URL || "http://localhost:5173",
                 expectedRPID: "localhost",
                 requireUserVerification: false,
             });
