@@ -13,8 +13,7 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         if (!user?.id) {
             return null;
         }
-        const socketUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:2404";
-        return io(socketUrl, {
+        return io(undefined, {
             withCredentials: true,
         });
     }, [user?.id]);

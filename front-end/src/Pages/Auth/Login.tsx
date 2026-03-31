@@ -177,7 +177,7 @@ const Login = () => {
                                 <SocialLoginButton
                                     icon={<FaGoogle className="text-[16px]" />}
                                     title="Google"
-                                    url={`${import.meta.env.VITE_API_BASE_URL || "http://localhost:2404"}/api/auth/social-login/google`}
+                                    url="/api/auth/social-login/google"
                                     provider="google"
                                 />
 
