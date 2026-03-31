@@ -20,10 +20,8 @@ const SocialLoginButton = ({ icon, title, url, provider }: SocialLoginButtonProp
 
 
         const handleMessage = (event: MessageEvent) => {
-            // Allow messages from both frontend and backend URLs during development
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:2404";
-            const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
-            if (event.origin !== frontendUrl && event.origin !== new URL(apiBaseUrl).origin) {
+            // Allow messages from current origin
+            if (event.origin !== window.location.origin) {
                 return;
             }
             const { token, user } = event.data;
