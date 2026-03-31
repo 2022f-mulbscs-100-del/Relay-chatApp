@@ -12,7 +12,7 @@ const Group = sequelize.define("group", {
         allowNull: false,
     },
     createdBy: {
-        type: DataTypes.STRING,
+        type: DataTypes.BIGINT,
         allowNull: false,
     },
     profile:{

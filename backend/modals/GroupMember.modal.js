@@ -12,7 +12,7 @@ const GroupMember = sequelize.define("group_member", {
         allowNull: false,
     },
     userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
     },
     isMuted: {

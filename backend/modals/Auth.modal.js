@@ -10,7 +10,7 @@ const Auth = sequelize.define("auths", {
         primaryKey: true,
     },
     userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
     },
     password: {

@@ -8,11 +8,11 @@ const PrivateMemberModal = sequelize.define("private_members", {
         primaryKey: true,
     },
     userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
     },
     associateUserId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
     },
     isMuted: {

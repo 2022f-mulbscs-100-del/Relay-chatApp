@@ -8,7 +8,7 @@ const GroupMessage  = sequelize.define("groupMessage", {
         primaryKey: true,
     },
     senderId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
     },
     groupId: {
