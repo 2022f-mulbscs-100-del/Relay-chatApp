@@ -5,9 +5,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Path to CA certificate (only exists locally)
-const localCAPath = "/home/dev/Documents/ca.pem";
+const localCAPath = "/home/dev/Music/ca.pem";
 
-console.log(localCAPath,process.env.DB_HOST,process.env.DB_NAME,process.env.DB_PORT,process.env.DB_USER,process.env.DB_PASSWORD)
+logger.info(`Database Config - Host: ${process.env.DB_HOST}, Database: ${process.env.DB_NAME}, Port: ${process.env.DB_PORT}, User: ${process.env.DB_USER}`);
+
 // Check if we're running locally or on Render
 const isLocal = fs.existsSync(localCAPath);
 
@@ -37,7 +38,7 @@ const dialectOptions = isLocal
 const sequelize = new Sequelize(
     process.env.DB_NAME || 'chatapp',
     process.env.DB_USER || 'root',
-    process.env.DB_PASSWORD,
+    process.env.DB_PASSWORD || 'root',
     {
         dialect: 'mysql',
         host: process.env.DB_HOST || 'localhost',

@@ -42,7 +42,7 @@ const ChangePasswordModal = ({ open, onClose }: ChangePasswordModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 px-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="change-password-title"
@@ -55,15 +55,15 @@ const ChangePasswordModal = ({ open, onClose }: ChangePasswordModalProps) => {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-xl transition-colors duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 id="change-password-title" className="text-lg font-semibold text-slate-900">
+          <h2 id="change-password-title" className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             Change password
           </h2>
           <button
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+            className="rounded-lg p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
             onClick={onClose}
             aria-label="Close"
           >
@@ -71,36 +71,36 @@ const ChangePasswordModal = ({ open, onClose }: ChangePasswordModalProps) => {
           </button>
         </div>
 
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
           Use a strong password with at least 8 characters.
         </p>
 
         <div className="mt-5 space-y-4">
           <label className="text-sm">
-            <span className="text-slate-500">Current password</span>
+            <span className="text-slate-500 dark:text-slate-400">Current password</span>
             <input
               type="password"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-slate-100 transition-colors duration-200"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Enter current password"
             />
           </label>
           <label className="text-sm">
-            <span className="text-slate-500">New password</span>
+            <span className="text-slate-500 dark:text-slate-400">New password</span>
             <input
               type="password"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-slate-100 transition-colors duration-200"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Enter new password"
             />
           </label>
           <label className="text-sm">
-            <span className="text-slate-500">Confirm new password</span>
+            <span className="text-slate-500 dark:text-slate-400">Confirm new password</span>
             <input
               type="password"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-slate-100 transition-colors duration-200"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
@@ -110,13 +110,13 @@ const ChangePasswordModal = ({ open, onClose }: ChangePasswordModalProps) => {
 
         <div className="mt-6 flex items-center justify-end gap-2">
           <button
-            className="px-4 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
+            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
             onClick={onClose}
           >
             Cancel
           </button>
           <button
-            className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800 transition"
+            className="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition"
             onClick={handleSubmit}
           >
             Update password

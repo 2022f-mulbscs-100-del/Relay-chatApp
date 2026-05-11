@@ -34,15 +34,15 @@ const ProfileSecondaryCards = () => {
                 return (
                     <div
                         key={index}
-                        className="rounded-xl w-full border border-slate-200 bg-white px-4 py-4 shadow-sm"
+                        className="rounded-xl w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-4 shadow-sm transition-colors duration-200"
                     >
                         <div className="flex w-full items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                                <Icon className="w-5 h-5 text-slate-700" />
+                            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                <Icon className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                             </div>
                             <div>
-                                <div className="text-lg font-semibold">{stat.value}</div>
-                                <div className="text-xs text-slate-500">{stat.label}</div>
+                                <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">{stat.value}</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</div>
                             </div>
                         </div>
                     </div>

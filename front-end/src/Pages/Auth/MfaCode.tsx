@@ -38,12 +38,12 @@ const MfaCode = ({ email, stage }: MfaCodeProps) => {
 
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex items-center justify-center px-4 py-10 transition-colors duration-200">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <div className="text-sm uppercase tracking-[0.35em] text-slate-400">Relay</div>
+          <div className="text-sm uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Relay</div>
           <h1 className="text-2xl font-semibold mt-2">Enter verification code</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {stage === "emailTwoFactor" && "We sent a 6-digit code to your email or phone."}
             {stage === "totpTwoFactor" && "Enter the 6-digit code from your authenticator app."}
             {stage === "passkeyTwoFactor" && "Use your passkey to verify your identity."}
@@ -51,11 +51,11 @@ const MfaCode = ({ email, stage }: MfaCodeProps) => {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm transition-colors duration-200">
           <label className="text-sm">
-            <span className="text-slate-500">Verification code</span>
+            <span className="text-slate-500 dark:text-slate-400">Verification code</span>
             <input
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 tracking-[0.4em] text-center"
+              className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 tracking-[0.4em] text-center text-slate-900 dark:text-slate-100 transition-colors duration-200"
               type="text"
               maxLength={6}
               value={code}
@@ -64,22 +64,22 @@ const MfaCode = ({ email, stage }: MfaCodeProps) => {
             />
           </label>
 
-          <button className="mt-5 w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition"
+          <button className="mt-5 w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-100 transition"
             onClick={handleVerifyTwoFactor}>
             Verify
           </button>
 
-          <div className="mt-4 text-center text-xs text-slate-500">
+          <div className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
             Didn’t get a code?{" "}
-            <button className="text-slate-700 hover:text-slate-900 font-medium">
+            <button className="text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium">
               Resend
             </button>
           </div>
         </div>
 
-        <div className="text-center text-sm text-slate-600 mt-4">
+        <div className="text-center text-sm text-slate-600 dark:text-slate-400 mt-4">
           <button
-            className="inline-flex items-center gap-2 text-slate-700 hover:text-slate-900"
+            className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             onClick={() => {
               setStage(null);
               

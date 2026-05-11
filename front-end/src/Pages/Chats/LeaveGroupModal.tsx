@@ -28,20 +28,20 @@ const LeaveGroupModal = ({ setIsLeaveGroupModalOpen, filterGroup }: LeaveGroupMo
     }
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-3">
-            <div ref={wraperRef} className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+            <div ref={wraperRef} className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl transition-colors duration-200">
+                <div className="flex items-start justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-5">
                     <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                        <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
                             <FiAlertTriangle className="h-5 w-5" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-900">Leave group?</h2>
-                            <p className="text-xs text-slate-500">This is a confirmation step only.</p>
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Leave group?</h2>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">This is a confirmation step only.</p>
                         </div>
                     </div>
                     <button
                         type="button"
-                        className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                        className="rounded-lg p-2 text-slate-400 dark:text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
                         onClick={() => setIsLeaveGroupModalOpen(false)}
                         aria-label="Close leave group modal"
                     >
@@ -50,29 +50,29 @@ const LeaveGroupModal = ({ setIsLeaveGroupModalOpen, filterGroup }: LeaveGroupMo
                 </div>
 
                 <div className="px-6 py-5">
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                         You are about to leave{" "}
-                        <span className="font-semibold text-slate-900">
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">
                             {filterGroup?.groupName || "this group"}
                         </span>
                         .
                     </p>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                         By leaving group chat will be deleted automatically.
                     </p>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-6 py-4">
+                <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-slate-700 px-6 py-4">
                     <button
                         type="button"
-                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                        className="rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                         onClick={() => setIsLeaveGroupModalOpen(false)}
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
-                        className="rounded-lg bg-rose-600 px-3 py-2 text-sm text-white transition hover:bg-rose-700"
+                        className="rounded-lg bg-rose-600 dark:bg-rose-700 px-3 py-2 text-sm text-white transition hover:bg-rose-700 dark:hover:bg-rose-600"
                         onClick={() => handleLeaveGroup()}
                     >
                         Leave group

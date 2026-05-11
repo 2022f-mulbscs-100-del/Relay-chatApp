@@ -28,10 +28,10 @@ const { user } = useUser();
   return (
     <>
       <aside className="space-y-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm transition-colors duration-200">
           <div className={`flex items-center justify-between ${categoriesListOpen ? "mb-3" : ""}`}>
-            <h2 className="text-sm font-semibold text-slate-700">Categories</h2>
-            <FiChevronDown className="w-4 h-4 text-slate-400 cursor-pointer"
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Categories</h2>
+            <FiChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500 cursor-pointer"
               onClick={() => { setCategoriesListOpen(!categoriesListOpen) }}
             />
           </div>
@@ -40,7 +40,7 @@ const { user } = useUser();
               {categories.map((category) => (
                 <button
                   key={category.label}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition ${category.active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-50"
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition ${category.active ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                     }`}
                   onClick={() => {
                     if (category.label === "All groups") {
@@ -51,7 +51,7 @@ const { user } = useUser();
                   }}
                 >
                   <span>{category.label}</span>
-                  <span className={`text-xs ${category.active ? "text-white/80" : "text-slate-400"}`}>
+                  <span className={`text-xs ${category.active ? "text-white/80 dark:text-slate-900/80" : "text-slate-400 dark:text-slate-500"}`}>
                     {category.count}
                   </span>
                 </button>

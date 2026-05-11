@@ -67,7 +67,7 @@ const ContactsList = ({ associatedUser, isLoading = false }: ContactsListProps) 
         return (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={`contact-skeleton-${index}`} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div key={`contact-skeleton-${index}`} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm transition-colors duration-200">
                         <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
                                 <SkeletonBlock width={48} height={48} radius={999} />
@@ -94,49 +94,49 @@ const ContactsList = ({ associatedUser, isLoading = false }: ContactsListProps) 
             {usersWithOnlineStatus.map((contact: AssociatedUser) => (
                 <div
                     key={contact.id}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-300 transition"
+                    className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition transition-colors duration-200"
                 >
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                             <div className="relative">
-                                <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-sm font-semibold text-slate-700">
+                                <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-semibold text-slate-700 dark:text-slate-300">
                                     {contact.associatedUser.username
                                         .split(" ")
                                         .map((part) => part[0])
                                         .join("")}
                                 </div>
-                                <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white  ${contact.isOnline ? "bg-emerald-500" : "bg-slate-200"}`} />
+                                <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-800  ${contact.isOnline ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-600"}`} />
                             </div>
                             <div>
-                                <div className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                                     {contact.associatedUser.username}
                                     {(contactCategories[contact.associateUserId] === "Favourite" || contact.category === "Favourite") && <FiStar className="w-3.5 h-3.5 text-amber-500" />}
                                     {contact.isMuted && <FiVolumeX className="w-3.5 h-3.5 text-slate-400" title="Muted" />}
                                 </div>
-                                <div className="text-xs text-slate-500">{contact.associatedUser.email}</div>
-                                <div className="text-xs text-slate-400 mt-1">{!contact.isOnline && contact.associatedUser?.lastSeen && (new Date(contact.associatedUser.lastSeen)).toLocaleTimeString([], {
+                                <div className="text-xs text-slate-500 dark:text-slate-400">{contact.associatedUser.email}</div>
+                                <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">{!contact.isOnline && contact.associatedUser?.lastSeen && (new Date(contact.associatedUser.lastSeen)).toLocaleTimeString([], {
                                     hour: "2-digit",
                                     minute: "2-digit",
                                 })}</div>
                                 <div>
-                                    {contact.category && <span className="text-xs mt-1 inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-800">{contact.category}</span>}
+                                    {contact.category && <span className="text-xs mt-1 inline-block px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">{contact.category}</span>}
                                 </div>
                             </div>
                         </div>
                         <div className="relative">
                             <button
-                                className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition"
+                                className="p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition"
                                 onClick={() => setOpenMenuId((prev) => (prev === contact.id ? null : contact.id))}
                             >
                                 <FiMoreVertical className="w-4 h-4" />
                             </button>
                             {openMenuId === contact.id && (
-                                <div className="absolute right-0 mt-1 z-10 w-44 rounded-lg border border-slate-200 bg-white shadow-md">
-                                    <div className="px-3 py-2 text-[11px] uppercase tracking-wide text-slate-400">Add to</div>
+                                <div className="absolute right-0 mt-1 z-10 w-44 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-md transition-colors duration-200">
+                                    <div className="px-3 py-2 text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">Add to</div>
                                     {["Favourite", "Work", "Family"].map((category) => (
                                         <button
                                             key={category}
-                                            className={`w-full px-3 py-2 text-left text-sm transition ${contactCategories[contact.associateUserId] === category ? "bg-slate-100 text-slate-900" : "text-slate-600 hover:bg-slate-50"}`}
+                                            className={`w-full px-3 py-2 text-left text-sm transition ${contactCategories[contact.associateUserId] === category ? "bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100" : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"}`}
                                             onClick={() => handleCategoryChange(contact.associateUserId, category)}
                                         >
                                             {category}
@@ -149,7 +149,7 @@ const ContactsList = ({ associatedUser, isLoading = false }: ContactsListProps) 
 
                     <div className="mt-4 flex items-center">
                         <div className="flex items-center gap-2">
-                            <button className="p-2 cursor-pointer rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                            <button className="p-2 cursor-pointer rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                                 onClick={() => {
                                     navigate("/?tab=chats")
                                     setActiveUserId(String(contact.associatedUser.id))

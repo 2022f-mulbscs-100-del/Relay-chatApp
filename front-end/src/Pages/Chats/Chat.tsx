@@ -298,12 +298,12 @@ const Chats = () => {
       Array.from({ length: 6 }).map((_, index) => (
          <div
             key={`${keyPrefix}-skeleton-${index}`}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-3 transition-colors duration-200"
          >
             <div className="flex items-center gap-3">
                <div className="relative shrink-0">
                   <SkeletonBlock width={44} height={44} radius={999} />
-                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-200" />
+                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-600" />
                </div>
                <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
@@ -321,16 +321,16 @@ const Chats = () => {
 
 
    return (
-      <div className="h-[100dvh] bg-slate-50">
+      <div className="h-[100dvh] bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
          <div className="flex h-full overflow-hidden">
-            <div className={`${activeUserId ? "hidden md:flex" : "flex"} w-full md:w-[340px] md:shrink-0 md:border-r border-slate-200 bg-white flex-col`}>
-               <div className="px-3 py-4 border-b border-slate-200">
+            <div className={`${activeUserId ? "hidden md:flex" : "flex"} w-full md:w-[340px] md:shrink-0 md:border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-col transition-colors duration-200`}>
+               <div className="px-3 py-4 border-b border-slate-200 dark:border-slate-700">
                   <div className="flex items-center justify-between">
                      <div>
-                        <h1 className="text-xl font-semibold text-slate-900">Chats</h1>
-                        <p className="text-xs text-slate-500">Keep up with your team</p>
+                        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Chats</h1>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Keep up with your team</p>
                      </div>
-                     <span className="text-xs text-slate-400">{tab === "chats" ? associatedUser.length : listOfgroups.length} total</span>
+                     <span className="text-xs text-slate-400 dark:text-slate-500">{tab === "chats" ? associatedUser.length : listOfgroups.length} total</span>
                   </div>
 
                   <LiveSearch
@@ -340,9 +340,9 @@ const Chats = () => {
                   />
 
                   <div className="mt-3 flex items-center gap-2 text-xs">
-                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "chats" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("chats")}>Chats</button>
+                     <button className={`px-2.5 py-1 rounded-md cursor-pointer transition ${tab === "chats" ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"}`} onClick={() => setTab("chats")}>Chats</button>
                      {/* <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "unread" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("unread")}>Unread</button> */}
-                     <button className={`px-2.5 py-1 rounded-md cursor-pointer ${tab === "groups" ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50 transition"}`} onClick={() => setTab("groups")}>Groups</button>
+                     <button className={`px-2.5 py-1 rounded-md cursor-pointer transition ${tab === "groups" ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"}`} onClick={() => setTab("groups")}>Groups</button>
                   </div>
                </div>
 
@@ -404,7 +404,7 @@ const Chats = () => {
 
             {/* chat page */}
             {tab === "chats" &&
-               <main className={`${activeUserId ? "flex" : "hidden md:flex"} flex-1 min-w-0 bg-white`}>
+               <main className={`${activeUserId ? "flex" : "hidden md:flex"} flex-1 min-w-0 bg-white dark:bg-slate-800 transition-colors duration-200`}>
                   {activeUserId ?
                      <ChatPage
                         inputMessage={inputMessage}
@@ -418,10 +418,10 @@ const Chats = () => {
                         isMessagesLoading={messageLoading}
                      />
                      : (
-                        <div className="flex h-full w-full items-center justify-center bg-slate-50">
-                           <div className="text-center rounded-xl border border-slate-200 bg-white px-8 py-6 shadow-sm">
-                              <div className="text-sm font-semibold text-slate-900">No chat selected</div>
-                              <div className="text-xs text-slate-500 mt-1">Choose a conversation to start messaging</div>
+                        <div className="flex h-full w-full items-center justify-center bg-slate-50 dark:bg-slate-900/50 transition-colors duration-200">
+                           <div className="text-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-8 py-6 shadow-sm transition-colors duration-200">
+                              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">No chat selected</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Choose a conversation to start messaging</div>
                            </div>
                         </div>
                      )}
@@ -430,7 +430,7 @@ const Chats = () => {
 
             {/* group page  */}
             {tab === "groups" &&
-               <main className={`${activeUserId ? "flex" : "hidden md:flex"} flex-1 min-w-0 bg-white`}>
+               <main className={`${activeUserId ? "flex" : "hidden md:flex"} flex-1 min-w-0 bg-white dark:bg-slate-800 transition-colors duration-200`}>
                   {activeUserId ?
                      <ChatPage
                         inputMessage={inputMessage}
@@ -446,10 +446,10 @@ const Chats = () => {
                         isMessagesLoading={groupMessageLoading}
                      />
                      : (
-                        <div className="flex items-center justify-center w-full h-full bg-slate-50">
-                           <div className="text-center rounded-xl border border-slate-200 bg-white px-8 py-6 shadow-sm">
-                              <div className="text-sm font-semibold text-slate-900">No chat selected</div>
-                              <div className="text-xs text-slate-500 mt-1">Choose a conversation to start messaging</div>
+                        <div className="flex items-center justify-center w-full h-full bg-slate-50 dark:bg-slate-900/50 transition-colors duration-200">
+                           <div className="text-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-8 py-6 shadow-sm transition-colors duration-200">
+                              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">No chat selected</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Choose a conversation to start messaging</div>
                            </div>
                         </div>
                      )}

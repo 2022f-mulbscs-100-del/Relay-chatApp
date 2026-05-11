@@ -74,17 +74,17 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
                 }
             }}
         >
-            <div ref={wraperRef} className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl">
+            <div ref={wraperRef} className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-2xl transition-colors duration-200">
                 <div className="mb-2 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                        <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900">
                             <FiUsers className="h-5 w-5" />
                         </div>
-                        <h1 className="font-bold">Add member</h1>
+                        <h1 className="font-bold text-slate-900 dark:text-slate-100">Add member</h1>
                     </div>
                     <button
                         type="button"
-                        className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                        className="rounded-lg p-2 text-slate-400 dark:text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
                         onClick={() => setIsAddMemberModalOpen(false)}
                         aria-label="Close add member modal"
                     >
@@ -92,8 +92,8 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
                     </button>
                 </div>
 
-                <div className="mt-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200">
-                    <FiSearch className="h-4 w-4 text-slate-400" />
+                <div className="mt-2 flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 focus-within:border-slate-400 dark:focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-200 dark:focus-within:ring-slate-700 transition-colors duration-200">
+                    <FiSearch className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                     <input
                         className="w-full outline-none"
                         placeholder="Type a name or email"
@@ -110,12 +110,12 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
                             return (
                                 <span
                                     key={id}
-                                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-700"
+                                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-2.5 py-1 text-xs text-slate-700 dark:text-slate-300"
                                 >
                                     {selectedUser.username}
                                     <button
                                         type="button"
-                                        className="text-slate-400 hover:text-slate-700"
+                                        className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                                         onClick={() =>
                                             setSelectedMemberIds((prev) => prev.filter((memberId) => memberId !== id))
                                         }
@@ -136,9 +136,9 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
                             <button
                                 type="button"
                                 key={user.id}
-                                className={`mt-3 flex w-full items-center justify-between rounded-lg border p-2 text-left ${isSelected
-                                    ? "border-emerald-200 bg-emerald-50"
-                                    : "border-slate-200 hover:bg-slate-50"
+                                className={`mt-3 flex w-full items-center justify-between rounded-lg border p-2 text-left transition ${isSelected
+                                    ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20"
+                                    : "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
                                     }`}
                                 onClick={() => {
                                     setSelectedMemberIds((prev) => {
@@ -150,38 +150,38 @@ const AddMemberModal = ({ setIsAddMemberModalOpen, filterGroup }: AddMemberModal
                                 }}
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                                    <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900">
                                         {user.username[0]?.toUpperCase()}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">{user.username}</p>
-                                        <p className="text-xs text-slate-500">{user.email}</p>
+                                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{user.username}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
                                     </div>
                                 </div>
-                                <span className={`text-xs ${isSelected ? "text-emerald-700" : "text-slate-500"}`}>
+                                <span className={`text-xs ${isSelected ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
                                     {isSelected ? "Selected" : "Select"}
                                 </span>
                             </button>
                         );
                     })}
                     {usersToRender.length === 0 && (
-                        <div className="mt-4 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-center text-xs text-slate-500">
+                        <div className="mt-4 rounded-lg border border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 px-3 py-4 text-center text-xs text-slate-500 dark:text-slate-400">
                             No users available to add.
                         </div>
                     )}
                 </div>
 
-                <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-200 pt-4">
+                <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-200 dark:border-slate-700 pt-4">
                     <button
                         type="button"
-                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                        className="rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                         onClick={() => setIsAddMemberModalOpen(false)}
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
-                        className="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-lg bg-slate-900 dark:bg-white px-3 py-2 text-sm text-white dark:text-slate-900 transition hover:bg-slate-800 dark:hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={selectedMemberIds.length === 0}
                         onClick={handleAddMembers}
                     >

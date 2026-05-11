@@ -5,6 +5,7 @@ import { PiChatsCircleBold } from "react-icons/pi";
 import { RiChatSmileAiFill } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMessage } from "../context/MessageProvider";
+import ThemeToggle from "./ThemeToggle";
 
 
 const SideBar = () => {
@@ -56,11 +57,11 @@ const SideBar = () => {
     ]
 
     return (
-        <div className="bg-white/90 backdrop-blur border-r border-slate-200 fixed h-screen w-[72px] px-3 py-4 flex flex-col items-center justify-between">
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur border-r border-slate-200 dark:border-slate-700 fixed h-screen w-[72px] px-3 py-4 flex flex-col items-center justify-between transition-colors duration-200">
             <div className="flex justify-center">
                 <div
                 onClick={()=>{navigate("/profile")}}
-                className="w-10 h-10 rounded-xl cursor-pointer bg-slate-900 text-white flex items-center justify-center text-sm font-semibold shadow-sm">
+                className="w-10 h-10 rounded-xl cursor-pointer bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-sm font-semibold shadow-sm transition-colors duration-200">
                     R
                 </div>
             </div>
@@ -72,8 +73,8 @@ const SideBar = () => {
                             title={item.name}
                             className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl transition relative cursor-pointer ${
                                 active === item.id
-                                    ? "bg-slate-900 text-white shadow-sm"
-                                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
+                                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                             }`}
                             onClick={() => {
                                 navigate(item.link);
@@ -83,12 +84,16 @@ const SideBar = () => {
                             }}
                         >
                             {active === item.id && (
-                                <span className="absolute -left-2 w-1.5 h-6 rounded-full bg-slate-900" />
+                                <span className="absolute -left-2 w-1.5 h-6 rounded-full bg-slate-900 dark:bg-white" />
                             )}
                             {item.icon}
                         </button>
                     </div>
                 ))}
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+                <ThemeToggle />
             </div>
 
         </div>

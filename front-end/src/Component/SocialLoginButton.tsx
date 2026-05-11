@@ -45,7 +45,7 @@ const SocialLoginButton = ({ icon, title, url, provider }: SocialLoginButtonProp
     return (
         <button
             type="button"
-            className="w-full hover:bg-secondary cursor-pointer flex justify-center items-center gap-4 p-2 border border-slate-200   rounded-lg disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full hover:bg-secondary dark:hover:bg-slate-700 cursor-pointer flex justify-center items-center gap-4 p-2 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-lg disabled:cursor-not-allowed disabled:opacity-60 transition-colors duration-200"
             onClick={openPopup}
         >
             {icon}
