@@ -53,22 +53,22 @@ const ChatMessage = ({
                     <div key={index} className="flex my-2">
                         <div
                             className={`max-w-[70%] h-full px-3 py-2 rounded-2xl text-sm leading-relaxed shadow-sm ${isMyMessage
-                                ? 'bg-slate-900 text-white ml-auto rounded-br-md'
-                                : 'bg-white text-slate-900 border border-slate-200 rounded-bl-md'
+                                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 ml-auto rounded-br-md'
+                                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-bl-md'
                                 }`}
                         >
                             {message.ImageUrl && (
                                 <img
                                     src={message.ImageUrl}
                                     alt="Sent image"
-                                    className="mb-2 max-h-60 w-auto rounded-lg border border-slate-200 object-cover shadow-sm"
+                                    className="mb-2 max-h-60 w-auto rounded-lg border border-slate-200 dark:border-slate-700 object-cover shadow-sm"
                                 />
                             )}
                             <p className=" max-w-[500px] h-full   wrap-break-word" ref={index === messageList.length - 1 ? lastMessageRef : null}>
                                 {message.content}
                             </p>
                             {message.createdAt && (
-                                <p className="text-xs text-slate-400 ">
+                                <p className="text-xs text-slate-400 dark:text-slate-500 ">
                                     {normalizeDate(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                             )}

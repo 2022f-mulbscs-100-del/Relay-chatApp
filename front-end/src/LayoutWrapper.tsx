@@ -5,7 +5,7 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     return (
 
         <>
-            <div className="flex ">
+            <div className="flex bg-white dark:bg-slate-900 min-h-screen transition-colors duration-200">
                 <ErrorBoundary>
                     <SideBar />
                 </ErrorBoundary>

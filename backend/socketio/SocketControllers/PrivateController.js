@@ -28,7 +28,6 @@ export const handlePrivateMessage = (io, socket) => {
             const apiBaseUrl = process.env.API_BASE_URL || "http://localhost:2404";
             const res = await axios.post(`${apiBaseUrl}/api/images/upload`, form);
              safeURL = res.data.imageUrl;
-            console.log("Image uploaded successfully, URL:", safeURL);
         }
 
         try {

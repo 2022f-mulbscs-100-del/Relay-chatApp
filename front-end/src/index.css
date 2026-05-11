@@ -1,8 +1,26 @@
+
 @import "tailwindcss";
+@tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
 
+@layer base {
+  html,
+  body,
+  #root {
+    background-color: #F7F7FF;
+    color: #0f172a;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+    min-height: 100%;
+  }
 
-html{
-    background-color: #F7F7FF
+  html.dark,
+  html.dark body,
+  html.dark #root {
+    background-color: #0f172a;
+    color: #f1f5f9;
+  }
 }
 
 .customScrollbar {

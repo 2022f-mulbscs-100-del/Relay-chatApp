@@ -114,7 +114,7 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput, isLoading = false
         return (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={`group-skeleton-${index}`} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div key={`group-skeleton-${index}`} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm transition-colors duration-200">
                         <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
                                 <SkeletonBlock width={48} height={48} radius={12} />
@@ -147,21 +147,21 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput, isLoading = false
             (
                 <div
                     key={searchInput.length > 0 ? group.id : `${group.id}-filtered`}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-300 transition"
+                    className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition transition-colors duration-200"
                 >
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-sm font-semibold">
+                            <div className="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-sm font-semibold">
                                 {group.groupName
                                     .split(" ")
                                     .map((part) => part[0])
                                     .join("")}
                             </div>
                             <div>
-                                <div className="text-sm font-semibold text-slate-800">{group.groupName}</div>
-                                <div className="text-xs text-slate-500">{group.memberIds.length} members</div>
+                                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{group.groupName}</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">{group.memberIds.length} members</div>
                                 {group.members?.find(member => member.userId === user?.id)?.categoroy && (
-                                    <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                                    <span className="mt-1 inline-flex rounded-full bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:text-slate-300">
                                         {group.members?.find(member => member.userId === user?.id)?.categoroy}
                                     </span>
                                 )}
@@ -169,13 +169,13 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput, isLoading = false
                         </div>
                         <div className="relative">
                             <button
-                                className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition"
+                                className="p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition"
                                 onClick={() => setActiveMenuId((prev) => (prev === group.id ? null : String(group.id)))}
                             >
                                 <FiMoreVertical className="w-4 h-4" />
                             </button>
                             {activeMenuId === group.id && (
-                                <div className="absolute right-0 z-10 mt-1 w-44 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+                                <div className="absolute right-0 z-10 mt-1 w-44 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1 shadow-lg transition-colors duration-200">
                                     {/* <button
                                         className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
                                         onClick={() => togglePinGroup(group.id)}
@@ -191,7 +191,7 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput, isLoading = false
                                     {labels.map((label) => (
                                         <button
                                             key={`${group.id}-${label}`}
-                                            className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                                            className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                                             onClick={() => addCategoryToGroup(group.id, label)}
                                         >
                                             Add to {label}
@@ -207,24 +207,24 @@ const GroupsList = ({ listOfgroups, filterGroups, searchInput, isLoading = false
                             <FiClock className="w-3.5 h-3.5" />
                         </div>
                         {group.groupMessages.length <= 0 ? (
-                            <span className="px-2 py-0.5 rounded-full bg-slate-900 text-white text-xs font-medium">
+                            <span className="px-2 py-0.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium">
                                 new
                             </span>
                         ) : (
-                            <span className="text-xs text-slate-400">No unread</span>
+                            <span className="text-xs text-slate-400 dark:text-slate-500">No unread</span>
                         )}
                     </div>
 
                     {group?.members?.map((member) => {
                         if (member.userId === user?.id && member.isPinned) {
-                            return <p className="mt-2 text-xs font-medium text-slate-600">Pinned group</p>
+                            return <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400">Pinned group</p>
                         }
                         return null;
                     })}
 
                     <div className="mt-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <button className="p-2 cursor-pointer rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                            <button className="p-2 cursor-pointer rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                                 onClick={() => { setActiveUserId(String(group.id)); navigate(`/?tab=groups`) }}
                             >
                                 <FiMessageCircle className="w-4 h-4"

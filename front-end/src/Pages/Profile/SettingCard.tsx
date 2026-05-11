@@ -23,8 +23,8 @@ const SettingCard = () => {
         }
     }
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm w-full">
-            <h2 className="text-sm font-semibold text-slate-700 mb-3">Settings</h2>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm w-full transition-colors duration-200">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Settings</h2>
             <div className="space-y-1">
                 {settings.map((setting, index) => {
                     const Icon = setting.icon;
@@ -32,8 +32,8 @@ const SettingCard = () => {
                         <button
                             key={index}
                             className={` cursor-pointer w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition ${setting.danger
-                                ? 'text-rose-600 hover:bg-rose-50'
-                                : 'text-slate-700 hover:bg-slate-50'
+                                ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20'
+                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                                 }`}
                             onClick={() => {
                                 if (setting.label === 'Log Out') {
@@ -45,7 +45,7 @@ const SettingCard = () => {
                             <Icon className="w-4 h-4" />
                             <div className="flex-1">
                                 <div className="text-sm font-medium">{setting.label}</div>
-                                <div className="text-xs text-slate-500">{setting.description}</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">{setting.description}</div>
                             </div>
                         </button>
                     );

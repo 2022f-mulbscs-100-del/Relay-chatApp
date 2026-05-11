@@ -126,22 +126,22 @@ const SecuritySetting = ({ setIsChangePasswordOpen }: SecuritySettingProps) => {
     return (
         <>
         {!SOCIAL_LOGIN &&
-            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm transition-colors duration-200">
                 <div className="flex items-center gap-2 mb-4">
-                    <FiShield className="w-4 h-4 text-slate-500" />
-                    <h2 className="text-sm font-semibold text-slate-700">Security</h2>
+                    <FiShield className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                    <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Security</h2>
                 </div>
                 <div className="space-y-4">
                     {/* two factor authentication */}
-                    <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-600 p-4">
                         <div className="flex items-center gap-3">
-                            <FiKey className="w-4 h-4 text-slate-500" />
+                            <FiKey className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             <div>
                                 <div className="text-sm font-medium">Two-factor authentication</div>
-                                <div className="text-xs text-slate-500">Add an extra layer of security to your account</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Add an extra layer of security to your account</div>
                             </div>
                         </div>
-                        <button className={`px-3 py-1.5 rounded-md min-w-[70px] ${emailTwoFactor ? "bg-red-500" : "bg-slate-900"} text-white text-xs font-medium cursor-pointer `}
+                        <button className={`px-3 py-1.5 rounded-md min-w-[70px] ${emailTwoFactor ? "bg-red-500" : "bg-slate-900 dark:bg-white"} text-white dark:text-slate-900 text-xs font-medium cursor-pointer `}
                             onClick={HandleTwoFactorChange}
                         >
 
@@ -149,60 +149,60 @@ const SecuritySetting = ({ setIsChangePasswordOpen }: SecuritySettingProps) => {
                         </button>
                     </div>
                     {/*Passkey*/}
-                    <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-600 p-4">
                         <div className="flex items-center gap-3">
-                            <FiSmartphone className="w-4 h-4 text-slate-500" />
+                            <FiSmartphone className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             <div>
                                 <div className="text-sm font-medium">Passkey</div>
-                                <div className="text-xs text-slate-500">Use a device passkey for passwordless sign-in</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Use a device passkey for passwordless sign-in</div>
                             </div>
                         </div>
-                        <button className={`px-3 py-1.5 rounded-md border ${passKeyEnabled ? "border-red-500 bg-red-500 text-white" : "border-slate-200 text-slate-700"} text-xs font-medium cursor-pointer`}
+                        <button className={`px-3 py-1.5 rounded-md border ${passKeyEnabled ? "border-red-500 bg-red-500 text-white" : "border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300"} text-xs font-medium cursor-pointer`}
                             onClick={passKeyEnabled ? handleDisablePasskey : handlePasskeySetup}
                         >
                             {passKeyEnabled ? "Disable Passkey" : "Set up Passkey"}
                         </button>
                     </div>
                     {/*Authenticator app*/}
-                    <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-600 p-4">
                         <div className="flex items-center gap-3">
-                            <FiSmartphone className="w-4 h-4 text-slate-500" />
+                            <FiSmartphone className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             <div>
                                 <div className="text-sm font-medium">Authenticator app</div>
-                                <div className="text-xs text-slate-500">Generate one-time codes with an authenticator</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Generate one-time codes with an authenticator</div>
                             </div>
                         </div>
                         <button
-                            className={`px-3 py-1.5 rounded-md border ${authenticatorApp ? "border-red-500 bg-red-500 text-white" : "border-slate-200 text-slate-700"} text-xs font-medium cursor-pointer`}
+                            className={`px-3 py-1.5 rounded-md border ${authenticatorApp ? "border-red-500 bg-red-500 text-white" : "border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300"} text-xs font-medium cursor-pointer`}
                             onClick={() => authenticatorApp ? handleAuthenticatorDisable() : HandleAuthenticatorSetup()}
                         >
                             {authenticatorApp ? "Disable" : "Set up"}
                         </button>
                     </div>
                     {/* Change Password */}
-                    <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-600 p-4">
                         <div className="flex items-center gap-3">
-                            <FiLock className="w-4 h-4 text-slate-500" />
+                            <FiLock className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             <div>
                                 <div className="text-sm font-medium">Change password</div>
-                                <div className="text-xs text-slate-500">Update your password regularly</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Update your password regularly</div>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsChangePasswordOpen(true)}
-                            className="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            className="px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-600 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                         >
                             Update
                         </button>
                     </div>
 
                     {/* Active sessions */}
-                    <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-600 p-4">
                         <div className="flex items-center gap-3">
-                            <FiSmartphone className="w-4 h-4 text-slate-500" />
+                            <FiSmartphone className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             <div>
                                 <div className="text-sm font-medium">Active sessions</div>
-                                <div className="text-xs text-slate-500">See devices logged into your account</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">See devices logged into your account</div>
                             </div>
                         </div>
                         <button className="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer">

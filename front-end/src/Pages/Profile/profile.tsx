@@ -31,7 +31,7 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <div className=" bg-slate-50 text-slate-900 px-10">
+    <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-10 transition-colors duration-200">
       <ProfileInfoCard />
       <ProfileSecondaryCards />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">

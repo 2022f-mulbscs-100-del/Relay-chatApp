@@ -79,19 +79,19 @@ const CreateGroupModal = ({
     return (
         <>
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-3">
-                <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                    <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+                <div className="w-full max-w-2xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl transition-colors duration-200">
+                    <div className="flex items-start justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-5">
                         <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                            <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900">
                                 <FiUsers className="h-5 w-5" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-semibold text-slate-900">Create group</h2>
-                                <p className="text-xs text-slate-500">Pick people, name the group, and continue.</p>
+                                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Create group</h2>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Pick people, name the group, and continue.</p>
                             </div>
                         </div>
                         <button
-                            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                            className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                             onClick={() => setIsCreateOpen(false)}
                             aria-label="Close create group modal"
                         >
@@ -102,11 +102,11 @@ const CreateGroupModal = ({
                         <div>
                             <div className="mb-4">
                                 <div className="flex items-center justify-between">
-                                    <div className="text-xs font-medium text-slate-600">Selected users</div>
-                                    <span className="text-[11px] text-slate-400">{selectedUsers.length} selected</span>
+                                    <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Selected users</div>
+                                    <span className="text-[11px] text-slate-400 dark:text-slate-500">{selectedUsers.length} selected</span>
                                 </div>
                                 {selectedUsers.length === 0 ? (
-                                    <div className="mt-2 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                                    <div className="mt-2 rounded-lg border border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs text-slate-500 dark:text-slate-400">
                                         No users selected yet.
                                     </div>
                                 ) : (
@@ -114,14 +114,14 @@ const CreateGroupModal = ({
                                         {selectedUsers.map((user) => (
                                             <span
                                                 key={user.id}
-                                                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 shadow-sm"
+                                                className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1 text-xs text-slate-700 dark:text-slate-300 shadow-sm transition-colors duration-200"
                                             >
-                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] text-white">
+                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 dark:bg-white text-[10px] text-white dark:text-slate-900">
                                                     {user.username?.slice(0, 1)?.toUpperCase() || "U"}
                                                 </span>
                                                 {user.username}
                                                 <button
-                                                    className="text-slate-400 hover:text-slate-600"
+                                                    className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                                                     onClick={() =>
                                                         setSelectedUsers((prev) => prev.filter((u) => u.id !== user.id))
                                                     }
@@ -135,22 +135,22 @@ const CreateGroupModal = ({
                                 )}
                             </div>
                             <div className="mb-4">
-                                <label className="text-xs font-medium text-slate-600">Group name</label>
+                                <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Group name</label>
                                 <input
-                                    className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                                    className="mt-2 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 transition-colors duration-200"
                                     placeholder="Enter group name"
                                     value={groupName}
                                     onChange={(e) => setGroupName(e.target.value)}
                                 />
                             </div>
-                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
+                            <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-3 text-xs text-slate-500 dark:text-slate-400 transition-colors duration-200">
                                 Tip: Start with a clear name like “Design Review” or “Q1 Launch”.
                             </div>
                         </div>
                         <div>
-                            <label className="text-xs font-medium text-slate-600">Search users</label>
-                            <div className="mt-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200">
-                                <FiSearch className="w-4 h-4 text-slate-400" />
+                            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Search users</label>
+                            <div className="mt-2 flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 focus-within:border-slate-400 dark:focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-200 dark:focus-within:ring-slate-700 transition-colors duration-200">
+                                <FiSearch className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                 <input
                                     className="w-full outline-none"
                                     placeholder="Type a name or email"
@@ -160,28 +160,28 @@ const CreateGroupModal = ({
                             </div>
                             <div className="mt-3 max-h-64 overflow-y-auto space-y-2 pr-1 customScrollbar">
                                 {filterUser.length === 0 ? (
-                                    <div className="text-xs text-slate-500">No users found.</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">No users found.</div>
                                 ) : (
                                     usersToShow.map((user) => {
                                         const isSelected = selectedUsers.some((u) => u.id === user.id);
                                         return (
                                             <div
                                                 key={user.id}
-                                                className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:border-slate-300 hover:shadow-sm transition"
+                                                className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-sm transition transition-colors duration-200"
                                             >
                                                 <div className="flex items-center gap-3 min-w-0">
-                                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-semibold text-white">
+                                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 dark:bg-white text-xs font-semibold text-white dark:text-slate-900">
                                                         {user.username?.slice(0, 2)?.toUpperCase() || "US"}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <div className="font-medium text-slate-900 truncate">{user.username}</div>
-                                                        {user.email && <div className="text-xs text-slate-500 truncate">{user.email}</div>}
+                                                        <div className="font-medium text-slate-900 dark:text-slate-100 truncate">{user.username}</div>
+                                                        {user.email && <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</div>}
                                                     </div>
                                                 </div>
                                                 <button
                                                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs transition ${isSelected
-                                                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                                            : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                                                            ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
+                                                            : "border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                                                         }`}
                                                     onClick={() => {
                                                         if (isSelected) return;
@@ -199,14 +199,14 @@ const CreateGroupModal = ({
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-6 py-4">
+                    <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-slate-700 px-6 py-4">
                         <button
-                            className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition"
+                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                             onClick={() => setIsCreateOpen(false)}
                         >
                             Cancel
                         </button>
-                        <button className="px-3 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800 transition"
+                        <button className="px-3 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition"
                             onClick={handleCreateGroup}
                         >
                             Create

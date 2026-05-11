@@ -20,7 +20,7 @@ const GooglePassport = await import('./middleware/passport/GooglePassport.js').t
 // In ES modules, ALL import statements at the top of a file are resolved BEFORE any code executes, even before dotenv.config().
 // When GooglePassport.js loads, process.env variables are still undefined because dotenv hasn't loaded them yet.
 const app = express();
-const PORT = process.env.PORT || 2404;
+const PORT = process.env.SERVER_PORT || process.env.PORT || 2404;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicPath = path.join(__dirname, 'public');
